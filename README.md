@@ -1,0 +1,6 @@
+ - install git bash https://git-scm.com/downloads/win
+ - install github command line
+ - login w/ `gh auth login`
+ - use `gh repo clone MagnetoMallard/n64-ftr` command in the folder you're wantin
+ - run `make` to build it!!
+ - run `make run` to run it in ares (eleos' piece on the side)
