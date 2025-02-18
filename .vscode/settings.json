@@ -1,0 +1,16 @@
+{
+    "npm.includeDirectories": [
+    
+    ],
+    "C_Cpp.default.includePath": [
+        "O:\\src\\n64\\libdragon\\include"
+    ],
+    "files.associations": {
+        "t3dmodel.h": "c",
+        "t3d.h": "c",
+        "libdragon.h": "c",
+        "t3dmath.h": "c",
+        "graphics.h": "c",
+        "actor.h": "c"
+    }
+}

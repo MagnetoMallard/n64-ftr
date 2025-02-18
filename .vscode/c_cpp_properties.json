@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "n64",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/**",
+                "O:\\src\\n64\\libdragon\\include",
+                "O:\\src\\n64\\tiny3d\\src",
+                "O:\\src\\n64\\mips64-elf\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.22621.0",
+            "compilerPath": "O:\\src\\n64\\tools\\bin\\mips64-elf-gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "compilerPathInCppPropertiesJson": "O:\\src\\n64\\tools\\bin\\mips64-elf-gcc.exe",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "O:/src/n64/libdragon/include",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
