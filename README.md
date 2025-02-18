@@ -2,5 +2,6 @@
  - install github command line
  - login w/ `gh auth login`
  - use `gh repo clone MagnetoMallard/n64-ftr` command in the folder you're wantin
- - run `make` to build it!!
- - run `make run` to run it in ares (eleos' piece on the side)
+ - edit `setvars.sh` to match your local libdragon, t3d and ares installs
+ - run `source setvars.sh`
+ - run `make && make run` to build and run it in ares (eleos' piece on the side)
