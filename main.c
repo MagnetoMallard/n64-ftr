@@ -7,6 +7,7 @@
 
 #include "actor.h"
 #include "checkerboard.h"
+#include "dragon.h"
 
 color_t get_rainbow_color(float s) {
   float r = fm_sinf(s + 0.0f) * 127.0f + 128.0f;
@@ -90,18 +91,10 @@ int main()
   T3DVec3 lightDirVec = {{-1.0f, 1.0f, 1.0f}};
   t3d_vec3_norm(&lightDirVec);
 
-  // Load a model-file, this contains the geometry and some metadata
-  // Then cache it into a display list
-  T3DModel *dragonModel = t3d_model_load("rom:/dragon2.t3dm");
-  rspq_block_t *dragonDpl;
-
-  rspq_block_begin();
-  t3d_model_draw(dragonModel);
-  dragonDpl = rspq_block_end();
 
   // Create an actor for the derg
-  Actor dragonActor = actor_create(1,dragonDpl);
-  Checkerboard checkerboard = create_checkerboard(2);
+  Actor dragonActor = dragon_create(1);
+  Actor checkerboardActor = checkerboard_create(2);
 
   float rotAngle = 0.0f;
   float rotAngleY = 0.0f;
@@ -131,13 +124,10 @@ int main()
     objTime += deltaTime;
 
     actor_update(&dragonActor, objTime);
+    actor_update(&checkerboardActor, objTime);
     
     t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(80.0f), 1.0f, 100.0f);
     t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(T3DVec3){{0,1,0}});
-
-
-    // t3d_mat4_to_fixed(modelMatFP, &modelMat);
-
 
     // ======== Draw ======== //
     rdpq_attach(display_get(), display_get_zbuf());
@@ -153,12 +143,10 @@ int main()
     t3d_light_set_count(1);
     t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH);
 
-    //rdpq_set_prim_color(get_rainbow_color(rotAngle * 0.42f));
-
     t3d_matrix_push_pos(1);
     // ======== <Inner Draw> ======== //
 
-    actor_draw(&checkerboard.actor);
+    actor_draw(&checkerboardActor);
     actor_draw(&dragonActor);
     
     // ======== </Inner Draw> ======== //  
@@ -173,6 +161,9 @@ int main()
 
     rdpq_detach_show();
   }
+
+  actor_delete(&dragonActor);
+  actor_delete(&checkerboardActor);
 
   t3d_destroy();
   return 0;

@@ -2,7 +2,17 @@
 #include "actor.h"
 #include "checkerboard.h"
 
-Checkerboard create_checkerboard(uint32_t id) { 
+void checkerboard_update(Actor *self, float objTime) {
+  self->pos[0] = 0;
+  self->pos[1] = 0;
+  self->pos[2] = 0;
+}
+
+void checkerboard_draw(Actor *self) {
+
+}
+
+Actor checkerboard_create(uint32_t id) { 
 
   uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
   T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
@@ -31,10 +41,7 @@ Checkerboard create_checkerboard(uint32_t id) {
 
   dplDraw = rspq_block_end();
 
-  Checkerboard checkerboard = (Checkerboard) { 
-    .dpl  = dplDraw,
-    .actor = actor_create(id, dplDraw)
-  };
+  Actor  actor = actor_create(id, dplDraw, &checkerboard_update, &checkerboard_draw);
 
-  return checkerboard;
+  return actor;
 }
