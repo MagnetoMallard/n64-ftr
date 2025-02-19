@@ -10,11 +10,27 @@ src = main.c actor.c checkerboard.c dragon.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)
+assets_xm1 = $(wildcard assets/*.xm)
+assets_xm2 = $(wildcard assets/*.XM)
 assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 			  $(addprefix filesystem/,$(notdir $(assets_ttf:%.ttf=%.font64))) \
-			  $(addprefix filesystem/,$(notdir $(assets_gltf:%.glb=%.t3dm)))
+			  $(addprefix filesystem/,$(notdir $(assets_gltf:%.glb=%.t3dm))) \
+			  $(addprefix filesystem/,$(notdir $(assets_xm1:%.xm=%.xm64))) \
+			  $(addprefix filesystem/,$(notdir $(assets_xm2:%.XM=%.xm64)))
+
+AUDIOCONV_FLAGS ?=
+
 
 all: t3d_01_model.z64
+
+filesystem/%.xm64: assets/%.xm
+	@mkdir -p $(dir $@)
+	@echo "    [AUDIO] $@"
+	@$(N64_AUDIOCONV) $(AUDIOCONV_FLAGS) -o filesystem "$<"
+filesystem/%.xm64: assets/%.XM
+	@mkdir -p $(dir $@)
+	@echo "    [AUDIO] $@"
+	@$(N64_AUDIOCONV) $(AUDIOCONV_FLAGS) -o filesystem "$<"
 
 filesystem/%.sprite: assets/%.png
 	@mkdir -p $(dir $@)
