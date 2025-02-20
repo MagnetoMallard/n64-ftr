@@ -8,8 +8,6 @@ static float baseSpeed = 1.0f;
 
 struct Actor;
 
-
-
 // Holds our actor data, relevant for t3d is 'modelMat'.
 typedef struct _actor {
   uint32_t id;
