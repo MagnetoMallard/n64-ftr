@@ -71,15 +71,15 @@ int main()
     float deltaTime = (newTime - objTimeLast) * baseSpeed;
     objTimeLast = newTime;
     objTime += deltaTime;
-
+    
     for(int i = 0; i < ACTOR_COUNT; i++) {
       actor_update(&actors[i], objTime);
     }
-    
     camera_update(&inputs.c[0], &camera, &viewport);
 
     // ======== Draw
     t3d_draw_setup(&viewport, ambientLightColour, colorDir, &lightDirVec);
+
 
     // ======= lights
     t3d_light_set_ambient(ambientLightColour);
@@ -88,11 +88,13 @@ int main()
     }
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
 
+
     // = <Inner Draw>
     t3d_matrix_push_pos(1);
     actor_draw(&checkerboardActor);
     actor_draw(&dragonActor);
     t3d_matrix_pop(1);
+    
     // = </Inner Draw>
 
     // ====== 2D
@@ -147,7 +149,7 @@ inline void t3d_draw_setup(T3DViewport* viewport, uint8_t* ambientLightColour,ui
 }
 
 void music_init() {
-  char *cur_rom = "rom:/kritta-girl.xm64";
+  char *cur_rom = "rom:/smallhold.xm64";
 
   xm64player_open(&xm, cur_rom);
   xm64player_play(&xm, 0);
