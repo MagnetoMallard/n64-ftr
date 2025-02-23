@@ -24,7 +24,7 @@ void music_init();
 inline void music_update();
 
 void print_inputs(_SI_condat *inputs);
-bool mute[32] = {0};
+bool mute[16] = {0};
 xm64player_t xm;
 
 int main()
@@ -59,8 +59,6 @@ int main()
   actors[0] = dragonActor;
   actors[1] = checkerboardActor;
 
-
-
   for(;;)
   {
     // ======== Update
@@ -80,7 +78,6 @@ int main()
     // ======== Draw
     t3d_draw_setup(&viewport, ambientLightColour, colorDir, &lightDirVec);
 
-
     // ======= lights
     t3d_light_set_ambient(ambientLightColour);
     for(int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
@@ -88,12 +85,9 @@ int main()
     }
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
 
-
     // = <Inner Draw>
-    t3d_matrix_push_pos(1);
     actor_draw(&checkerboardActor);
     actor_draw(&dragonActor);
-    t3d_matrix_pop(1);
     
     // = </Inner Draw>
 
@@ -106,6 +100,7 @@ int main()
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 48, "CAMERA ZTAR: %.2f",  camera.target.z);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 64, "CAMERA XPOS: %.2f",  camera.pos.x);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 80, "CAMERA ZPOS: %.2f",  camera.pos.z);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 96, "FPS: %.2f",  display_get_fps());
     rdpq_detach_show();
 
     // ===== Audio
@@ -133,10 +128,11 @@ static inline void engine_init() {
   debug_init_isviewer();
   console_init();
   audio_init(44100, 4);
-  mixer_init(32);
+  mixer_init(16);
 
   t3d_init((T3DInitParams){});
   rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO));
+
 }
 
 inline void t3d_draw_setup(T3DViewport* viewport, uint8_t* ambientLightColour,uint8_t* colorDir, T3DVec3* lightDirVec) {
@@ -147,8 +143,7 @@ inline void t3d_draw_setup(T3DViewport* viewport, uint8_t* ambientLightColour,ui
 
   t3d_screen_clear_color(RGBA32(75, 0, 75, 0xFF));
   t3d_screen_clear_depth();
-
-  t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH);
+   t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH );
 }
 
 void music_init() {

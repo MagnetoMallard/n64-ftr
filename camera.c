@@ -16,7 +16,7 @@ T3DVec3 camDir = {{0,0,1}};
 Camera camera_create() { 
     Camera camera = { 
         .pos = {{0.0f,50.0f,-50.0f}},
-        .target = {{0,50,300}}
+        .target = {{0,50,50}}
     };
     return camera;
 } 
@@ -60,7 +60,7 @@ void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) {
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(85.0f), 1.0f, 100.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(85.0f), 1.0f, 300.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
     
     // t3d_mat4_mul(&viewport->matCamProj, &viewport->matProj, &viewport->matCamera);

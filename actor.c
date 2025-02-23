@@ -36,10 +36,12 @@ void actor_update(Actor *actor, float objTime) {
   t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
-void actor_draw(Actor *actor) {
+inline void actor_draw(Actor *actor) {
+  t3d_matrix_push_pos(1);
   t3d_matrix_set(actor->modelMat, true);
   actor->drawFunction(actor);
   rspq_block_run(actor->dpl);
+  t3d_matrix_pop(1);
 }
 
 void actor_delete(Actor *actor) {
