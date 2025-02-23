@@ -2,7 +2,7 @@
 #include <libdragon.h>
 
 inline void debug_print(int x, int y, char* label, float value) {
-    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, x, y, "OBJTIME : %.2f", value);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, x, y, "%s : %.2f", label, value);
   }
   
 inline void debug_print_inputs(_SI_condat *inputs)

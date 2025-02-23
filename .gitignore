@@ -1,3 +1,4 @@
 build
 filesystem
 *.z64
+.vscode/settings.json

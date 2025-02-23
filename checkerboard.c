@@ -20,13 +20,13 @@ Actor checkerboard_create(uint32_t id) {
   // Allocate vertices (make sure to have an uncached pointer before passing it to the API!)
   // For performance reasons, 'T3DVertPacked' contains two vertices at once in one struct.
   vertices[0] = (T3DVertPacked){
-    .posA = {-320, 16, 132}, .rgbaA = 0xFF0000'FF, .normA = norm,
-    .posB = { 320, 16, 132}, .rgbaB = 0x00FF00'FF, .normB = norm,
+    .posA = {-320, 20, 200}, .rgbaA = 0xFF0000'FF, .normA = norm,
+    .posB = { 320, 20, 200}, .rgbaB = 0x00FF00'FF, .normB = norm,
   };
 
   vertices[1] = (T3DVertPacked){
-    .posA = { 320,  16, 0}, .rgbaA = 0x0000FF'FF, .normA = norm,
-    .posB = {-320,  16, 0}, .rgbaB = 0xFF00FF'FF, .normB = norm,
+    .posA = { 320,  20, -200}, .rgbaA = 0x0000FF'FF, .normA = norm,
+    .posB = {-320,  20, -200}, .rgbaB = 0xFF00FF'FF, .normB = norm,
   };
 
   rspq_block_t *dplDraw;

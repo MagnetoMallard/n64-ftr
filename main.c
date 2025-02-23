@@ -98,11 +98,14 @@ int main()
     // = </Inner Draw>
 
     // ====== 2D
-    debug_print(16, 150, "DRAGON ROT X", dragonActor.rot[0]);
-    debug_print(16, 170, "DRAGON ROT Y", dragonActor.rot[1]);
-    debug_print(16, 190, "DRAGON ROT Z", dragonActor.rot[2]);
-    debug_print(16, 220, "OBJTIME", objTime);
-    
+    camera_draw(); // purely for debug
+    // debug_print(16, 170, "DRAGON ROT Y", dragonActor.rot[1]);
+    // debug_print(16, 220, "OBJTIME", objTime);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 16, "STICK X : %.i",  inputs.c[0].x);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 32, "CAMERA XTAR: %.2f",  camera.target.x);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 48, "CAMERA ZTAR: %.2f",  camera.target.z);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 64, "CAMERA XPOS: %.2f",  camera.pos.x);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 80, "CAMERA ZPOS: %.2f",  camera.pos.z);
     rdpq_detach_show();
 
     // ===== Audio

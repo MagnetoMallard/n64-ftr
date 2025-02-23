@@ -13,5 +13,6 @@ typedef struct {
 
 Camera camera_create();
 void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport);
+void camera_draw();
 
 #endif
