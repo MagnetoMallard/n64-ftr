@@ -30,5 +30,6 @@ Actor actor_create(
 void actor_update(Actor *actor, float objTime);
 void actor_draw(Actor *actor);
 void actor_delete(Actor *actor);
+Actor create_actor_from_model(uint32_t id, char* modelName); 
 
 #endif

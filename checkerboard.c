@@ -32,7 +32,7 @@ Actor checkerboard_create(uint32_t id) {
 
   uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
  
-  T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * BOARD_SIZE * BOARD_SIZE);
+  T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
 
   // Allocate vertices (make sure to have an uncached pointer before passing it to the API!)
   // For performance reasons, 'T3DVertPacked' contains two vertices at once in one struct.
