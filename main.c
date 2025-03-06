@@ -23,6 +23,9 @@ inline void debug_print(int x, int y, char* label, float value);
 void music_init();
 inline void music_update();
 
+float fogNear = 100.0;
+float fogFar = 250.0;
+
 void print_inputs(_SI_condat *inputs);
 bool mute[16] = {0};
 xm64player_t xm;
@@ -87,7 +90,13 @@ int main()
     //   actor_update(&actors[i], objTime);
     // }
     camera_update(&inputs.c[0], &camera, &viewport);
+    
+    if(inputs.c[0].up) fogNear--;
+    if(inputs.c[0].down) fogNear++;
 
+    if(inputs.c[0].left) fogFar--;
+    if(inputs.c[0].right) fogFar++;
+    
     // ======== Draw
     t3d_draw_setup(&viewport, ambientLightColour, colorDir, &lightDirVec);
 
@@ -110,8 +119,8 @@ int main()
     // debug_print(16, 170, "DRAGON ROT Y", dragonActor.rot[1]);
     // debug_print(16, 220, "OBJTIME", objTime);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 16, "STICK X : %.i",  inputs.c[0].x);
-    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 32, "CAMERA XTAR: %.2f",  camera.target.x);
-    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 48, "CAMERA ZTAR: %.2f",  camera.target.z);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 32, "FOG NEAR: %.2f",  fogNear);
+    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 48, "FOG FAR: %.2f",  fogFar);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 64, "CAMERA XPOS: %.2f",  camera.pos.x);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 80, "CAMERA ZPOS: %.2f",  camera.pos.z);
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 96, "FPS: %.2f",  display_get_fps());
@@ -157,15 +166,15 @@ static inline void t3d_draw_setup(T3DViewport* viewport, uint8_t* ambientLightCo
   t3d_viewport_attach(viewport);
   rdpq_mode_combiner(RDPQ_COMBINER_SHADE);
 
-  t3d_screen_clear_color(RGBA32(75, 0, 75, 0xFF));
-  t3d_screen_clear_depth();
-
   rdpq_mode_fog(RDPQ_FOG_STANDARD);
   rdpq_set_fog_color((color_t){70, 70, 140, 0xFF});
 
-  t3d_fog_set_range(0.0f, 250.0f);
+  t3d_screen_clear_color(RGBA32(70, 70, 140, 0xFF));
+  t3d_screen_clear_depth();
+
+  t3d_fog_set_range(fogNear, fogFar);
   t3d_fog_set_enabled(true);
-   //t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH );
+  t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH );
 }
 
 void music_init() {
