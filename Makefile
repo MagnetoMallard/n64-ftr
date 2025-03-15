@@ -6,7 +6,7 @@ include $(T3D_INST)/t3d.mk
 
 N64_CFLAGS += -std=gnu2x
 
-src = main.c actor.c checkerboard.c dragon.c camera.c lights.c
+src = main.c actor.c dragon.c camera.c lights.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)
@@ -21,7 +21,7 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 AUDIOCONV_FLAGS ?=
 
 
-all: t3d_01_model.z64
+all: ftrCart.z64
 
 filesystem/%.xm64: assets/%.xm
 	@mkdir -p $(dir $@)
@@ -43,15 +43,21 @@ filesystem/%.t3dm: assets/%.glb
 	$(T3D_GLTF_TO_3D) "$<" $@
 	$(N64_BINDIR)/mkasset -c 2 -o filesystem $@
 
-$(BUILD_DIR)/t3d_01_model.dfs: $(assets_conv)
-$(BUILD_DIR)/t3d_01_model.elf: $(src:%.c=$(BUILD_DIR)/%.o)
+$(BUILD_DIR)/ftrCart.dfs: $(assets_conv)
+$(BUILD_DIR)/ftrCart.elf: $(src:%.c=$(BUILD_DIR)/%.o)
 
-t3d_01_model.z64: N64_ROM_TITLE="Tiny3D - Model"
-t3d_01_model.z64: $(BUILD_DIR)/t3d_01_model.dfs
+ftrCart.z64: N64_ROM_TITLE="Tiny3D - Model"
+ftrCart.z64: $(BUILD_DIR)/ftrCart.dfs
 
 run:
-	$(ARES_DIR)/ares.exe ./t3d_01_model.z64
+	$(ARES_DIR)/ares.exe ./ftrCart.z64
 
+unfload:
+	./UNFLoader.exe -d -r ./ftrCart.z64
+
+sc64:
+	./sc64deployer.exe reset
+	./sc64deployer.exe upload ./ftrCart.z64
 clean:
 	rm -rf $(BUILD_DIR) *.z64
 	rm -rf filesystem

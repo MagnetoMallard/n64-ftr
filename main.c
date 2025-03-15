@@ -6,13 +6,12 @@
 #include <graphics.h>
 
 #include "actor.h"
-#include "checkerboard.h"
 #include "dragon.h"
 #include "camera.h"
 #include "lights.h"
 #include "debug.h"
 
-#define ACTOR_COUNT 3
+#define ACTOR_COUNT 2
 #define DIRECTIONAL_LIGHT_COUNT 3
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
@@ -68,12 +67,14 @@ int main()
   Actor actors[ACTOR_COUNT];
 
   Actor dragonActor = dragon_create(1);
-  Actor checkerboardActor = checkerboard_create(2);
   Actor stageActor = create_actor_from_model(3, "MainBarArea");
 
+  stageActor.scale[0] = 1.0f;
+  stageActor.scale[1] = 0.8f;
+  stageActor.scale[2] = 1.0f;
+
   actors[0] = dragonActor;
-  actors[1] = checkerboardActor;
-  actors[2] = stageActor;
+  actors[1] = stageActor;
 
   for(;;)
   {
@@ -109,7 +110,6 @@ int main()
 
     // = <Inner Draw>
     actor_draw(&stageActor);
-    // actor_draw(&checkerboardActor);
     actor_draw(&dragonActor);
 
     // = </Inner Draw>
@@ -127,14 +127,13 @@ int main()
     rdpq_detach_show();
 
     // ===== Audio
-    mixer_try_play();
+   // mixer_try_play();
 
 
   }
 
   actor_delete(&dragonActor);
   actor_delete(&stageActor);
-  actor_delete(&checkerboardActor);
 
   t3d_destroy();
   return 0;
@@ -154,7 +153,6 @@ static inline void engine_init() {
   console_init();
   audio_init(44100, 8);
   mixer_init(8);
-  // t3d_fog_set_enabled(true);
   t3d_init((T3DInitParams){});
   rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO));
 

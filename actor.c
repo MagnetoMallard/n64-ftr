@@ -30,7 +30,10 @@ Actor actor_create(
 
 void actor_update(Actor *actor, float objTime) {
 
-  actor->updateFunction(actor, objTime);
+  if(actor->updateFunction) { 
+    actor->updateFunction(actor, objTime);
+
+  }
 
   // t3d lets you directly construct a fixed-point matrix from SRT
   t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
