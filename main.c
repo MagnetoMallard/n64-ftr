@@ -87,9 +87,9 @@ int main()
     objTimeLast = newTime;
     objTime += deltaTime;
 
-    // for(int i = 0; i < ACTOR_COUNT; i++) {
-    //   actor_update(&actors[i], objTime);
-    // }
+    for(int i = 0; i < ACTOR_COUNT; i++) {
+      actor_update(&actors[i], objTime);
+    }
     camera_update(&inputs.c[0], &camera, &viewport);
     
     if(inputs.c[0].up) fogNear--;
@@ -127,7 +127,7 @@ int main()
     rdpq_detach_show();
 
     // ===== Audio
-   // mixer_try_play();
+    mixer_try_play();
 
 
   }
