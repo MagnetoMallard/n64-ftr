@@ -68,6 +68,7 @@ int main()
 
   Actor dragonActor = dragon_create(1);
   Actor stageActor = create_actor_from_model(3, "MainBarArea");
+  //Actor dynamoActor = create_actor_from_model(4, "Dynamo5");
 
   stageActor.scale[0] = 1.0f;
   stageActor.scale[1] = 0.8f;
@@ -75,6 +76,7 @@ int main()
 
   actors[0] = dragonActor;
   actors[1] = stageActor;
+ // actors[2] = dynamoActor;
 
   for(;;)
   {
@@ -82,9 +84,7 @@ int main()
     controller_scan();
     struct controller_data inputs = get_keys_pressed();
 
-    float newTime = get_time_s();
-    float deltaTime = (newTime - objTimeLast) * baseSpeed;
-    objTimeLast = newTime;
+    float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
     objTime += deltaTime;
 
     for(int i = 0; i < ACTOR_COUNT; i++) {
@@ -108,9 +108,10 @@ int main()
     }
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
 
+    
     // = <Inner Draw>
-    actor_draw(&stageActor);
     actor_draw(&dragonActor);
+    actor_draw(&stageActor);
 
     // = </Inner Draw>
 
@@ -150,7 +151,7 @@ static inline void engine_init() {
   timer_init();
   joypad_init();
   debug_init_isviewer();
-  console_init();
+  // console_init();
   audio_init(44100, 8);
   mixer_init(8);
   t3d_init((T3DInitParams){});

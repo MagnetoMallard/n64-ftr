@@ -42,15 +42,16 @@ void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) {
     t3d_vec3_norm(&camDir);
 
     if(inputs->Z) {
-      rotAngleX += (float)inputs->x * camRotSpeed;
       rotAngleY += (float)inputs->y * camRotSpeed;
+      camera->pos.v[0] += camDir.v[2] * (float)inputs->x * -camSpeed;
+      camera->pos.v[2] -= camDir.v[0] * (float)inputs->x * -camSpeed;
     } else {
       camera->pos.v[0] += camDir.v[0] * (float)inputs->y * camSpeed;
       camera->pos.v[1] += camDir.v[1] * (float)inputs->y * camSpeed;
       camera->pos.v[2] += camDir.v[2] * (float)inputs->y * camSpeed;
+      rotAngleX += (float)inputs->x * camRotSpeed;
 
-      camera->pos.v[0] += camDir.v[2] * (float)inputs->x * -camSpeed;
-      camera->pos.v[2] -= camDir.v[0] * (float)inputs->x * -camSpeed;
+
     }
 
     if(inputs->C_up)camera->pos.v[1] += camSpeed * 15.0f;

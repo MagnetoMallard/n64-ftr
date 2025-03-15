@@ -14,7 +14,7 @@ void dragon_draw(Actor *self) {
 Actor dragon_create(uint32_t id) { 
 
   uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
-  T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
+  // T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
   // Load a model-file, this contains the geometry and some metadata
   // Then cache it into a display list
   T3DModel *dragonModel = t3d_model_load("rom:/dragon2.t3dm");
