@@ -1,21 +1,16 @@
 #include <libdragon.h>
 #include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
-#include <t3d/t3ddebug.h>
 
 #include "actor.h"
 
-
-
 Actor actor_create(
-  uint32_t id, 
   rspq_block_t *dpl,
   ActorUpdateFunction actorUpdateFunction,
   ActorDrawFunction actorDrawFunction
 )
 {
   Actor actor = (Actor){
-    .id = id,
     .pos = {0, 25, 50},
     .rot = {0, 0, 0},
     .scale = {1.0, 1.0, 1.0},
@@ -29,13 +24,10 @@ Actor actor_create(
 }
 
 void actor_update(Actor *actor, float objTime) {
-
   if(actor->updateFunction) { 
     actor->updateFunction(actor, objTime);
-
   }
 
-  // t3d lets you directly construct a fixed-point matrix from SRT
   t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
@@ -51,10 +43,10 @@ void actor_delete(Actor *actor) {
   free_uncached(actor->modelMat);
 }
 
-Actor create_actor_from_model(uint32_t id, char* modelName) { 
-
+Actor create_actor_from_model(char* modelName) {
   uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
   T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
+
   // Load a model-file, this contains the geometry and some metadata
   // Then cache it into a display list
   char filename[32];
@@ -66,7 +58,7 @@ Actor create_actor_from_model(uint32_t id, char* modelName) {
   t3d_model_draw(dragonModel);
   dragonDpl = rspq_block_end();
 
-  Actor  actor = actor_create(id, dragonDpl, NULL, NULL);
+  Actor actor = actor_create(dragonDpl, NULL, NULL);
 
   return actor;
 }

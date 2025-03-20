@@ -1,12 +1,14 @@
 BUILD_DIR=build
-# T3D_INST=$(shell realpath ../..)
+T3D_INST=$(shell realpath /mnt/o/src/n64/tiny3d)
+N64_INST=$(shell realpath /opt/libdragon/)
+ARES_DIR=$(shell realpath /mnt/o/src/n64/ares-v141/)
 
 include $(N64_INST)/n64.mk
 include $(T3D_INST)/t3d.mk
 
 N64_CFLAGS += -std=gnu2x
 
-src = main.c actor.c dragon.c camera.c lights.c
+src = main.c actor.c dragon.c camera.c lights.c stage.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)
