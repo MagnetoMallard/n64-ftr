@@ -118,6 +118,7 @@ void stage_loop(int running) {
     // ===== Audio
     if (running) {
         mixer_try_play();
+    } else {
         rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 120, 96, "PAUSED");
     }
 }

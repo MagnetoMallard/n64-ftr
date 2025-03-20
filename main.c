@@ -39,6 +39,7 @@ int main()
         break;
       case PAUSED:
         stage_loop(0);
+        if(inputs.c[0].B) { isRunning = 0; }
         break;
     }
   }
@@ -69,6 +70,7 @@ static void engine_init() {
 }
 
 static void engine_teardown() {
+
   t3d_destroy();
 }
 

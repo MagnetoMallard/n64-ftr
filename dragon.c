@@ -11,7 +11,7 @@ void dragon_draw(Actor *self) {
 
 }
 
-Actor dragon_create(uint32_t id) { 
+Actor dragon_create(void) {
 
   uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
   // T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
@@ -24,7 +24,7 @@ Actor dragon_create(uint32_t id) {
   t3d_model_draw(dragonModel);
   dragonDpl = rspq_block_end();
 
-  Actor  actor = actor_create(id, dragonDpl, &dragon_update, &dragon_draw);
+  Actor  actor = actor_create(dragonDpl, &dragon_update, &dragon_draw);
 
   return actor;
 }

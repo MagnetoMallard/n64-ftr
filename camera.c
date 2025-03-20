@@ -7,11 +7,9 @@ float camDist = 20.0f;
 float lastTimeMs = 0.0f;
 float time = 0.0f;
 
-
 T3DVec3 camDir = {{0,0,1}};
 
 #define RAD_360 6.28318530718f
-
 
 Camera camera_create() { 
     Camera camera = { 
@@ -22,7 +20,6 @@ Camera camera_create() {
 } 
 void camera_draw() { 
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 128, "ROT ANGLE X : %.2f",  rotAngleX);
-
 }
 
 void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) { 
@@ -50,8 +47,6 @@ void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) {
       camera->pos.v[1] += camDir.v[1] * (float)inputs->y * camSpeed;
       camera->pos.v[2] += camDir.v[2] * (float)inputs->y * camSpeed;
       rotAngleX += (float)inputs->x * camRotSpeed;
-
-
     }
 
     if(inputs->C_up)camera->pos.v[1] += camSpeed * 15.0f;
@@ -63,8 +58,5 @@ void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) {
 
     t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(85.0f), 1.0f, 300.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
-    
-    // t3d_mat4_mul(&viewport->matCamProj, &viewport->matProj, &viewport->matCamera);
-    // t3d_mat4_to_frustum(&viewport->viewFrustum, &viewport->matCamProj);
-    // viewport->_isCamProjDirty = false;
+
 }
