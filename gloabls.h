@@ -17,6 +17,12 @@ enum GameSate {
     CREDITS
 };
 
+enum MusicState {
+    HOLDLOOP,
+    KRITTAGIRL
+};
+
+
 extern enum GameSate gameState;
 extern xm64player_t xm;
 extern struct controller_data inputs;

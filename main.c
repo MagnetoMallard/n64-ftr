@@ -2,8 +2,11 @@
 #include <libdragon.h>
 #include <t3d/t3d.h>
 
+
+
 #include "gloabls.h"
 #include "stage.h"
+
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
 
@@ -16,6 +19,7 @@ bool mute[SOUND_CHANNELS] = {0};
 xm64player_t xm;
 
 enum GameSate gameState = STAGE;
+enum GameSate musicState = HOLDLOOP;
 struct controller_data inputs;
 
 int main()
@@ -42,6 +46,10 @@ int main()
         if(inputs.c[0].B) { isRunning = 0; }
         break;
     }
+
+    switch (musicState) {
+
+    }
   }
 
   stage_teardown();
@@ -57,7 +65,7 @@ static void engine_init() {
   asset_init_compression(2);
 
   dfs_init(DFS_DEFAULT_LOCATION);
-  display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE_ANTIALIAS_DEDITHER);
+  display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
   rdpq_init();
   timer_init();
   joypad_init();
@@ -84,4 +92,13 @@ void music_init() {
   memset(mute, 0, sizeof(mute));
 }
 
+
+void music_switch() {
+  char *cur_rom = musicState;
+  xm64player_open(&xm, cur_rom);
+  xm64player_play(&xm, 0);
+
+  // Unmute all channels
+  memset(mute, 0, sizeof(mute));
+}
 

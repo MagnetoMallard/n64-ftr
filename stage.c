@@ -138,9 +138,10 @@ static inline void t3d_draw_update(T3DViewport* viewport) {
     rdpq_mode_fog(RDPQ_FOG_STANDARD);
     rdpq_set_fog_color(fogColour);
 
-    t3d_screen_clear_color(RGBA32(70, 70, 140, 0xFF));
+    t3d_screen_clear_color(RGBA32(70,70, 140, 0xFF));
     t3d_screen_clear_depth();
 
+    rdpq_mode_filter(FILTER_BILINEAR);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
     t3d_state_set_drawflags(T3D_FLAG_SHADED | T3D_FLAG_DEPTH );
