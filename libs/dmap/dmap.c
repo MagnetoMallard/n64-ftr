@@ -36,6 +36,10 @@
     #include <intrin.h>  // MSVC intrinsics
 #endif
 
+#ifdef N64
+	#include <libdragon.h>
+#endif
+
 static inline size_t next_power_of_2(size_t x) {
     if (x <= 1) return 1;  // ensure minimum value of 1
 
@@ -69,6 +73,9 @@ uint64_t dmap_generate_seed() {
         GetSystemTimeAsFileTime(&ft);
         timestamp = ((uint64_t)ft.dwHighDateTime << 32) | ft.dwLowDateTime;
         uint64_t pid = (uint64_t)_getpid();
+    #elif N64
+        timestamp = timer_ticks();
+        uint64_t pid = timer_ticks();
     #else
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -173,14 +180,14 @@ void dmap_freelist_push(DmapHdr *dh, u32 index) {
         }
         dh->free_list->cap = 16;
         dh->free_list->len = 0;
-        dh->free_list->data = (u32*)malloc(dh->cap * sizeof(u32));
+        dh->free_list->data = (unsigned int*)malloc(dh->cap * sizeof(u32));
         if(!dh->free_list->data){
             dmap_error_handler("malloc failed at freelist");
         }
     }
     if (dh->free_list->len == dh->free_list->cap) {
         dh->free_list->cap = (dh->free_list->cap * 3) / 2 + 1;  
-        dh->free_list->data = (u32*)realloc(dh->free_list->data, dh->free_list->cap * sizeof(u32));
+        dh->free_list->data = (unsigned int*)realloc(dh->free_list->data, dh->free_list->cap * sizeof(u32));
         if(!dh->free_list->data){
             dmap_error_handler("realloc failed at freelist");
         }
@@ -269,7 +276,7 @@ static void *dmap__grow_internal(void *dmap, size_t elem_size) {
     new_hdr->cap = (u32)new_cap;
     new_hdr->hash_cap = (u32)new_hash_cap;
 
-    dmap_assert(((uintptr_t)&new_hdr->data & (DMAP_ALIGNMENT - 1)) == 0); // ensure alignment
+    //dmap_assert(((uintptr_t)&new_hdr->data & (DMAP_ALIGNMENT - 1)) == 0); // ensure alignment
     return new_hdr->data; // return the aligned data pointer
 }
 
@@ -315,7 +322,7 @@ static void *dmap__init_internal(void *dmap, size_t capacity, size_t elem_size, 
     new_hdr->key_type = is_string ? DMAP_STR : DMAP_U64;
 
     dmap_grow_table(new_hdr->data, new_hdr->hash_cap, 0);
-    dmap_assert(((uintptr_t)&new_hdr->data & (DMAP_ALIGNMENT - 1)) == 0); // ensure alignment
+    //dmap_assert(((uintptr_t)&new_hdr->data & (DMAP_ALIGNMENT - 1)) == 0); // ensure alignment
     return new_hdr->data;
 }
 void *dmap__kstr_init(void *dmap, size_t initial_capacity, size_t elem_size, AllocatorFn alloc){

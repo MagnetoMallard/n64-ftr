@@ -1,18 +1,16 @@
 #include <string.h>
 #include <libdragon.h>
 #include <t3d/t3d.h>
-
-
-
 #include "gloabls.h"
 #include "stage.h"
 
+#define SONG_COUNT 2
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
 
 static void engine_init();
 static void engine_teardown();
-
+static void music_load(int songIndex);
 static void music_init();
 
 bool mute[SOUND_CHANNELS] = {0};
@@ -20,7 +18,11 @@ xm64player_t xm;
 
 enum GameSate gameState = STAGE;
 enum GameSate musicState = HOLDLOOP;
+
 struct controller_data inputs;
+char* songs[SONG_COUNT]; // TODO make this a function return, makes things clearer
+
+int songSelection = 0;
 
 int main()
 {
@@ -31,9 +33,30 @@ int main()
   int isSetup = 0;
   int isRunning = 1;
 
+  int ldas = 0;
+  int rdas = 0;
+
   while (isRunning) {
     controller_scan();
     inputs = get_keys_pressed();
+
+
+    if(inputs.c[0].L) { ldas++; }
+    if(inputs.c[0].R) { rdas++; }
+
+    if (rdas > 5) {
+      if (songSelection < (SONG_COUNT-1)) { songSelection++; }
+      else { songSelection = 0; }
+      music_load(songSelection);
+      rdas = 0;
+    }
+
+    if (ldas > 5) {
+      if (songSelection > 0){ songSelection--; }
+      else { songSelection = (SONG_COUNT-1); }
+      music_load(songSelection);
+      ldas = 0;
+    }
 
     switch (gameState) {
       default:
@@ -47,9 +70,6 @@ int main()
         break;
     }
 
-    switch (musicState) {
-
-    }
   }
 
   stage_teardown();
@@ -69,6 +89,7 @@ static void engine_init() {
   rdpq_init();
   timer_init();
   joypad_init();
+  timer_init(); // needed for hashmaps!
   debug_init_isviewer();
   // console_init();
   audio_init(44100, 8);
@@ -78,25 +99,23 @@ static void engine_init() {
 }
 
 static void engine_teardown() {
-
   t3d_destroy();
 }
 
-
-void music_init() {
-  char *cur_rom = "rom:/smallhold.xm64";
-  xm64player_open(&xm, cur_rom);
+static void music_load(int songIndex) {
+  if (xm.playing) {
+    xm64player_close(&xm);
+  }
+  xm64player_open(&xm, songs[songIndex]);
   xm64player_play(&xm, 0);
-
-  // Unmute all channels
-  memset(mute, 0, sizeof(mute));
 }
 
+static void music_init() {
+  // SETUP SONG LIST
+  songs[0] = "rom:/smallhold.xm64";
+  songs[1] = "rom:/kritta-girl.xm64";
 
-void music_switch() {
-  char *cur_rom = musicState;
-  xm64player_open(&xm, cur_rom);
-  xm64player_play(&xm, 0);
+  music_load(0);
 
   // Unmute all channels
   memset(mute, 0, sizeof(mute));

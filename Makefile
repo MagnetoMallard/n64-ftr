@@ -2,7 +2,7 @@ BUILD_DIR=build
 T3D_INST=$(shell realpath /mnt/o/src/n64/tiny3d)
 N64_INST=$(shell realpath /opt/libdragon/)
 ARES_DIR=$(shell realpath /mnt/o/src/n64/ares-v141/)
-
+D=1
 include $(N64_INST)/n64.mk
 include $(T3D_INST)/t3d.mk
 
@@ -21,7 +21,6 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 			  $(addprefix filesystem/,$(notdir $(assets_xm2:%.XM=%.xm64)))
 
 AUDIOCONV_FLAGS ?=
-
 
 all: ftrCart.z64
 
@@ -51,7 +50,10 @@ $(BUILD_DIR)/ftrCart.elf: $(src:%.c=$(BUILD_DIR)/%.o)
 ftrCart.z64: N64_ROM_TITLE="Tiny3D - Model"
 ftrCart.z64: $(BUILD_DIR)/ftrCart.dfs
 
-run:
+# dummy entry for clion, which treats makefiles strangely
+clionAres:
+
+ares:
 	$(ARES_DIR)/ares.exe ./ftrCart.z64
 
 unfload:
