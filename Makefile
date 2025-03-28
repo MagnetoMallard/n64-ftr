@@ -1,8 +1,4 @@
 BUILD_DIR=build
-T3D_INST=$(shell realpath /mnt/o/src/n64/tiny3d)
-N64_INST=$(shell realpath /opt/libdragon/)
-ARES_DIR=$(shell realpath /mnt/o/src/n64/ares-v141/)
-D=1
 include $(N64_INST)/n64.mk
 include $(T3D_INST)/t3d.mk
 
