@@ -18,6 +18,8 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 
 AUDIOCONV_FLAGS ?=
 
+
+
 all: ftrCart.z64
 
 filesystem/%.xm64: assets/%.xm
