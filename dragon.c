@@ -1,6 +1,5 @@
 #include <t3d/t3d.h>
 #include "actor.h"
-#include "checkerboard.h"
 #include <t3d/t3dmodel.h>
 
 void dragon_update(Actor *self, float objTime) {

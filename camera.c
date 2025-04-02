@@ -1,20 +1,28 @@
 #include <libdragon.h>
 #include "camera.h"
+#include "globals.h"
 
 float rotAngleX = 0.0f;  
-float rotAngleY = 0.0f;  
+float rotAngleY = 0.0f;
+float rotAngleZ = 0.0f;
 float camDist = 20.0f;
 float lastTimeMs = 0.0f;
 float time = 0.0f;
 
 T3DVec3 camDir = {{0,0,1}};
+T3DVec3 fwdVector = (T3DVec3){{0,0,1}};
+T3DVec3 perpVector = (T3DVec3){{1,0,0}};
+T3DVec3 dergVector;
+T3DVec3 dynamoVector;
 
+extern
 #define RAD_360 6.28318530718f
 
 Camera camera_create() { 
     Camera camera = { 
         .pos = {{0.0f,50.0f,-50.0f}},
-        .target = {{0,50,50}}
+        .target = {{0,50,50}},
+        .rotation = {{0.0f,0.0f,0.0f}}
     };
     return camera;
 } 
@@ -22,9 +30,22 @@ void camera_draw() {
     rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 128, "ROT ANGLE X : %.2f",  rotAngleX);
 }
 
-void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) { 
+void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
     T3DVec3 upVector = (T3DVec3){{0,1,0}};
-    
+    T3DVec3 nullVector = (T3DVec3){{0,0,0}};
+
+    camera->target = *target;
+
+    t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
+    t3d_vec3_diff(&camera->rotation, &nullVector, &camera->target);
+    debugf("up vec x, %f\n", upVector.x);
+    debugf("up vec y, %f\n", upVector.y);
+    debugf("up vec z, %f\n", upVector.z);
+}
+
+void camera_update(Camera* camera, T3DViewport* viewport) {
+    T3DVec3 upVector = (T3DVec3){{0,1,0}};
+
     double nowMs = (double)get_ticks_us() / 1000.0;
     float deltaTime = (float)(nowMs - lastTimeMs);
     lastTimeMs = nowMs;
@@ -33,24 +54,26 @@ void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport) {
     float camSpeed = deltaTime * 0.001f;
     float camRotSpeed = deltaTime * 0.00001f;
 
-    camDir.v[0] = fm_cosf(rotAngleX) * fm_cosf(rotAngleY);
-    camDir.v[1] = fm_sinf(rotAngleY);
-    camDir.v[2] = fm_sinf(rotAngleX) * fm_cosf(rotAngleY);
-    t3d_vec3_norm(&camDir);
+    camDir.v[0] =  fm_cosf(camera->rotation.x) * fm_cosf(camera->rotation.y);
+    camDir.v[1] =  fm_sinf(camera->rotation.y);
+    camDir.v[2] =  fm_sinf(camera->rotation.x) * fm_cosf(camera->rotation.y);
 
-    if(inputs->Z) {
-      rotAngleY += (float)inputs->y * camRotSpeed;
-      camera->pos.v[0] += camDir.v[2] * (float)inputs->x * -camSpeed;
-      camera->pos.v[2] -= camDir.v[0] * (float)inputs->x * -camSpeed;
+    if(inputs.btn.z) {
+      camera->rotation.y += (float)inputs.stick_y * camRotSpeed;
+      camera->pos.v[0] += camDir.v[2] * (float)inputs.stick_y * -camSpeed;
+      camera->pos.v[2] -= camDir.v[0] * (float)inputs.stick_x * -camSpeed;
     } else {
-      camera->pos.v[0] += camDir.v[0] * (float)inputs->y * camSpeed;
-      camera->pos.v[1] += camDir.v[1] * (float)inputs->y * camSpeed;
-      camera->pos.v[2] += camDir.v[2] * (float)inputs->y * camSpeed;
-      rotAngleX += (float)inputs->x * camRotSpeed;
+      camera->pos.v[0] += camDir.v[0] * (float)inputs.stick_y * camSpeed;
+      camera->pos.v[1] += camDir.v[1] * (float)inputs.stick_y * camSpeed;
+      camera->pos.v[2] += camDir.v[2] * (float)inputs.stick_y * camSpeed;
+      camera->rotation.x += (float)inputs.stick_x * camRotSpeed;
     }
 
-    if(inputs->C_up)camera->pos.v[1] += camSpeed * 15.0f;
-    if(inputs->C_down)camera->pos.v[1] -= camSpeed * 15.0f;
+    if(inputs.btn.c_up)camera->pos.v[1] += camSpeed * 15.0f;
+    if(inputs.btn.c_down)camera->pos.v[1] -= camSpeed * 15.0f;
+    if(inputs.btn.a)    camera_look_at(camera,&dergVector,viewport);
+    if(inputs.btn.b)    camera_look_at(camera,&dynamoVector,viewport);
+
 
     camera->target.v[0] = camera->pos.v[0] + camDir.v[0];
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];

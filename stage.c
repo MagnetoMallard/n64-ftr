@@ -1,7 +1,7 @@
 #include "actor.h"
 #include "camera.h"
 #include "dragon.h"
-#include "gloabls.h"
+#include "globals.h"
 #include "lights.h"
 
 #include "stage.h"
@@ -20,6 +20,7 @@ static float objTime = 0.0f;
 static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0xFF};
+rspq_syncpoint_t syncPoint = 0;
 
 static inline void t3d_draw_update(T3DViewport* viewport);
 
@@ -56,16 +57,44 @@ int stage_setup() {
     stageActor.scale[1] = 0.8f;
     stageActor.scale[2] = 1.0f;
 
+    dragonActor.pos[0] = -160.0f;
+    dragonActor.pos[1] = 0.0f;
+    dragonActor.pos[2] = 0.0f;
+
+    dynamoActor.pos[0] = -10.0f;
+    dynamoActor.pos[1] = 0.0f;
+    dynamoActor.pos[2] = 100.0f;
+
+    dynamoActor.rot[1] = -10.0f;
+
+
     actors[0] = dragonActor;
     actors[1] = stageActor;
     actors[2] = dynamoActor;
+
+    dergVector = (T3DVec3){
+        {
+            dragonActor.pos[0],
+            dragonActor.pos[1],
+            dragonActor.pos[2]
+        }};
+
+    dynamoVector = (T3DVec3){
+        {
+            dynamoActor.pos[0],
+            dynamoActor.pos[1],
+            dynamoActor.pos[2]
+    }};
+    camera_update(&camera, &viewport);
+
+    camera_look_at(&camera,&dergVector,&viewport);
 
     return 1;
 }
 
 void stage_loop(int running) {
     // ======== Update
-    if (inputs.c[0].start) gameState = gameState == STAGE ? PAUSED : STAGE;
+    if (inputs.btn.start) gameState = gameState == STAGE ? PAUSED : STAGE;
 
     if (running) {
 
@@ -74,16 +103,25 @@ void stage_loop(int running) {
 
         // TIES up controls:
         // Analogue Stick, C up and Down, Z
-        camera_update(&inputs.c[0], &camera, &viewport);
+        camera_update(&camera, &viewport);
+        if(inputs.btn.d_up) fogNear--;
+        if(inputs.btn.d_down) fogNear++;
 
-        if(inputs.c[0].up) fogNear--;
-        if(inputs.c[0].down) fogNear++;
-
-        if(inputs.c[0].left) fogFar--;
-        if(inputs.c[0].right) fogFar++;
+        if(inputs.btn.d_left) fogFar--;
+        if(inputs.btn.d_right) fogFar++;
 
         for(int i = 0; i < 3; i++) {
             actor_update(&actors[i], objTime);
+        }
+    }
+
+
+    if(syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
+
+    for(int i = 0; i < ACTORS_COUNT; i++) {
+        if (actors[i].anim.animationCount) {
+            t3d_skeleton_update(&actors[i].anim.skel);
+            t3d_mat4fp_from_srt_euler(actors[i].modelMat, actors[i].scale, actors[i].rot, actors[i].pos);
         }
     }
 
@@ -100,12 +138,15 @@ void stage_loop(int running) {
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
 
     // = <Inner Draw>
-    for(int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
+    for(int i = 0; i < ACTORS_COUNT; i++) {
         actor_draw(&actors[i]);
     }
     // = </Inner Draw>
 
     // = 2D
+    syncPoint = rspq_syncpoint_new();
+    rdpq_sync_pipe();
+
     camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "FOG NEAR: %.2f",  fogNear);
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "FOG FAR: %.2f",  fogFar);

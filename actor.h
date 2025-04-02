@@ -1,9 +1,11 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
+
 #include <libdragon.h>
 #include <t3d/t3d.h>
 
+#include "actor_animated.h"
 #define RAD_360 6.28318530718f
 
 static float objTimeLast = 0.0f;
@@ -13,11 +15,13 @@ struct Actor;
 
 // Holds our actor data, relevant for t3d is 'modelMat'.
 typedef struct _actor {
+  char* name;
   float pos[3];
   float rot[3];
   float scale[3];
   rspq_block_t *dpl;
   T3DMat4FP *modelMat;
+  AnimatedActor anim;
   void (*updateFunction)(struct _actor*,float);
   void (*drawFunction)(struct _actor*);
 } Actor;

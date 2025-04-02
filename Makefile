@@ -4,7 +4,7 @@ include $(T3D_INST)/t3d.mk
 
 N64_CFLAGS += -std=gnu2x
 
-src = main.c actor.c dragon.c camera.c lights.c stage.c
+src = main.c actor.c dragon.c camera.c lights.c stage.c actor_animated.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)

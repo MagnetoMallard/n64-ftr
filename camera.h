@@ -9,10 +9,12 @@
 typedef struct { 
     T3DVec3 pos;
     T3DVec3 target;
+    T3DVec3 rotation;
 } Camera;
 
 Camera camera_create();
-void camera_update(_SI_condat *inputs, Camera* camera, T3DViewport* viewport);
+void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport);
+void camera_update(Camera* camera, T3DViewport* viewport);
 void camera_draw();
 
 #endif

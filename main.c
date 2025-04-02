@@ -1,7 +1,7 @@
 #include <string.h>
 #include <libdragon.h>
 #include <t3d/t3d.h>
-#include "gloabls.h"
+#include "globals.h"
 #include "stage.h"
 
 #define SONG_COUNT 2
@@ -19,8 +19,9 @@ xm64player_t xm;
 enum GameSate gameState = STAGE;
 enum GameSate musicState = HOLDLOOP;
 
-struct controller_data inputs;
-char* songs[SONG_COUNT]; // TODO make this a function return, makes things clearer
+joypad_inputs_t inputs;
+
+char* songs[SONG_COUNT];
 
 int songSelection = 0;
 
@@ -36,13 +37,13 @@ int main()
   int ldas = 0;
   int rdas = 0;
 
+
   while (isRunning) {
-    controller_scan();
-    inputs = get_keys_pressed();
+    joypad_poll();
+    inputs = joypad_get_inputs(0);
 
-
-    if(inputs.c[0].L) { ldas++; }
-    if(inputs.c[0].R) { rdas++; }
+    if(inputs.btn.l) { ldas++; }
+    if(inputs.btn.r) { rdas++; }
 
     if (rdas > 5) {
       if (songSelection < (SONG_COUNT-1)) { songSelection++; }
@@ -66,7 +67,7 @@ int main()
         break;
       case PAUSED:
         stage_loop(0);
-        if(inputs.c[0].B) { isRunning = 0; }
+        if(inputs.btn.b) { isRunning = 0; }
         break;
     }
 

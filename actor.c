@@ -1,8 +1,9 @@
-#include <libdragon.h>
-#include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
+#include <t3d/t3dskeleton.h>
 
 #include "actor.h"
+#include "globals.h"
+
 
 Actor actor_create(
   rspq_block_t *dpl,
@@ -18,6 +19,7 @@ Actor actor_create(
     .modelMat = malloc_uncached(sizeof(T3DMat4FP)), // needed for t3d
     .updateFunction = actorUpdateFunction,
     .drawFunction = actorDrawFunction,
+    .anim = {}
   };
   t3d_mat4fp_identity(actor.modelMat);
   return actor;
@@ -28,6 +30,9 @@ void actor_update(Actor *actor, float objTime) {
     actor->updateFunction(actor, objTime);
   }
 
+  if (actor->anim.animationCount) {
+    t3d_anim_update(&actor->anim.animationInstances[1], objTime);
+  }
   t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
@@ -41,24 +46,38 @@ inline void actor_draw(Actor *actor) {
 
 void actor_delete(Actor *actor) {
   free_uncached(actor->modelMat);
+  animations_teardown(actor->anim);
 }
 
 Actor create_actor_from_model(char* modelName) {
-  uint16_t norm = t3d_vert_pack_normal(&(T3DVec3){{ 0, 0, 1}}); // normals are packed in a 5.6.5 format
-  T3DVertPacked* vertices = malloc_uncached(sizeof(T3DVertPacked) * 2);
+
+  Actor actor = actor_create(NULL, NULL, NULL);
 
   // Load a model-file, this contains the geometry and some metadata
   // Then cache it into a display list
   char filename[32];
   sprintf(filename, "rom:/%s.t3dm", modelName);
-  T3DModel *dragonModel = t3d_model_load(filename);
-  rspq_block_t *dragonDpl;
+  T3DModel *actorModel = t3d_model_load(filename);
 
-  rspq_block_begin();
-  t3d_model_draw(dragonModel);
-  dragonDpl = rspq_block_end();
+  // Detect if model has animations
+  // And add them to the struct if they do
+  uint32_t animationCount = t3d_model_get_animation_count(actorModel);
+  debugf("Model name, %s\n", filename);
+  debugf("Animation count: %ld\n", animationCount);
+  if (animationCount) {
+    actor.anim =  create_from_model(actorModel, animationCount);
+  }
 
-  Actor actor = actor_create(dragonDpl, NULL, NULL);
+  if (animationCount) {
+    rspq_block_begin();
+      t3d_model_draw_skinned(actorModel, &actor.anim.skel);
+    actor.dpl = rspq_block_end();
+  } else {
+    rspq_block_begin();
+      t3d_model_draw(actorModel);
+    actor.dpl = rspq_block_end();
+  }
+
 
   return actor;
 }
