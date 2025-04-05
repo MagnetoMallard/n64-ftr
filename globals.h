@@ -1,0 +1,35 @@
+//
+// Created by mallard on 20/03/2025.
+//
+
+#ifndef GLOBALS_H
+#define GLOBALS_H
+
+#include <libdragon.h>
+
+#define SOUND_CHANNELS 16
+
+enum GameSate {
+    MAIN_MENU,
+    PAUSED,
+    STAGE,
+    CREDITS
+};
+
+enum MusicState {
+    HOLDLOOP,
+    KRITTAGIRL
+};
+
+enum GameFonts {
+    FONT_FTR
+};
+
+extern T3DVec3 dergVector;
+extern T3DVec3 dynamoVector;
+extern enum GameSate gameState;
+extern xm64player_t xm;
+extern joypad_inputs_t inputs;
+extern rspq_syncpoint_t syncPoint;
+
+#endif //GLOBALS_H
