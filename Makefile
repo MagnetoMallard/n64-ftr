@@ -18,10 +18,20 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 
 AUDIOCONV_FLAGS ?=
 
+filesystem/dragon2.t3dm: GLTF_FLAGS = --bvh
+filesystem/dragon.t3dm: GLTF_FLAGS = --bvh
+filesystem/Dynamo5.t3dm: GLTF_FLAGS = --bvh
+filesystem/MainBarArea.t3dm: GLTF_FLAGS = --bvh
+filesystem/MainBarAreaRecolour.t3dm: GLTF_FLAGS = --bvh
+filesystem/model.t3dm: GLTF_FLAGS = --bvh
 
 
 all: ftrCart.z64
 
+filesystem/%.font64: assets/%.ttf
+	@mkdir -p $(dir $@)
+	@echo "    [FONT] $@"
+	$(N64_MKFONT) $(MKFONT_FLAGS) -o filesystem "$<"
 filesystem/%.xm64: assets/%.xm
 	@mkdir -p $(dir $@)
 	@echo "    [AUDIO] $@"
@@ -36,11 +46,12 @@ filesystem/%.sprite: assets/%.png
 	@echo "    [SPRITE] $@"
 	$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -o filesystem "$<"
 
-filesystem/%.t3dm: assets/%.glb
+filesystem/%.t3dm:  assets/%.glb
 	@mkdir -p $(dir $@)
 	@echo "    [T3D-MODEL] $@"
-	$(T3D_GLTF_TO_3D) "$<" $@
+	$(T3D_GLTF_TO_3D) $(GLTF_FLAGS) "$<" $@
 	$(N64_BINDIR)/mkasset -c 2 -o filesystem $@
+
 
 $(BUILD_DIR)/ftrCart.dfs: $(assets_conv)
 $(BUILD_DIR)/ftrCart.elf: $(src:%.c=$(BUILD_DIR)/%.o)

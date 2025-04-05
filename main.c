@@ -1,5 +1,6 @@
 #include <string.h>
 #include <libdragon.h>
+#include <usb.h>
 #include <t3d/t3d.h>
 #include "globals.h"
 #include "stage.h"
@@ -25,9 +26,20 @@ char* songs[SONG_COUNT];
 
 int songSelection = 0;
 
+
+static void load_fonts() {
+  rdpq_font_t *fnt1 = rdpq_font_load("rom:/STAN0754.font64");
+  rdpq_font_style(fnt1, 0, &(rdpq_fontstyle_t){
+      .color = RGBA32(0xED, 0xAE, 0x49, 0xFF),
+  });
+  rdpq_text_register_font(FONT_FTR, fnt1);
+}
+
 int main()
 {
   engine_init();
+
+  // load_fonts();
 
   music_init();
 
@@ -37,6 +49,7 @@ int main()
   int ldas = 0;
   int rdas = 0;
 
+  usb_initialize();
 
   while (isRunning) {
     joypad_poll();
@@ -71,6 +84,10 @@ int main()
         break;
     }
 
+    if (usb_poll()) {
+      isRunning = 0;
+    };
+
   }
 
   stage_teardown();
@@ -86,14 +103,18 @@ static void engine_init() {
   asset_init_compression(2);
 
   dfs_init(DFS_DEFAULT_LOCATION);
-  display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
+  const resolution_t RESOLUTION_320x240_PAL = {.width = 320, .height = 240, .interlaced = INTERLACE_OFF, .pal60 = true};
+  const resolution_t RESOLUTION_640x480_PAL = {.width = 640, .height = 480, .interlaced = INTERLACE_HALF, .pal60 = true};
+
+  display_init(RESOLUTION_320x240_PAL, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
+
   rdpq_init();
   timer_init();
   joypad_init();
   timer_init(); // needed for hashmaps!
   debug_init_isviewer();
   // console_init();
-  audio_init(44100, 8);
+  audio_init(44100, 16);
   mixer_init(SOUND_CHANNELS);
   t3d_init((T3DInitParams){});
   rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO));
