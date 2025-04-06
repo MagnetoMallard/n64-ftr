@@ -53,15 +53,8 @@ void actor_update(Actor *actor, float objTime) {
 
 
 inline void actor_draw(Actor *actor) {
-    //  t3d_matrix_push(actor->modelMat);
-    // // actor->drawFunction(actor);
-    //  rspq_block_run(actor->dpl);
-    //  t3d_matrix_pop(1);
-
-   // t3d_matrix_push(actor->modelMat);
 
     t3d_matrix_set(actor->modelMat, true);
-   //
 
     if (actor->visible) {
         T3DModelState state = t3d_model_state_create();
@@ -77,12 +70,7 @@ inline void actor_draw(Actor *actor) {
     }
     uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
 
-    // debugDrawAABB(display_get_current_framebuffer().buffer,
-    //             actor->t3dModel->aabbMin,
-    //             actor->t3dModel->aabbMax,
-    //           t3d_viewport_get(), 1.0f, debugClr[0]);
 
-   // t3d_matrix_pop(1);
 }
 
 void actor_delete(Actor *actor) {

@@ -123,15 +123,17 @@ void stage_loop(int running) {
 
     if (inputs.btn.d_left) modelScale -= 0.01f;
     if (inputs.btn.d_right) modelScale += 0.01f;
-    t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
+    // t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
 
     t3d_matrix_push_pos(1);
+
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
 
         if (running) {
             actor_update(curActor, objTime);
         }
+        //TODO: Move into helper function
 
         if (curActor->t3dModel) {
 
@@ -145,6 +147,9 @@ void stage_loop(int running) {
                     while (t3d_model_iter_next(&it)) {
                         int16_t transposedAabbMin[3];
                         int16_t transposedAabbMax[3];
+
+                        //TODO: Also Scale and rotate
+                        //TODO: Make helper function
 
                         transposedAabbMin[0] = it.object->aabbMin[0] + curActor->pos[0];
                         transposedAabbMin[1] = it.object->aabbMin[1] + curActor->pos[1];
@@ -163,7 +168,6 @@ void stage_loop(int running) {
     }
     t3d_matrix_pop(1);
 
-
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 
     // <Draw>
@@ -172,10 +176,8 @@ void stage_loop(int running) {
         Actor* curActor = &actors[i];
         if (curActor->anim.animationCount) {
             t3d_skeleton_update(&curActor->anim.skel);
-            //t3d_mat4fp_from_srt_euler(curActor->modelMat, curActor->scale, curActor->rot, curActor->pos);
         }
     }
-
 
     // = lights
     t3d_light_set_ambient(ambientLightColour);
@@ -191,16 +193,12 @@ void stage_loop(int running) {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor =&actors[i];
 
-
         uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-        uint16_t debugClr2[4] = {0x00, 0xFF, 0x00, 0xFF};
 
         debugDrawAABB(display_get_current_framebuffer().buffer,
                         curActor->t3dModel->aabbMin,
                         curActor->t3dModel->aabbMax,
                       &viewport, 1.0f, debugClr[0]);
-
-        //debugDrawFrustrum(display_get_current_framebuffer().buffer, &viewport, &viewport.viewFrustum, 1.0f, debugClr[0]);
 
         actor_draw(curActor);
     }

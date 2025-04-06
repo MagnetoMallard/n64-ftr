@@ -68,30 +68,6 @@ static void debugDrawAABB(uint16_t *fb, const int16_t *min, const int16_t *max, 
   for(int i=0; i<24; i+=2) {
     debugDrawLineVec3(fb, &points[indices[i]], &points[indices[i+1]], color);
   }
-}static void debugDrawFrustrum(uint16_t *fb, T3DViewport *vp, T3DFrustum *frust,  float scale, uint16_t color)
-{
-  // transform min/max to screen space
-  T3DVec3 points[8];
-  T3DVec3 pt0 = {{frust->planes[0].x*scale, frust->planes[0].y*scale, frust->planes[0].z*scale}};
-  T3DVec3 pt1 = {{frust->planes[5].x*scale, frust->planes[5].y*scale, frust->planes[5].z*scale}};
-  t3d_viewport_calc_viewspace_pos(vp, &points[0], &pt0);
-  t3d_viewport_calc_viewspace_pos(vp, &points[1], &pt1); pt0.v[1] = frust->planes[5].y*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[2], &pt0); pt1.v[1] = frust->planes[5].y*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[3], &pt1); pt0.v[2] = frust->planes[5].z*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[4], &pt0); pt1.v[2] = frust->planes[5].z*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[5], &pt1); pt0.v[1] = frust->planes[0].y*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[6], &pt0); pt1.v[1] = frust->planes[0].y*scale;
-  t3d_viewport_calc_viewspace_pos(vp, &points[7], &pt1);
-
-  // draw min/max as wireframe cube
-  const int indices[24] = {
-    0, 1, 1, 3, 3, 2, 2, 0,
-    4, 5, 5, 7, 7, 6, 6, 4,
-    0, 6, 1, 7, 2, 4, 3, 5
-  };
-  for(int i=0; i<24; i+=2) {
-    debugDrawLineVec3(fb, &points[indices[i]], &points[indices[i+1]], color);
-  }
 }
 
 static uint16_t DEBUG_COLORS[8] = {
