@@ -7,7 +7,7 @@ float rotAngleY = 0.0f;
 float rotAngleZ = 0.0f;
 float camDist = 20.0f;
 float lastTimeMs = 0.0f;
-float time = 0.0f;
+float time_d = 0.0f;
 
 T3DVec3 camDir = {{0,0,1}};
 T3DVec3 fwdVector = (T3DVec3){{0,0,1}};
@@ -27,7 +27,7 @@ Camera camera_create() {
     return camera;
 } 
 void camera_draw() { 
-    rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 128, "ROT ANGLE X : %.2f",  rotAngleX);
+    // rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 128, "ROT ANGLE X : %.2f",  rotAngleX);
 }
 
 void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
@@ -49,7 +49,7 @@ void camera_update(Camera* camera, T3DViewport* viewport) {
     double nowMs = (double)get_ticks_us() / 1000.0;
     float deltaTime = (float)(nowMs - lastTimeMs);
     lastTimeMs = nowMs;
-    time += deltaTime;
+    time_d += deltaTime;
 
     float camSpeed = deltaTime * 0.001f;
     float camRotSpeed = deltaTime * 0.00001f;
@@ -79,7 +79,6 @@ void camera_update(Camera* camera, T3DViewport* viewport) {
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(85.0f), 1.0f, 300.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 1.0f, 200.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
-
 }

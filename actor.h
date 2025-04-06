@@ -19,9 +19,13 @@ typedef struct _actor {
   float pos[3];
   float rot[3];
   float scale[3];
+  bool visible;
+  int16_t initialAabbMin[3];
+  int16_t initialAabbMax[3];
   rspq_block_t *dpl;
   T3DMat4FP *modelMat;
   AnimatedActor anim;
+  T3DModel *t3dModel;
   void (*updateFunction)(struct _actor*,float);
   void (*drawFunction)(struct _actor*);
 } Actor;
@@ -36,6 +40,7 @@ Actor actor_create(
 void actor_update(Actor *actor, float objTime);
 void actor_draw(Actor *actor);
 void actor_delete(Actor *actor);
+void actor_attach_update_function(Actor* actor, ActorUpdateFunction updateFunction);
 Actor create_actor_from_model(char* modelName); 
 
 #endif
