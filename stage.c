@@ -195,10 +195,10 @@ void stage_loop(int running) {
 
         uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
 
-        debugDrawAABB(display_get_current_framebuffer().buffer,
-                        curActor->t3dModel->aabbMin,
-                        curActor->t3dModel->aabbMax,
-                      &viewport, 1.0f, debugClr[0]);
+        // debugDrawAABB(display_get_current_framebuffer().buffer,
+        //                 curActor->t3dModel->aabbMin,
+        //                 curActor->t3dModel->aabbMax,
+        //               &viewport, 1.0f, debugClr[0]);
 
         actor_draw(curActor);
     }
