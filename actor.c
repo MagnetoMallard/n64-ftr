@@ -25,6 +25,7 @@ Actor actor_create(
     return actor;
 }
 
+
 void actor_update(Actor *actor, float objTime) {
     if (actor->updateFunction) {
         actor->updateFunction(actor, objTime);
@@ -34,8 +35,19 @@ void actor_update(Actor *actor, float objTime) {
         t3d_anim_update(&actor->anim.animationInstances[1], objTime);
     }
 
-    actor->t3dModel->aabbMax = {0, 0, 0};
-    actor->t3dModel->aabbMin =
+
+    // posVec.x = actor->modelMat->m[0].f[3];
+    // posVec.y = actor->modelMat->m[1].f[3];
+    // posVec.z = actor->modelMat->m[2].f[3];
+
+    actor->t3dModel->aabbMin[0] =  (int16_t) actor->initialAabbMin[0] + (actor->pos[0]);
+    actor->t3dModel->aabbMin[1] =  (int16_t) actor->initialAabbMin[1] + (actor->pos[1]);
+    actor->t3dModel->aabbMin[2] =  (int16_t) actor->initialAabbMin[2] + (actor->pos[2]);
+
+    actor->t3dModel->aabbMax[0] =  (int16_t) actor->initialAabbMax[0] + (actor->pos[0]);
+    actor->t3dModel->aabbMax[1] =  (int16_t) actor->initialAabbMax[1] + (actor->pos[1]);
+    actor->t3dModel->aabbMax[2] =  (int16_t) actor->initialAabbMax[2] + (actor->pos[2]);
+
     t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
@@ -97,6 +109,17 @@ Actor create_actor_from_model(char *modelName) {
     uint32_t animationCount = t3d_model_get_animation_count(actorModel);
     debugf("Model name, %s\n", filename);
     debugf("Animation count: %ld\n", animationCount);
+    debugf("AABBmin x: %i\n", actorModel->aabbMin[0]);
+    debugf("AABBmin y: %i\n", actorModel->aabbMin[1]);
+    debugf("AABBmin z: %i\n", actorModel->aabbMin[2]);
+
+    debugf("AABBmax x: %i\n", actorModel->aabbMax[0]);
+    debugf("AABBmax y: %i\n", actorModel->aabbMax[1]);
+    debugf("AABBmax z: %i\n", actorModel->aabbMax[2]);
+
+    if (animationCount) {
+        actor.anim =  create_from_model(actorModel, animationCount);
+    }
 
     T3DModelIter it = t3d_model_iter_create(actorModel, T3D_CHUNK_TYPE_OBJECT);
     while (t3d_model_iter_next(&it)) {
@@ -109,6 +132,10 @@ Actor create_actor_from_model(char *modelName) {
         it.object->userBlock = rspq_block_end();
     }
 
+    memcpy(actor.initialAabbMin, actorModel->aabbMin, sizeof(int16_t[3]));
+    memcpy(actor.initialAabbMax, actorModel->aabbMax, sizeof(int16_t[3]));
+
+    actor.name = modelName;
     actor.t3dModel = actorModel;
 
     return actor;

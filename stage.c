@@ -60,11 +60,12 @@ int stage_setup() {
 
     actor_attach_update_function(&dragonActor, (ActorUpdateFunction) &dragon_update);
 
+
     // stageActor.scale[0] = 1.0f;
     // stageActor.scale[1] = 0.8f;
     // stageActor.scale[2] = 1.0f;
 
-    dragonActor.pos[0] = -160.0f;
+    dragonActor.pos[0] = 160.0f;
     dragonActor.pos[1] = 0.0f;
     dragonActor.pos[2] = 0.0f;
 
@@ -124,51 +125,44 @@ void stage_loop(int running) {
     if (inputs.btn.d_right) modelScale += 0.01f;
     t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
 
+    t3d_matrix_push_pos(1);
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
-
-        if (curActor->t3dModel) {
-            // float modelScale = curActor.name == magicString ? 0.5f : 0.15f;
-
-        //        t3d_mat4fp_from_srt_euler(
-        //         curActor.modelMat,
-        //    (float[]){modelScale, modelScale, modelScale},
-        //      (float[]){0, 0, 0},
-        // (float[]){0, 0, 0}
-        //        );
-
-            // since we want to avoid transforming individual AABBs, we transform the frustum
-            // to match our map instead (model space). In this case we only have to scale it
-            T3DFrustum frustum = viewport.viewFrustum;
-            t3d_frustum_scale(&frustum, modelScale);
-
-            // before we do any finer checks with BVH, we test if the entire model is visible
-            // note that this data is always available in all models, even without a BVH
-            curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
-                                                       curActor->t3dModel->aabbMax);
-
-            if (curActor->visible) {
-
-                const T3DBvh *bvh = t3d_model_bvh_get(curActor->t3dModel);
-
-                // BVHs are optional, use '--bvh' in the gltf importer (see Makefile)
-                if (bvh) {
-                    t3d_model_bvh_query_frustum(bvh, &frustum);
-                } else {
-                    // without BVH, you can still iterate over all objects and perform a manual frustum checks
-                    T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
-                    while (t3d_model_iter_next(&it)) {
-                        it.object->isVisible =
-                            t3d_frustum_vs_aabb_s16(&frustum, it.object->aabbMin, it.object->aabbMax);
-                    }
-                }
-            }
-        }
 
         if (running) {
             actor_update(curActor, objTime);
         }
+
+        if (curActor->t3dModel) {
+
+            T3DFrustum frustum = viewport.viewFrustum;
+
+            curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
+                                                       curActor->t3dModel->aabbMax);
+
+            if (curActor->visible) {
+                    T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
+                    while (t3d_model_iter_next(&it)) {
+                        int16_t transposedAabbMin[3];
+                        int16_t transposedAabbMax[3];
+
+                        transposedAabbMin[0] = it.object->aabbMin[0] + curActor->pos[0];
+                        transposedAabbMin[1] = it.object->aabbMin[1] + curActor->pos[1];
+                        transposedAabbMin[2] = it.object->aabbMin[2] + curActor->pos[2];
+
+                        transposedAabbMax[0] = it.object->aabbMax[0] + curActor->pos[0];
+                        transposedAabbMax[1] = it.object->aabbMax[1] + curActor->pos[1];
+                        transposedAabbMax[2] = it.object->aabbMax[2] + curActor->pos[2];
+
+                        it.object->isVisible =
+                            t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
+                    }
+                // }
+            }
+        }
     }
+    t3d_matrix_pop(1);
+
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 
@@ -199,11 +193,14 @@ void stage_loop(int running) {
 
 
         uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+        uint16_t debugClr2[4] = {0x00, 0xFF, 0x00, 0xFF};
 
         debugDrawAABB(display_get_current_framebuffer().buffer,
                         curActor->t3dModel->aabbMin,
                         curActor->t3dModel->aabbMax,
                       &viewport, 1.0f, debugClr[0]);
+
+        //debugDrawFrustrum(display_get_current_framebuffer().buffer, &viewport, &viewport.viewFrustum, 1.0f, debugClr[0]);
 
         actor_draw(curActor);
     }
@@ -247,13 +244,14 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_fog(RDPQ_FOG_STANDARD);
     rdpq_set_fog_color(fogColour);
 
-    t3d_screen_clear_color(fogColour);
-    t3d_screen_clear_depth();
-
     rdpq_mode_antialias(AA_NONE);
 
     rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
     t3d_state_set_drawflags(T3D_FLAG_CULL_FRONT | T3D_FLAG_DEPTH | T3D_FLAG_SHADED);
+
+    t3d_screen_clear_color(fogColour);
+    t3d_screen_clear_depth();
+
 }
