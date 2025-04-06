@@ -4,8 +4,10 @@
 #include "globals.h"
 #include "lights.h"
 #include "debugDraw.h"
+#include "aabbHelpers.h"
 
 #include "stage.h"
+
 
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 3
@@ -103,6 +105,29 @@ int stage_setup() {
 
 float modelScale = 1.0f;
 
+static void check_aabbs(Actor *curActor) {
+    T3DFrustum frustum = viewport.viewFrustum;
+
+    curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
+                                               curActor->t3dModel->aabbMax);
+
+    if (curActor->visible) {
+            T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
+            while (t3d_model_iter_next(&it)) {
+
+                int16_t transposedAabbMin[3];
+                int16_t transposedAabbMax[3];
+
+                aabb_translate(transposedAabbMin, it.object->aabbMin, curActor->pos);
+                aabb_translate(transposedAabbMax, it.object->aabbMax, curActor->pos);
+
+                it.object->isVisible =
+                    t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
+            }
+        // }
+    }
+}
+
 void stage_loop(int running) {
     // ======== Update
     if (inputs.btn.start) start_das++;
@@ -133,37 +158,9 @@ void stage_loop(int running) {
         if (running) {
             actor_update(curActor, objTime);
         }
-        //TODO: Move into helper function
 
         if (curActor->t3dModel) {
-
-            T3DFrustum frustum = viewport.viewFrustum;
-
-            curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
-                                                       curActor->t3dModel->aabbMax);
-
-            if (curActor->visible) {
-                    T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
-                    while (t3d_model_iter_next(&it)) {
-                        int16_t transposedAabbMin[3];
-                        int16_t transposedAabbMax[3];
-
-                        //TODO: Also Scale and rotate
-                        //TODO: Make helper function
-
-                        transposedAabbMin[0] = it.object->aabbMin[0] + curActor->pos[0];
-                        transposedAabbMin[1] = it.object->aabbMin[1] + curActor->pos[1];
-                        transposedAabbMin[2] = it.object->aabbMin[2] + curActor->pos[2];
-
-                        transposedAabbMax[0] = it.object->aabbMax[0] + curActor->pos[0];
-                        transposedAabbMax[1] = it.object->aabbMax[1] + curActor->pos[1];
-                        transposedAabbMax[2] = it.object->aabbMax[2] + curActor->pos[2];
-
-                        it.object->isVisible =
-                            t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
-                    }
-                // }
-            }
+            check_aabbs(curActor);
         }
     }
     t3d_matrix_pop(1);
@@ -251,5 +248,4 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
 
     t3d_screen_clear_color(fogColour);
     t3d_screen_clear_depth();
-
 }

@@ -7,7 +7,7 @@ Light light_create(uint8_t colour[4], T3DVec3 direction) {
         .colour = colour,
         .direction = direction
     };
-    t3d_vec3_norm(&light.direction);
+   // t3d_vec3_norm(&light.direction);
     return light;
 }
 
