@@ -1,8 +1,10 @@
 #include <t3d/t3dmodel.h>
 #include <t3d/t3dskeleton.h>
-#include "actor.h"
 #include "globals.h"
 #include "debugDraw.h"
+#include "aabbHelpers.h"
+
+#include "actor.h"
 
 Actor actor_create(
     rspq_block_t *dpl,
@@ -25,6 +27,10 @@ Actor actor_create(
     return actor;
 }
 
+static void actor_recalc_aabs(Actor *actor) {
+    aabb_translate(actor->t3dModel->aabbMin, actor->initialAabbMin, actor->pos);
+    aabb_translate(actor->t3dModel->aabbMax, actor->initialAabbMax, actor->pos);
+}
 
 void actor_update(Actor *actor, float objTime) {
     if (actor->updateFunction) {
@@ -35,25 +41,13 @@ void actor_update(Actor *actor, float objTime) {
         t3d_anim_update(&actor->anim.animationInstances[1], objTime);
     }
 
-
-    // posVec.x = actor->modelMat->m[0].f[3];
-    // posVec.y = actor->modelMat->m[1].f[3];
-    // posVec.z = actor->modelMat->m[2].f[3];
-
-    actor->t3dModel->aabbMin[0] =  (int16_t) actor->initialAabbMin[0] + (actor->pos[0]);
-    actor->t3dModel->aabbMin[1] =  (int16_t) actor->initialAabbMin[1] + (actor->pos[1]);
-    actor->t3dModel->aabbMin[2] =  (int16_t) actor->initialAabbMin[2] + (actor->pos[2]);
-
-    actor->t3dModel->aabbMax[0] =  (int16_t) actor->initialAabbMax[0] + (actor->pos[0]);
-    actor->t3dModel->aabbMax[1] =  (int16_t) actor->initialAabbMax[1] + (actor->pos[1]);
-    actor->t3dModel->aabbMax[2] =  (int16_t) actor->initialAabbMax[2] + (actor->pos[2]);
+    actor_recalc_aabs(actor);
 
     t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
 
 inline void actor_draw(Actor *actor) {
-
     t3d_matrix_set(actor->modelMat, true);
 
     if (actor->visible) {
@@ -68,9 +62,6 @@ inline void actor_draw(Actor *actor) {
             }
         }
     }
-    uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-
-
 }
 
 void actor_delete(Actor *actor) {

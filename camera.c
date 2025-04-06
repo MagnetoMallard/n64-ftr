@@ -74,11 +74,10 @@ void camera_update(Camera* camera, T3DViewport* viewport) {
     if(inputs.btn.a)    camera_look_at(camera,&dergVector,viewport);
     if(inputs.btn.b)    camera_look_at(camera,&dynamoVector,viewport);
 
-
     camera->target.v[0] = camera->pos.v[0] + camDir.v[0];
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 1.0f, 200.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 1.0f, 300.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
 }
