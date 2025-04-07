@@ -5,7 +5,6 @@
 #include "globals.h"
 #include "stage.h"
 
-#define SONG_COUNT 2
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
 
@@ -26,6 +25,11 @@ char* songs[SONG_COUNT];
 
 int songSelection = 0;
 
+bool l_pressed = false;
+bool l_pressed_last = false;
+
+bool r_pressed = false;
+bool r_pressed_last = false;
 
 static void load_fonts() {
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/STAN0754.font64");
@@ -46,30 +50,30 @@ int main()
   int isSetup = 0;
   int isRunning = 1;
 
-  int ldas = 0;
-  int rdas = 0;
-
   usb_initialize();
 
   while (isRunning) {
     joypad_poll();
     inputs = joypad_get_inputs(0);
 
-    if(inputs.btn.l) { ldas++; }
-    if(inputs.btn.r) { rdas++; }
+    l_pressed_last = l_pressed;
+    r_pressed_last = r_pressed;
 
-    if (rdas > 5) {
+    if(inputs.btn.l) { l_pressed = true; } else { l_pressed = false; }
+    if(inputs.btn.r) { r_pressed = true; } else { r_pressed = false; }
+
+    // trigger on button release
+    if (r_pressed_last == true && r_pressed == false) {
       if (songSelection < (SONG_COUNT-1)) { songSelection++; }
       else { songSelection = 0; }
       music_load(songSelection);
-      rdas = 0;
     }
 
-    if (ldas > 5) {
+    // trigger on button release
+    if (l_pressed_last == true && l_pressed == false) {
       if (songSelection > 0){ songSelection--; }
       else { songSelection = (SONG_COUNT-1); }
       music_load(songSelection);
-      ldas = 0;
     }
 
     switch (gameState) {

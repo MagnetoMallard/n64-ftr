@@ -208,7 +208,7 @@ void stage_loop(int running) {
 
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "modelScale: %.2f",  modelScale);
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", songs[songSelection]);
 
     // ===== Audio
     if (running) {

@@ -8,6 +8,7 @@
 #include <libdragon.h>
 
 #define SOUND_CHANNELS 16
+#define SONG_COUNT 2
 
 enum GameSate {
     MAIN_MENU,
@@ -31,5 +32,6 @@ extern enum GameSate gameState;
 extern xm64player_t xm;
 extern joypad_inputs_t inputs;
 extern rspq_syncpoint_t syncPoint;
-
+extern char* songs[SONG_COUNT];
+extern int songSelection;
 #endif //GLOBALS_H
