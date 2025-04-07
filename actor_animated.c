@@ -29,10 +29,11 @@ AnimatedActor create_from_model(const T3DModel* model, uint32_t animationCount) 
     }
     T3DAnim* animInst = &animationStruct.animationInstances[1];
     t3d_anim_set_time(animInst, 0.0f);
-    t3d_anim_set_speed(animInst, 0.001f);
+    t3d_anim_set_speed(animInst, 1.0f);
     t3d_anim_set_playing(animInst, 1);
     t3d_anim_set_looping(animInst, 1);
     debugf("Animation name: %s\n", animInst->animRef->name);
+    debugf("Animation duration: %.2f\n", animInst->animRef->duration);
     return animationStruct;
 }
 

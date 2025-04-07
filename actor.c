@@ -5,6 +5,8 @@
 #include "aabbHelpers.h"
 
 #include "actor.h"
+static float lastTimeMs = 0.0f;
+static float time_d = 0.0f;
 
 Actor actor_create(
     rspq_block_t *dpl,
@@ -32,13 +34,14 @@ static void actor_recalc_aabs(Actor *actor) {
     aabb_translate(actor->t3dModel->aabbMax, actor->initialAabbMax, actor->pos);
 }
 
-void actor_update(Actor *actor, float objTime) {
+void actor_update(Actor *actor, float objTime, float deltaTime) {
+
     if (actor->updateFunction) {
         actor->updateFunction(actor, objTime);
     }
 
     if (actor->anim.animationCount) {
-        t3d_anim_update(&actor->anim.animationInstances[1], objTime);
+        t3d_anim_update(&actor->anim.animationInstances[1], deltaTime );
     }
 
     actor_recalc_aabs(actor);

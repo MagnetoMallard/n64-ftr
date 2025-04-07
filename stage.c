@@ -60,15 +60,21 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("Dynamo5");
 
-    actor_attach_update_function(&dragonActor, (ActorUpdateFunction) &dragon_update);
+    actor_attach_update_function(&dragonActor, &dragon_update);
 
-    dragonActor.pos[0] = 160.0f;
-    dragonActor.pos[1] = 0.0f;
-    dragonActor.pos[2] = 0.0f;
+    dragonActor.pos[0] = -360.0f;
+    dragonActor.pos[1] = 20.0f;
+    dragonActor.pos[2] = -40.0f;
 
-    dynamoActor.pos[0] = -10.0f;
-    dynamoActor.pos[1] = 0.0f;
-    dynamoActor.pos[2] = 100.0f;
+    dragonActor.scale[0] = 2.0f;
+    dragonActor.scale[1] = 2.0f;
+    dragonActor.scale[2] = 2.0f;
+
+    //dragonActor.rot[0] = T3D_DEG_TO_RAD(-90.0f);
+
+    // dynamoActor.pos[0] = -10.0f;
+    // dynamoActor.pos[1] = 0.0f;
+    // dynamoActor.pos[2] = 100.0f;
 
     dynamoActor.rot[1] = -10.0f;
 
@@ -91,7 +97,8 @@ int stage_setup() {
             dynamoActor.pos[2]
         }
     };
-    camera_update(&camera, &viewport);
+ //   camera_look_at(&camera, &dergVector, &viewport);
+    camera_update(&camera, &viewport, objTime);
 
     return 1;
 }
@@ -131,7 +138,7 @@ void stage_loop(int running) {
 
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
-    camera_update(&camera, &viewport);
+    camera_update(&camera, &viewport, deltaTime);
     if (inputs.btn.d_up) fogNear--;
     if (inputs.btn.d_down) fogNear++;
 
@@ -143,11 +150,9 @@ void stage_loop(int running) {
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
-
         if (running) {
-            actor_update(curActor, objTime);
+            actor_update(curActor, objTime, deltaTime);
         }
-
     }
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame

@@ -2,12 +2,11 @@
 #include "camera.h"
 #include "globals.h"
 
-float rotAngleX = 0.0f;  
+float rotAngleX = 0.0f;
 float rotAngleY = 0.0f;
 float rotAngleZ = 0.0f;
 float camDist = 20.0f;
 float lastTimeMs = 0.0f;
-float time_d = 0.0f;
 
 T3DVec3 camDir = {{0,0,1}};
 T3DVec3 fwdVector = (T3DVec3){{0,0,1}};
@@ -43,16 +42,15 @@ void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
     debugf("up vec z, %f\n", upVector.z);
 }
 
-void camera_update(Camera* camera, T3DViewport* viewport) {
+void camera_update(Camera* camera, T3DViewport* viewport, float objTime) {
     T3DVec3 upVector = (T3DVec3){{0,1,0}};
 
     double nowMs = (double)get_ticks_us() / 1000.0;
     float deltaTime = (float)(nowMs - lastTimeMs);
     lastTimeMs = nowMs;
-    time_d += deltaTime;
 
-    float camSpeed = deltaTime * 0.001f;
-    float camRotSpeed = deltaTime * 0.00001f;
+    float camSpeed = deltaTime * 0.002f;
+    float camRotSpeed = deltaTime * 0.00002f;
 
     camDir.v[0] =  fm_cosf(camera->rotation.x) * fm_cosf(camera->rotation.y);
     camDir.v[1] =  fm_sinf(camera->rotation.y);
@@ -78,6 +76,6 @@ void camera_update(Camera* camera, T3DViewport* viewport) {
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 1.0f, 300.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 2.0f, 300.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
 }

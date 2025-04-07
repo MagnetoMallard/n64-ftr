@@ -37,7 +37,7 @@ Actor actor_create(
   rspq_block_t *dpl,
   ActorUpdateFunction actorUpdateFunction, ActorDrawFunction actorDrawFunction
 ); 
-void actor_update(Actor *actor, float objTime);
+void actor_update(Actor *actor, float objTime, float deltaTime);
 void actor_draw(Actor *actor);
 void actor_delete(Actor *actor);
 void actor_attach_update_function(Actor* actor, ActorUpdateFunction updateFunction);
