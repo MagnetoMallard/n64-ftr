@@ -4,11 +4,12 @@
 #include <t3d/t3dmath.h>
 
 typedef struct _light {
-    uint8_t* colour;
+    uint8_t colour[4];
     T3DVec3 direction;
+    bool isPointLight;
 } Light;
 
-Light light_create(uint8_t colour[4], T3DVec3 direction);
+Light light_create(uint8_t colour[4], T3DVec3 direction, bool isPointLight);
 void light_update(Light* light, uint8_t colour[4], T3DVec3 direction);
 void light_draw(Light* light, int id);
 

@@ -40,18 +40,18 @@ int stage_setup() {
     // ======== Init Lights
     uint8_t colorDir[4] = {0xFF, 0x44, 0x44, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
-    Light pointLightOne = light_create(colorDir, lightDirVec);
+    Light pointLightOne = light_create(colorDir, lightDirVec, false);
 
     uint8_t colorDir2[4] = {0xFF, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec2 = {{-1.0f, 1.0f, -1.0f}};
-    Light pointLightTwo = light_create(colorDir2, lightDirVec2);
+    Light pointLightTwo = light_create(colorDir2, lightDirVec2, true);
 
     uint8_t colorDir3[4] = {0x00, 0x00, 0xFF, 0xFF};
     T3DVec3 lightDirVec3 = {{1.0f, 1.0f, 1.0f}};
-    Light pointLightThree = light_create(colorDir3, lightDirVec3);
+    Light pointLightThree = light_create(colorDir3, lightDirVec3, false);
 
     directionalLights[0] = pointLightOne;
-    directionalLights[1] = pointLightTwo;
+     directionalLights[1] = pointLightTwo;
     directionalLights[2] = pointLightThree;
 
     // ======== Init Actors
@@ -61,11 +61,6 @@ int stage_setup() {
     Actor dynamoActor = create_actor_from_model("Dynamo5");
 
     actor_attach_update_function(&dragonActor, (ActorUpdateFunction) &dragon_update);
-
-
-    // stageActor.scale[0] = 1.0f;
-    // stageActor.scale[1] = 0.8f;
-    // stageActor.scale[2] = 1.0f;
 
     dragonActor.pos[0] = 160.0f;
     dragonActor.pos[1] = 0.0f;
@@ -98,8 +93,6 @@ int stage_setup() {
     };
     camera_update(&camera, &viewport);
 
-    //    camera_look_at(&camera, &dergVector, &viewport);
-
     return 1;
 }
 
@@ -112,19 +105,16 @@ static void check_aabbs(Actor *curActor) {
                                                curActor->t3dModel->aabbMax);
 
     if (curActor->visible) {
-            T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
-            while (t3d_model_iter_next(&it)) {
+        T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
+        while (t3d_model_iter_next(&it)) {
+            int16_t transposedAabbMin[3];
+            int16_t transposedAabbMax[3];
 
-                int16_t transposedAabbMin[3];
-                int16_t transposedAabbMax[3];
-
-                aabb_translate(transposedAabbMin, it.object->aabbMin, curActor->pos);
-                aabb_translate(transposedAabbMax, it.object->aabbMax, curActor->pos);
-
-                it.object->isVisible =
-                    t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
-            }
-        // }
+            aabb_translate(transposedAabbMin, it.object->aabbMin, curActor->pos);
+            aabb_translate(transposedAabbMax, it.object->aabbMax, curActor->pos);
+            it.object->isVisible =
+                t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
+        }
     }
 }
 
@@ -146,11 +136,10 @@ void stage_loop(int running) {
     if (inputs.btn.d_down) fogNear++;
 
 
-    if (inputs.btn.d_left) modelScale -= 0.01f;
-    if (inputs.btn.d_right) modelScale += 0.01f;
-    // t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
+    if (inputs.btn.d_left) fogFar -= 0.01f;
+    if (inputs.btn.d_right) fogFar += 0.01f;
+     t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
 
-    t3d_matrix_push_pos(1);
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
@@ -159,11 +148,7 @@ void stage_loop(int running) {
             actor_update(curActor, objTime);
         }
 
-        if (curActor->t3dModel) {
-            check_aabbs(curActor);
-        }
     }
-    t3d_matrix_pop(1);
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 
@@ -174,7 +159,14 @@ void stage_loop(int running) {
         if (curActor->anim.animationCount) {
             t3d_skeleton_update(&curActor->anim.skel);
         }
+
+        if (curActor->t3dModel) {
+            check_aabbs(curActor);
+        }
     }
+
+    // = <Inner Draw>
+    t3d_matrix_push_pos(1);
 
     // = lights
     t3d_light_set_ambient(ambientLightColour);
@@ -184,14 +176,11 @@ void stage_loop(int running) {
     }
 
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
-
-    // = <Inner Draw>
-    t3d_matrix_push_pos(1);
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor =&actors[i];
 
-        uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-
+        // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+        //
         // debugDrawAABB(display_get_current_framebuffer().buffer,
         //                 curActor->t3dModel->aabbMin,
         //                 curActor->t3dModel->aabbMax,
@@ -209,7 +198,6 @@ void stage_loop(int running) {
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "modelScale: %.2f",  modelScale);
-    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "FOG FAR: %.2f",  fogFar);
 
     // ===== Audio
     if (running) {
@@ -244,7 +232,7 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
-    t3d_state_set_drawflags(T3D_FLAG_CULL_FRONT | T3D_FLAG_DEPTH | T3D_FLAG_SHADED);
+    t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED);
 
     t3d_screen_clear_color(fogColour);
     t3d_screen_clear_depth();
