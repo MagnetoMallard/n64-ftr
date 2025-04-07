@@ -80,7 +80,7 @@ int main()
         break;
       case PAUSED:
         stage_loop(0);
-        if(inputs.btn.b) { isRunning = 0; }
+        // if(inputs.btn.b) { isRunning = 0; }
         break;
     }
 

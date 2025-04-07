@@ -142,7 +142,9 @@ void stage_loop(int running) {
 
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
-    camera_update(&camera, &viewport, deltaTime);
+    if (running) {
+        camera_update(&camera, &viewport, deltaTime);
+    }
     if (inputs.btn.d_up) fogNear--;
     if (inputs.btn.d_down) fogNear++;
 
