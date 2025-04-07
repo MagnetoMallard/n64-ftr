@@ -28,7 +28,8 @@ T3DVec3 camPosScreen;
 
 static inline void t3d_draw_update(T3DViewport *viewport);
 
-int start_das = 0;
+bool start_pressed = false;
+bool start_pressed_last = false;
 constexpr char magicString[32] = "rom:/MainBarArea.t3dm";
 
 
@@ -127,10 +128,13 @@ static void check_aabbs(Actor *curActor) {
 
 void stage_loop(int running) {
     // ======== Update
-    if (inputs.btn.start) start_das++;
-    if (start_das > 5) {
+    start_pressed_last = start_pressed;
+    if (inputs.btn.start) start_pressed = true;
+    else start_pressed = false;
+
+    // pause when button is released
+    if (start_pressed_last == true && start_pressed == false) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
-        start_das = 0;
     }
 
     float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
