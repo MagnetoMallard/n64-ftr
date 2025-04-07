@@ -31,6 +31,8 @@ extern T3DVec3 dynamoVector;
 extern enum GameSate gameState;
 extern xm64player_t xm;
 extern joypad_inputs_t inputs;
+extern joypad_buttons_t btnsUp;
+extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
 extern char* songs[SONG_COUNT];
 extern int songSelection;

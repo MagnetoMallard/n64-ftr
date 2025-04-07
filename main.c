@@ -20,16 +20,12 @@ enum GameSate gameState = STAGE;
 enum GameSate musicState = HOLDLOOP;
 
 joypad_inputs_t inputs;
+joypad_buttons_t btnsUp;
+joypad_buttons_t btnsPressed;
 
 char* songs[SONG_COUNT];
 
 int songSelection = 0;
-
-bool l_pressed = false;
-bool l_pressed_last = false;
-
-bool r_pressed = false;
-bool r_pressed_last = false;
 
 static void load_fonts() {
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/STAN0754.font64");
@@ -54,23 +50,19 @@ int main()
 
   while (isRunning) {
     joypad_poll();
+    btnsUp = joypad_get_buttons_released(0);
+    btnsPressed = joypad_get_buttons_pressed(0);
     inputs = joypad_get_inputs(0);
 
-    l_pressed_last = l_pressed;
-    r_pressed_last = r_pressed;
-
-    if(inputs.btn.l) { l_pressed = true; } else { l_pressed = false; }
-    if(inputs.btn.r) { r_pressed = true; } else { r_pressed = false; }
-
     // trigger on button release
-    if (r_pressed_last == true && r_pressed == false) {
+    if (btnsPressed.l) {
       if (songSelection < (SONG_COUNT-1)) { songSelection++; }
       else { songSelection = 0; }
       music_load(songSelection);
     }
 
     // trigger on button release
-    if (l_pressed_last == true && l_pressed == false) {
+    if (btnsPressed.r) {
       if (songSelection > 0){ songSelection--; }
       else { songSelection = (SONG_COUNT-1); }
       music_load(songSelection);

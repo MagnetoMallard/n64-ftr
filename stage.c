@@ -28,8 +28,6 @@ T3DVec3 camPosScreen;
 
 static inline void t3d_draw_update(T3DViewport *viewport);
 
-bool start_pressed = false;
-bool start_pressed_last = false;
 constexpr char magicString[32] = "rom:/MainBarArea.t3dm";
 
 
@@ -128,17 +126,17 @@ static void check_aabbs(Actor *curActor) {
 
 void stage_loop(int running) {
     // ======== Update
-    start_pressed_last = start_pressed;
-    if (inputs.btn.start) start_pressed = true;
-    else start_pressed = false;
 
     // pause when button is released
-    if (start_pressed_last == true && start_pressed == false) {
+    if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
 
+
     float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
     objTime += deltaTime;
+
+    if (objTime == MAXFLOAT) objTime = 0;
 
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
@@ -149,8 +147,9 @@ void stage_loop(int running) {
     if (inputs.btn.d_down) fogNear++;
 
 
-    if (inputs.btn.d_left) fogFar -= 0.01f;
-    if (inputs.btn.d_right) fogFar += 0.01f;
+    if (inputs.btn.d_left) fogFar --;
+    if (inputs.btn.d_right) fogFar ++;
+
      t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
 
 
@@ -190,12 +189,12 @@ void stage_loop(int running) {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor =&actors[i];
 
-        // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-        //
-        // debugDrawAABB(display_get_current_framebuffer().buffer,
-        //                 curActor->t3dModel->aabbMin,
-        //                 curActor->t3dModel->aabbMax,
-        //               &viewport, 1.0f, debugClr[0]);
+        uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+
+        debugDrawAABB(display_get_current_framebuffer().buffer,
+                        curActor->t3dModel->aabbMin,
+                        curActor->t3dModel->aabbMax,
+                      &viewport, 1.0f, debugClr[0]);
 
         actor_draw(curActor);
     }
