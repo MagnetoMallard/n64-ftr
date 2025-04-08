@@ -19,14 +19,6 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 
 AUDIOCONV_FLAGS ?=
 
-filesystem/dragon2.t3dm: GLTF_FLAGS = --bvh
-filesystem/dragon.t3dm: GLTF_FLAGS = --bvh
-filesystem/Dynamo5.t3dm: GLTF_FLAGS = --bvh
-filesystem/MainBarArea.t3dm: GLTF_FLAGS = --bvh
-filesystem/MainBarAreaRecolour.t3dm: GLTF_FLAGS = --bvh
-filesystem/model.t3dm: GLTF_FLAGS = --bvh
-
-
 all: ftrCart.z64
 
 filesystem/%.font64: assets/%.ttf
