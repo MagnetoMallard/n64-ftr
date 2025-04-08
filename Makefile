@@ -3,8 +3,9 @@ include $(N64_INST)/n64.mk
 include $(T3D_INST)/t3d.mk
 
 N64_CFLAGS += -std=gnu2x
+VPATH=libs
 
-src = main.c actor.c camera.c lights.c stage.c actor_animated.c
+src = main.c actor.c camera.c lights.c stage.c actor_animated.c libxm/context.c libxm/load.c libxm/play.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)

@@ -5,6 +5,7 @@
 #include "lights.h"
 #include "debugDraw.h"
 #include "aabbHelpers.h"
+#include "libs/libxm/xm.h"
 
 #include "stage.h"
 
@@ -205,9 +206,16 @@ void stage_loop(int running) {
     syncPoint = rspq_syncpoint_new();
     rdpq_sync_pipe();
 
+
+    u_int16_t bpm;
+    u_int16_t tempo;
+
+    xm_get_playing_speed(xm.ctx,&bpm,&tempo);
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", songs[songSelection]);
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "bpm: %i", bpm);
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
 
     // ===== Audio
     if (running) {
