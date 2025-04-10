@@ -60,7 +60,7 @@ int stage_setup() {
 
     Actor dragonActor = create_actor_from_model("dragon2");
     Actor stageActor = create_actor_from_model("MainBarArea");
-    Actor dynamoActor = create_actor_from_model("Dynamo5");
+    Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
     sprite_t* dynamoEyeTex[4] = {
         sprite_load("rom:/EYE-DYNAMO1.sprite"),
