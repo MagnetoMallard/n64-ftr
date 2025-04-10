@@ -58,7 +58,7 @@ int stage_setup() {
 
     Actor dragonActor = create_actor_from_model("dragon2");
     Actor stageActor = create_actor_from_model("MainBarArea");
-    Actor dynamoActor = create_actor_from_model("Dynamo5");
+    Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
     actor_attach_update_function(&dragonActor, &dragon_update);
 
