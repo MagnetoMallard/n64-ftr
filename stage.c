@@ -1,6 +1,6 @@
 #include "actor.h"
 #include "camera.h"
-#include "dragon.h"
+#include "actorBehaviours.h"
 #include "globals.h"
 #include "lights.h"
 #include "debugDraw.h"
@@ -26,10 +26,12 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0xFF};
 rspq_syncpoint_t syncPoint = 0;
 T3DVec3 camPosScreen;
+sprite_t* dynamoEyeTex[4];
 
 static inline void t3d_draw_update(T3DViewport *viewport);
 
 constexpr char magicString[32] = "rom:/MainBarArea.t3dm";
+
 
 
 int stage_setup() {
@@ -60,21 +62,24 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("Dynamo5");
 
+    sprite_t* dynamoEyeTex[4] = {
+        sprite_load("rom:/EYE-DYNAMO1.sprite"),
+        sprite_load("rom:/EYE-DYNAMO-CLOSE.sprite"),
+        sprite_load("rom:/EYE-DYNAMO-DOWN.sprite"),
+        sprite_load("rom:/EYE-DYNAMO-UP.sprite"),
+    };
+
     actor_attach_update_function(&dragonActor, &dragon_update);
 
-    dragonActor.pos[0] = -360.0f;
+    //dynamoActor.customPartDrawFunc = &dynamo_part_draw;
+
+    dragonActor.pos[0] = 360.0f;
     dragonActor.pos[1] = 20.0f;
     dragonActor.pos[2] = -40.0f;
 
     dragonActor.scale[0] = 2.0f;
     dragonActor.scale[1] = 2.0f;
     dragonActor.scale[2] = 2.0f;
-
-    //dragonActor.rot[0] = T3D_DEG_TO_RAD(-90.0f);
-
-    // dynamoActor.pos[0] = -10.0f;
-    // dynamoActor.pos[1] = 0.0f;
-    // dynamoActor.pos[2] = 100.0f;
 
     dynamoActor.rot[1] = -10.0f;
 
@@ -116,9 +121,8 @@ static void check_aabbs(Actor *curActor) {
         while (t3d_model_iter_next(&it)) {
             int16_t transposedAabbMin[3];
             int16_t transposedAabbMax[3];
-
-            aabb_translate(transposedAabbMin, it.object->aabbMin, curActor->pos);
-            aabb_translate(transposedAabbMax, it.object->aabbMax, curActor->pos);
+            aabb_mat4_mult(transposedAabbMin, it.object->aabbMin, curActor->modelMatF);
+            aabb_mat4_mult(transposedAabbMax, it.object->aabbMax, curActor->modelMatF);
             it.object->isVisible =
                 t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
         }
@@ -197,7 +201,7 @@ void stage_loop(int running) {
                         curActor->t3dModel->aabbMax,
                       &viewport, 1.0f, debugClr[0]);
 
-        actor_draw(curActor);
+        actor_draw(curActor, objTime);
     }
     t3d_matrix_pop(1);
     // = </Inner Draw>
@@ -214,8 +218,9 @@ void stage_loop(int running) {
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "bpm: %i", bpm);
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "dragon min: %i, %i, %i", actors[0].t3dModel->aabbMin[0], actors[0].t3dModel->aabbMin[1], actors[0].t3dModel->aabbMin[2] );
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "dragon max: %i, %i, %i", actors[0].t3dModel->aabbMax[0], actors[0].t3dModel->aabbMax[1], actors[0].t3dModel->aabbMax[2] );
+    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
 
     // ===== Audio
     if (running) {

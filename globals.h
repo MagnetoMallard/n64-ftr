@@ -36,4 +36,5 @@ extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
 extern char* songs[SONG_COUNT];
 extern int songSelection;
+extern sprite_t* dynamoEyeTex[4];
 #endif //GLOBALS_H

@@ -20,6 +20,7 @@ Actor actor_create(
         .visible = true,
         .dpl = dpl,
         .modelMat = malloc_uncached(sizeof(T3DMat4FP)), // needed for t3d
+        .modelMatF = malloc_uncached(sizeof(T3DMat4)), // needed for t3d
         .updateFunction = actorUpdateFunction,
         .drawFunction = actorDrawFunction,
         .anim = {},
@@ -30,8 +31,8 @@ Actor actor_create(
 }
 
 static void actor_recalc_aabs(Actor *actor) {
-    aabb_translate(actor->t3dModel->aabbMin, actor->initialAabbMin, actor->pos);
-    aabb_translate(actor->t3dModel->aabbMax, actor->initialAabbMax, actor->pos);
+    aabb_mat4_mult(actor->t3dModel->aabbMin, actor->initialAabbMin, actor->modelMatF);
+    aabb_mat4_mult(actor->t3dModel->aabbMax, actor->initialAabbMax, actor->modelMatF);
 }
 
 void actor_update(Actor *actor, float objTime, float deltaTime) {
@@ -44,13 +45,13 @@ void actor_update(Actor *actor, float objTime, float deltaTime) {
         t3d_anim_update(&actor->anim.animationInstances[1], deltaTime );
     }
 
+    t3d_mat4_from_srt_euler(actor->modelMatF, actor->scale, actor->rot,actor->pos );
+    t3d_mat4_to_fixed_3x4(actor->modelMat, actor->modelMatF);
     actor_recalc_aabs(actor);
-
-    t3d_mat4fp_from_srt_euler(actor->modelMat, actor->scale, actor->rot, actor->pos);
 }
 
 
-inline void actor_draw(Actor *actor) {
+inline void actor_draw(Actor *actor, float objTime) {
     t3d_matrix_set(actor->modelMat, true);
 
     if (actor->visible) {
@@ -59,9 +60,14 @@ inline void actor_draw(Actor *actor) {
         while (t3d_model_iter_next(&it)) {
             if (it.object->isVisible) {
                 // draw material and object
-                t3d_model_draw_material(it.object->material, &state);
-                rspq_block_run(it.object->userBlock);
-                it.object->isVisible = false; // BVH only sets visible objects, so we need to reset this
+                if (actor->customPartDrawFunc) {
+                    actor->customPartDrawFunc(&it, &state, objTime);
+                } else {
+                    t3d_model_draw_material(it.object->material, &state);
+                    rspq_block_run(it.object->userBlock);
+                    it.object->isVisible = false; // BVH only sets visible objects, so we need to reset this
+                }
+
             }
         }
     }
@@ -106,6 +112,7 @@ Actor create_actor_from_model(char *modelName) {
     T3DModelIter it = t3d_model_iter_create(actorModel, T3D_CHUNK_TYPE_OBJECT);
     while (t3d_model_iter_next(&it)) {
         rspq_block_begin();
+        debugf("part name: %s\n", it.object->name);
         if (animationCount) {
             t3d_model_draw_object(it.object, actor.anim.skel.boneMatricesFP);
         } else {

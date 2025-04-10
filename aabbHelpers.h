@@ -14,14 +14,17 @@ inline void aabb_translate(int16_t transposedAabb[3], int16_t aabbPoint[3], floa
 }
 
 
-// TODO: Finish This!
-inline void aabb_scale(int16_t transposedAabbs[3], int16_t inputAabbs[3],  float scaleFactor[3], float pos[3]) {
-    // min in 0-2
-    // max in 3-5
+static void aabb_mat4_mult(int16_t transposedAabbs[3],int16_t initialAabbs[3], T3DMat4* multMatrix) {
+    T3DVec3 vec = {{initialAabbs[0], initialAabbs[1],  initialAabbs[2]  }};
 
-    transposedAabbs[0] = inputAabbs[0] + (pos[0] * scaleFactor[0]);
-    transposedAabbs[1] = inputAabbs[1] + (pos[1] * scaleFactor[1]);
-    transposedAabbs[2] = inputAabbs[2] + (pos[2] * scaleFactor[2]);
+    T3DVec4 outputVec;
+    t3d_mat4_mul_vec3(&outputVec, multMatrix, &vec);
+
+    transposedAabbs[0] = outputVec.x;
+    transposedAabbs[1] = outputVec.y;
+    transposedAabbs[2] = outputVec.z;
 }
 
 #endif //AABHELPERS_H
+
+
