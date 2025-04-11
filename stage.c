@@ -73,7 +73,7 @@ int stage_setup() {
 
     //dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
-    dragonActor.pos[0] = 360.0f;
+    dragonActor.pos[0] = -360.0f;
     dragonActor.pos[1] = 20.0f;
     dragonActor.pos[2] = -40.0f;
 
@@ -81,7 +81,8 @@ int stage_setup() {
     dragonActor.scale[1] = 2.0f;
     dragonActor.scale[2] = 2.0f;
 
-    dynamoActor.rot[1] = -10.0f;
+     dynamoActor.rot[1] = -10.0f;
+
 
     actors[0] = dragonActor;
     actors[1] = stageActor;
@@ -102,7 +103,13 @@ int stage_setup() {
             dynamoActor.pos[2]
         }
     };
- //   camera_look_at(&camera, &dergVector, &viewport);
+
+    camera.rotation.x = 2.68;
+    camera.pos.x = 80.0f;
+    camera.pos.y = 80.0f;
+    camera.pos.z = -80.0f;
+
+    // camera_look_at(&camera, &dergVector, &viewport);
     camera_update(&camera, &viewport, objTime);
 
     return 1;
@@ -117,12 +124,22 @@ static void check_aabbs(Actor *curActor) {
                                                curActor->t3dModel->aabbMax);
 
     if (curActor->visible) {
+
+
         T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
         while (t3d_model_iter_next(&it)) {
+            // Skip fine checks for animated models
+            // It doesn't really work properly
+            if (curActor->animCount == 0) {
+                it.object->isVisible = true;
+                continue;
+            }
+
             int16_t transposedAabbMin[3];
             int16_t transposedAabbMax[3];
             aabb_mat4_mult(transposedAabbMin, it.object->aabbMin, curActor->modelMatF);
             aabb_mat4_mult(transposedAabbMax, it.object->aabbMax, curActor->modelMatF);
+
             it.object->isVisible =
                 t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
         }
@@ -163,6 +180,10 @@ void stage_loop(int running) {
         if (running) {
             actor_update(curActor, objTime, deltaTime);
         }
+
+        if (curActor->t3dModel) {
+            check_aabbs(curActor);
+        }
     }
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
@@ -173,10 +194,6 @@ void stage_loop(int running) {
         Actor* curActor = &actors[i];
         if (curActor->anim.animationCount) {
             t3d_skeleton_update(&curActor->anim.skel);
-        }
-
-        if (curActor->t3dModel) {
-            check_aabbs(curActor);
         }
     }
 
@@ -218,8 +235,7 @@ void stage_loop(int running) {
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "dragon min: %i, %i, %i", actors[0].t3dModel->aabbMin[0], actors[0].t3dModel->aabbMin[1], actors[0].t3dModel->aabbMin[2] );
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "dragon max: %i, %i, %i", actors[0].t3dModel->aabbMax[0], actors[0].t3dModel->aabbMax[1], actors[0].t3dModel->aabbMax[2] );
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "camera rot: %.2f, %.2f, %.2f", camera.rotation.x, camera.rotation.y, camera.rotation.z );
     // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
 
     // ===== Audio
@@ -255,7 +271,7 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
-    t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED);
+    t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED );
 
     t3d_screen_clear_color(fogColour);
     t3d_screen_clear_depth();

@@ -18,6 +18,7 @@ Actor actor_create(
         .rot = {0, 0, 0},
         .scale = {1.0, 1.0, 1.0},
         .visible = true,
+        .animCount = 0,
         .dpl = dpl,
         .modelMat = malloc_uncached(sizeof(T3DMat4FP)), // needed for t3d
         .modelMatF = malloc_uncached(sizeof(T3DMat4)), // needed for t3d
@@ -126,6 +127,7 @@ Actor create_actor_from_model(char *modelName) {
 
     actor.name = modelName;
     actor.t3dModel = actorModel;
+    actor.animCount = animationCount;
 
     return actor;
 }

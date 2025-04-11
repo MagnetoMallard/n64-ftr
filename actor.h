@@ -20,6 +20,7 @@ typedef struct _actor {
   float rot[3];
   float scale[3];
   bool visible;
+  int animCount;
   int16_t initialAabbMin[3];
   int16_t initialAabbMax[3];
   rspq_block_t *dpl;
