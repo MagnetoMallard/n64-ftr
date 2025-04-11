@@ -90,17 +90,17 @@ int stage_setup() {
 
     dergVector = (T3DVec3){
         {
-            dragonActor.pos[0],
-            dragonActor.pos[1],
-            dragonActor.pos[2]
+            dragonActor.pos[0] + dragonActor.initialAabbMax[0] / 2,
+            dragonActor.pos[1] + dragonActor.initialAabbMax[1] / 2,
+            dragonActor.pos[2] + dragonActor.initialAabbMax[2] / 2
         }
     };
 
     dynamoVector = (T3DVec3){
         {
-            dynamoActor.pos[0],
-            dynamoActor.pos[1],
-            dynamoActor.pos[2]
+            dynamoActor.pos[0] + dynamoActor.initialAabbMax[0] / 2,
+            dynamoActor.pos[1] + dynamoActor.initialAabbMax[1] / 2,
+            dynamoActor.pos[2] + dynamoActor.initialAabbMax[2] / 2
         }
     };
 
@@ -213,10 +213,10 @@ void stage_loop(int running) {
 
         uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
 
-        debugDrawAABB(display_get_current_framebuffer().buffer,
-                        curActor->t3dModel->aabbMin,
-                        curActor->t3dModel->aabbMax,
-                      &viewport, 1.0f, debugClr[0]);
+        // debugDrawAABB(display_get_current_framebuffer().buffer,
+        //                 curActor->t3dModel->aabbMin,
+        //                 curActor->t3dModel->aabbMax,
+        //               &viewport, 1.0f, debugClr[0]);
 
         actor_draw(curActor, objTime);
     }
