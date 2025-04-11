@@ -71,7 +71,7 @@ int stage_setup() {
 
     actor_attach_update_function(&dragonActor, &dragon_update);
 
-    //dynamoActor.customPartDrawFunc = &dynamo_part_draw;
+    // dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
     dragonActor.pos[0] = -360.0f;
     dragonActor.pos[1] = 20.0f;
@@ -125,7 +125,6 @@ static void check_aabbs(Actor *curActor) {
 
     if (curActor->visible) {
 
-
         T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
         while (t3d_model_iter_next(&it)) {
             // Skip fine checks for animated models
@@ -154,7 +153,6 @@ void stage_loop(int running) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
 
-
     float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
     objTime += deltaTime;
 
@@ -165,24 +163,17 @@ void stage_loop(int running) {
     if (running) {
         camera_update(&camera, &viewport, deltaTime);
     }
+
     if (inputs.btn.d_up) fogNear--;
     if (inputs.btn.d_down) fogNear++;
 
-
     if (inputs.btn.d_left) fogFar --;
     if (inputs.btn.d_right) fogFar ++;
-
-     t3d_viewport_calc_viewspace_pos(&viewport, &camPosScreen , &camera.pos);
-
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
         if (running) {
             actor_update(curActor, objTime, deltaTime);
-        }
-
-        if (curActor->t3dModel) {
-            check_aabbs(curActor);
         }
     }
 
@@ -190,12 +181,6 @@ void stage_loop(int running) {
 
     // <Draw>
     t3d_draw_update(&viewport);
-    for (int i = 0; i < ACTORS_COUNT; i++) {
-        Actor* curActor = &actors[i];
-        if (curActor->anim.animationCount) {
-            t3d_skeleton_update(&curActor->anim.skel);
-        }
-    }
 
     // = <Inner Draw>
     t3d_matrix_push_pos(1);
@@ -209,9 +194,18 @@ void stage_loop(int running) {
 
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
     for (int i = 0; i < ACTORS_COUNT; i++) {
-        Actor* curActor =&actors[i];
+        Actor* curActor = &actors[i];
 
-        uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+        if (curActor->anim.animationCount) {
+            t3d_skeleton_update(&curActor->anim.skel);
+        }
+
+
+        if (curActor->t3dModel) {
+            check_aabbs(curActor);
+        }
+
+       // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
 
         // debugDrawAABB(display_get_current_framebuffer().buffer,
         //                 curActor->t3dModel->aabbMin,
@@ -228,15 +222,14 @@ void stage_loop(int running) {
     rdpq_sync_pipe();
 
 
-    u_int16_t bpm;
-    u_int16_t tempo;
+    // u_int16_t bpm;
+    // u_int16_t tempo;
 
-    xm_get_playing_speed(xm.ctx,&bpm,&tempo);
     // camera_draw(); // purely for debug
     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "camera rot: %.2f, %.2f, %.2f", camera.rotation.x, camera.rotation.y, camera.rotation.z );
-    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
+    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
+    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "camera rot: %.2f, %.2f, %.2f", camera.rotation.x, camera.rotation.y, camera.rotation.z );
+    // // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
 
     // ===== Audio
     if (running) {
@@ -257,7 +250,7 @@ void stage_teardown() {
 
 static inline void t3d_draw_update(T3DViewport *viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
-    rdpq_mode_zbuf(true, true);
+  //  rdpq_mode_zbuf(true, true);
     t3d_frame_start();
     t3d_viewport_attach(viewport);
 

@@ -10,8 +10,8 @@ float camDist = 20.0f;
 float lastTimeMs = 0.0f;
 
 T3DVec3 camDir = {{0,0,1}};
-T3DVec3 fwdVector = (T3DVec3){{0,0,1}};
-T3DVec3 perpVector = (T3DVec3){{1,0,0}};
+T3DVec3 upVector = (T3DVec3){{0,1,0}};
+
 T3DVec3 dergVector;
 T3DVec3 dynamoVector;
 
@@ -46,21 +46,15 @@ void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
 
 }
 
-void camera_update(Camera* camera, T3DViewport* viewport, float objTime) {
-    T3DVec3 upVector = (T3DVec3){{0,1,0}};
 
-    double nowMs = (double)get_ticks_us() / 1000.0;
-    float deltaTime = (float)(nowMs - lastTimeMs);
-    lastTimeMs = nowMs;
+void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
 
-    float camSpeed = deltaTime * 0.002f;
-    float camRotSpeed = deltaTime * 0.00002f;
+    float camSpeed = deltaTime * 2.0f;
+    float camRotSpeed = deltaTime * 0.02f;
 
     camDir.v[0] =  fm_cosf(camera->rotation.x) * fm_cosf(camera->rotation.y);
     camDir.v[1] =  fm_sinf(camera->rotation.y);
     camDir.v[2] =  fm_sinf(camera->rotation.x) * fm_cosf(camera->rotation.y);
-
-    t3d_vec3_norm(&camDir);
 
     bool inStickRangeY = camera->rotation.y <= STICk_RANGE_Y && camera->rotation.y >= -STICk_RANGE_Y;
 
@@ -91,7 +85,6 @@ void camera_update(Camera* camera, T3DViewport* viewport, float objTime) {
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(75.0f), 10.0f, 300.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(85.0f), 10.0f, 250.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
 }

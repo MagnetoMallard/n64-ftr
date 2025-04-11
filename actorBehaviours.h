@@ -10,16 +10,16 @@ static inline void dragon_update(Actor *self, float objTime) {
 }
 
 static inline void dynamo_part_draw(T3DModelIter *it, T3DModelState *state, float objTime) {
-    char strCheck[12]  = "Eyebrow.R";
-    if ( it->object->name == strCheck ) {
+    char strCheck[12]  = "EYES";
+    if (it->material && it->material->name == strCheck ) {
         int objTimeInt = objTime;
-        // if (objTimeInt % 10) {
-        //     // sets up tex manuallly
-        //     rdpq_set_lookup_address(1, dynamoEyeTex[1]->data);
-        // } else {
-        //     t3d_model_draw_material(it->object->material, state);
-        // }
-        debugf("doin it!");
+        if (objTimeInt % 10) {
+            // sets up tex manuallly
+            rdpq_set_lookup_address(1, dynamoEyeTex[1]->data);
+        } else {
+            t3d_model_draw_material(it->object->material, state);
+        }
+
         rdpq_set_lookup_address(1, dynamoEyeTex[1]->data);
 
     }
