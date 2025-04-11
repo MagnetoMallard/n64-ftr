@@ -73,15 +73,15 @@ int stage_setup() {
 
     // dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
-    dragonActor.pos[0] = -360.0f;
-    dragonActor.pos[1] = 20.0f;
-    dragonActor.pos[2] = -40.0f;
+    dynamoActor.pos[0] = -330.0f;
+    dynamoActor.pos[1] = 30.0f;
+    dynamoActor.pos[2] = -30.0f;
 
     dragonActor.scale[0] = 2.0f;
     dragonActor.scale[1] = 2.0f;
     dragonActor.scale[2] = 2.0f;
 
-    dynamoActor.rot[1] = -10.0f;
+    dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
 
     actors[0] = dragonActor;
     actors[1] = stageActor;
