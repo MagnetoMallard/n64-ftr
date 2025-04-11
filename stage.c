@@ -81,13 +81,13 @@ int stage_setup() {
     dragonActor.scale[1] = 2.0f;
     dragonActor.scale[2] = 2.0f;
 
-     dynamoActor.rot[1] = -10.0f;
-
+    dynamoActor.rot[1] = -10.0f;
 
     actors[0] = dragonActor;
     actors[1] = stageActor;
     actors[2] = dynamoActor;
 
+    // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
     dergVector = (T3DVec3){
         {
             dragonActor.pos[0] + dragonActor.initialAabbMax[0] / 2,
