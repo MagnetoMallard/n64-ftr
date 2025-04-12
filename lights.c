@@ -5,14 +5,15 @@
 Light light_create(uint8_t colour[4], T3DVec3 direction, bool isPointLight) {
     Light light = {
         .direction = direction,
-        .isPointLight = isPointLight
+        .isPointLight = isPointLight,
+        .lightUpdateFunction = nullptr
     };
     memcpy(light.colour, colour, sizeof(uint8_t[4]));
     t3d_vec3_norm(&light.direction);
     return light;
 }
 
-void light_update(Light* light, uint8_t colour[4], T3DVec3 direction) {
+void light_update(Light* light, uint8_t colour[4], T3DVec3 direction, float objTime) {
     if (colour != light->colour) memcpy(light->colour, colour, sizeof(uint8_t[4]));
     if (direction.v != light->direction.v) {
         light->direction = direction;

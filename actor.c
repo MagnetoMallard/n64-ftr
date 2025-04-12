@@ -5,8 +5,6 @@
 #include "aabbHelpers.h"
 
 #include "actor.h"
-static float lastTimeMs = 0.0f;
-static float time_d = 0.0f;
 
 Actor actor_create(
     rspq_block_t *dpl,
@@ -18,6 +16,7 @@ Actor actor_create(
         .rot = {0, 0, 0},
         .scale = {1.0, 1.0, 1.0},
         .visible = true,
+        .animCount = 0,
         .dpl = dpl,
         .modelMat = malloc_uncached(sizeof(T3DMat4FP)), // needed for t3d
         .modelMatF = malloc_uncached(sizeof(T3DMat4)), // needed for t3d
@@ -113,8 +112,12 @@ Actor create_actor_from_model(char *modelName) {
     while (t3d_model_iter_next(&it)) {
         rspq_block_begin();
         debugf("part name: %s\n", it.object->name);
+        debugf("material name: %s\n", it.object->material->name);
+
         if (animationCount) {
+
             t3d_model_draw_object(it.object, actor.anim.skel.boneMatricesFP);
+
         } else {
             t3d_model_draw_object(it.object, nullptr);
         }
@@ -126,6 +129,7 @@ Actor create_actor_from_model(char *modelName) {
 
     actor.name = modelName;
     actor.t3dModel = actorModel;
+    actor.animCount = animationCount;
 
     return actor;
 }

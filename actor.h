@@ -8,9 +8,6 @@
 #include "actor_animated.h"
 #define RAD_360 6.28318530718f
 
-static float objTimeLast = 0.0f;
-static float baseSpeed = 1.0f;
-
 struct Actor;
 
 // Holds our actor data, relevant for t3d is 'modelMat'.
@@ -20,6 +17,7 @@ typedef struct _actor {
   float rot[3];
   float scale[3];
   bool visible;
+  int animCount;
   int16_t initialAabbMin[3];
   int16_t initialAabbMax[3];
   rspq_block_t *dpl;

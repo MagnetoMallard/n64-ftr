@@ -126,7 +126,6 @@ static void engine_init() {
   joypad_init();
   timer_init(); // needed for hashmaps!
   debug_init_isviewer();
-  // console_init();
   audio_init(44100, 16);
   mixer_init(SOUND_CHANNELS);
   t3d_init((T3DInitParams){});
