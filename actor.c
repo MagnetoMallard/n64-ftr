@@ -5,8 +5,6 @@
 #include "aabbHelpers.h"
 
 #include "actor.h"
-static float lastTimeMs = 0.0f;
-static float time_d = 0.0f;
 
 Actor actor_create(
     rspq_block_t *dpl,

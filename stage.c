@@ -29,10 +29,7 @@ T3DVec3 camPosScreen;
 sprite_t* dynamoEyeTex[4];
 
 static inline void t3d_draw_update(T3DViewport *viewport);
-
-constexpr char magicString[32] = "rom:/MainBarArea.t3dm";
-
-
+static inline void debug_prints();
 
 int stage_setup() {
     viewport = t3d_viewport_create();
@@ -43,9 +40,10 @@ int stage_setup() {
     uint8_t colorDir[4] = {0xFF, 0x44, 0x44, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
+    pointLightOne.lightUpdateFunction = &light_update_traffic_light_xm;
 
     uint8_t colorDir2[4] = {0xFF, 0x00, 0x00, 0xFF};
-    T3DVec3 lightDirVec2 = {{-1.0f, 1.0f, -1.0f}};
+    T3DVec3 lightDirVec2 = {{-330.0f, 60.0f, -30.0f }};
     Light pointLightTwo = light_create(colorDir2, lightDirVec2, true);
 
     uint8_t colorDir3[4] = {0x00, 0x00, 0xFF, 0xFF};
@@ -62,12 +60,12 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
-    sprite_t* dynamoEyeTex[4] = {
-        sprite_load("rom:/EYE-DYNAMO1.sprite"),
-        sprite_load("rom:/EYE-DYNAMO-CLOSE.sprite"),
-        sprite_load("rom:/EYE-DYNAMO-DOWN.sprite"),
-        sprite_load("rom:/EYE-DYNAMO-UP.sprite"),
-    };
+    // sprite_t* dynamoEyeTex[4] = {
+    //     sprite_load("rom:/EYE-DYNAMO1.sprite"),
+    //     sprite_load("rom:/EYE-DYNAMO-CLOSE.sprite"),
+    //     sprite_load("rom:/EYE-DYNAMO-DOWN.sprite"),
+    //     sprite_load("rom:/EYE-DYNAMO-UP.sprite"),
+    // };
 
     actor_attach_update_function(&dragonActor, &dragon_update);
 
@@ -104,12 +102,12 @@ int stage_setup() {
         }
     };
 
-    camera.rotation.x = 2.68;
+    // camera.rotation.x = 2.68;
     camera.pos.x = 80.0f;
     camera.pos.y = 80.0f;
     camera.pos.z = -80.0f;
 
-    // camera_look_at(&camera, &dergVector, &viewport);
+    camera_look_at(&camera, &dynamoVector, &viewport);
     camera_update(&camera, &viewport, objTime);
 
     return 1;
@@ -161,6 +159,7 @@ void stage_loop(int running) {
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
     if (running) {
+
         camera_update(&camera, &viewport, deltaTime);
     }
 
@@ -174,6 +173,13 @@ void stage_loop(int running) {
         Actor* curActor = &actors[i];
         if (running) {
             actor_update(curActor, objTime, deltaTime);
+        }
+    }
+
+    for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
+        Light* curLight = &directionalLights[i];
+        if (curLight->lightUpdateFunction) {
+            curLight->lightUpdateFunction(curLight, deltaTime, objTime);
         }
     }
 
@@ -216,30 +222,29 @@ void stage_loop(int running) {
     }
     t3d_matrix_pop(1);
     // = </Inner Draw>
+    if (running){
+        mixer_try_play();
+    }
 
     // = 2D
     syncPoint = rspq_syncpoint_new();
     rdpq_sync_pipe();
 
 
-    // u_int16_t bpm;
-    // u_int16_t tempo;
-
-    // camera_draw(); // purely for debug
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "camera rot: %.2f, %.2f, %.2f", camera.rotation.x, camera.rotation.y, camera.rotation.z );
-    // // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
+    debug_prints();
 
     // ===== Audio
-    if (running) {
-        mixer_try_play();
-    } else {
+    if (!running) {
         rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 120, 96, "PAUSED");
     }
-
     rdpq_detach_show();
     // </Draw>
+}
+
+static void debug_prints() {
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
+     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "objTime: %.4f", objTime );
 }
 
 void stage_teardown() {
