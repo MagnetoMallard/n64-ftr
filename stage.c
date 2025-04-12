@@ -214,27 +214,26 @@ void stage_loop(int running) {
         actor_draw(curActor, objTime);
     }
     t3d_matrix_pop(1);
-    // = </Inner Draw>
-    if (running){
-        mixer_try_play();
-    }
 
     // = 2D
     syncPoint = rspq_syncpoint_new();
     rdpq_sync_pipe();
+  
+    debug_prints();
+
+    if (!running) {
+        static uint8_t fontIndex = 1;
+        if (btnsPressed.d_up) fontIndex++;
+        if (btnsPressed.d_down) fontIndex--;
+        rdpq_text_printf(nullptr, (fontIndex % 6) + 1, 130, 100, "PAUSED");
+    }
+    rdpq_detach_show();
 
     // ===== Audio
     if (running) {
         mixer_try_play();
     }
-  
-    debug_prints();
 
-    // ===== Audio
-    if (!running) {
-        rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 120, 96, "PAUSED");
-    }
-    rdpq_detach_show();
     // </Draw>
 }
 

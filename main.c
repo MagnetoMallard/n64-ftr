@@ -39,6 +39,7 @@ static void load_fonts() {
   rdpq_font_t *fnt4 = rdpq_font_load("rom:/BitDotted.font64");
   rdpq_text_register_font(4, fnt4);
 
+
   //use the fonts with different colours, outlines, etc
   rdpq_font_style(fnt4,0,&(rdpq_fontstyle_t){
   .color = RGBA32(255,255,0,255),
@@ -47,9 +48,9 @@ static void load_fonts() {
   rdpq_text_register_font(5, fnt4);
 
   rdpq_font_style(fnt3,1,&(rdpq_fontstyle_t){
-.color = RGBA32(255,255,255,255),
-.outline_color = RGBA32(0,0,0,255),
-});
+  .color = RGBA32(255,255,255,255),
+  .outline_color = RGBA32(0,0,0,255),
+  });
   rdpq_text_register_font(6, fnt3);
 
 }
