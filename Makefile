@@ -11,6 +11,7 @@ assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)
 assets_xm1 = $(wildcard assets/*.xm)
 assets_xm2 = $(wildcard assets/*.XM)
+assets_ttf = $(wildcard assets/*.ttf)
 assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 			  $(addprefix filesystem/,$(notdir $(assets_ttf:%.ttf=%.font64))) \
 			  $(addprefix filesystem/,$(notdir $(assets_gltf:%.glb=%.t3dm))) \
@@ -21,10 +22,11 @@ AUDIOCONV_FLAGS ?=
 
 all: ftrCart.z64
 
+#Sizes for fonts are FTR=8 and Dot=10, change only in values of x2 for pixel perfection
 filesystem/%.font64: assets/%.ttf
 	@mkdir -p $(dir $@)
 	@echo "    [FONT] $@"
-	$(N64_MKFONT) $(MKFONT_FLAGS) -o filesystem "$<"
+	$(N64_MKFONT) --monochrome --outline 1 --size 8 $(MKFONT_FLAGS) -o filesystem "$<"
 filesystem/%.xm64: assets/%.xm
 	@mkdir -p $(dir $@)
 	@echo "    [AUDIO] $@"

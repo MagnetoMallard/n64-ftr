@@ -27,20 +27,37 @@ char* songs[SONG_COUNT];
 
 int songSelection = 0;
 
+//Let's give some font loading a try here. Font ID 0 and 1 are already registered.
 static void load_fonts() {
-  rdpq_font_t *fnt1 = rdpq_font_load("rom:/STAN0754.font64");
-  rdpq_font_style(fnt1, 0, &(rdpq_fontstyle_t){
-      .color = RGBA32(0xED, 0xAE, 0x49, 0xFF),
+  //loads individual fonts with their default settings. Conversion options to be set in makefile e.g size, monochrome.
+  rdpq_font_t *fnt2 = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_VAR);
+  rdpq_text_register_font(2, fnt2);
+
+  rdpq_font_t *fnt3 = rdpq_font_load("rom:/STAN0753.font64");
+  rdpq_text_register_font(3, fnt3);
+
+  rdpq_font_t *fnt4 = rdpq_font_load("rom:/BitDotted.font64");
+  rdpq_text_register_font(4, fnt4);
+
+  //use the fonts with different colours, outlines, etc
+  rdpq_font_style(fnt4,0,&(rdpq_fontstyle_t){
+  .color = RGBA32(255,255,0,255),
+  .outline_color = RGBA32(0,0,0,255),
   });
-  rdpq_text_register_font(FONT_FTR, fnt1);
+  rdpq_text_register_font(5, fnt4);
+
+  rdpq_font_style(fnt3,1,&(rdpq_fontstyle_t){
+.color = RGBA32(255,255,255,255),
+.outline_color = RGBA32(0,0,0,255),
+});
+  rdpq_text_register_font(6, fnt3);
+
 }
 
 int main()
 {
   engine_init();
-
-  // load_fonts();
-
+  load_fonts();
   music_init();
 
   int isSetup = 0;

@@ -223,7 +223,11 @@ void stage_loop(int running) {
     syncPoint = rspq_syncpoint_new();
     rdpq_sync_pipe();
 
-
+    // ===== Audio
+    if (running) {
+        mixer_try_play();
+    }
+  
     debug_prints();
 
     // ===== Audio
@@ -235,9 +239,9 @@ void stage_loop(int running) {
 }
 
 static void debug_prints() {
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-     rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "objTime: %.4f", objTime );
+    rdpq_text_printf(nullptr, 6, 16, 16, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(nullptr, 6, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
+    rdpq_text_printf(nullptr, 3, 16, 48, "objTime: %.4f", objTime );
 }
 
 void stage_teardown() {
