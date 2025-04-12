@@ -3,7 +3,7 @@
 #include "actorBehaviours.h"
 #include "globals.h"
 #include "lights.h"
-#include "debugDraw.h"
+#include "light_behaviours.h"
 #include "aabbHelpers.h"
 #include "libs/libxm/xm.h"
 
@@ -26,7 +26,6 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0xFF};
 rspq_syncpoint_t syncPoint = 0;
 T3DVec3 camPosScreen;
-sprite_t* dynamoEyeTex[4];
 
 static inline void t3d_draw_update(T3DViewport *viewport);
 static inline void debug_prints();
@@ -60,16 +59,10 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
-    // sprite_t* dynamoEyeTex[4] = {
-    //     sprite_load("rom:/EYE-DYNAMO1.sprite"),
-    //     sprite_load("rom:/EYE-DYNAMO-CLOSE.sprite"),
-    //     sprite_load("rom:/EYE-DYNAMO-DOWN.sprite"),
-    //     sprite_load("rom:/EYE-DYNAMO-UP.sprite"),
-    // };
+    dynamo_init();
 
-    actor_attach_update_function(&dragonActor, &dragon_update);
-
-    // dynamoActor.customPartDrawFunc = &dynamo_part_draw;
+    dragonActor.updateFunction = &dragon_update;
+    dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
     dynamoActor.pos[0] = -330.0f;
     dynamoActor.pos[1] = 30.0f;

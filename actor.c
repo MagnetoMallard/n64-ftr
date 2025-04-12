@@ -112,6 +112,8 @@ Actor create_actor_from_model(char *modelName) {
     while (t3d_model_iter_next(&it)) {
         rspq_block_begin();
         debugf("part name: %s\n", it.object->name);
+        debugf("material name: %s\n", it.object->material->name);
+
         if (animationCount) {
 
             t3d_model_draw_object(it.object, actor.anim.skel.boneMatricesFP);
