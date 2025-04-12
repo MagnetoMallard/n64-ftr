@@ -216,17 +216,17 @@ void stage_loop(int running) {
 
     xm_get_playing_speed(xm.ctx,&bpm,&tempo);
     // camera_draw(); // purely for debug
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 48, "dragon min: %i, %i, %i", actors[0].t3dModel->aabbMin[0], actors[0].t3dModel->aabbMin[1], actors[0].t3dModel->aabbMin[2] );
-    rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "dragon max: %i, %i, %i", actors[0].t3dModel->aabbMax[0], actors[0].t3dModel->aabbMax[1], actors[0].t3dModel->aabbMax[2] );
+    rdpq_text_printf(nullptr, 6, 16, 16, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(nullptr, 6, 16, 32, "Playing song: %s", xm_get_module_name(xm.ctx));
+    rdpq_text_printf(nullptr, 3, 16, 48, "Dragon min: %i, %i, %i", actors[0].t3dModel->aabbMin[0], actors[0].t3dModel->aabbMin[1], actors[0].t3dModel->aabbMin[2] );
+    rdpq_text_printf(nullptr, 6, 16, 64, "Dragon max: %i, %i, %i", actors[0].t3dModel->aabbMax[0], actors[0].t3dModel->aabbMax[1], actors[0].t3dModel->aabbMax[2] );
     // rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 16, 64, "tpl: %i", tempo);
 
     // ===== Audio
     if (running) {
         mixer_try_play();
     } else {
-        rdpq_text_printf(nullptr, FONT_BUILTIN_DEBUG_MONO, 120, 96, "PAUSED");
+        rdpq_text_printf(nullptr, 5, 160, 120, "PAUSED");
     }
 
     rdpq_detach_show();
