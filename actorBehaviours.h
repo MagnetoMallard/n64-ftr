@@ -17,7 +17,6 @@ static void dragon_update(Actor *self, float objTime) {
 /**
  * @section Dynamo.
  */
-
 static surface_t dynamoEyeSurface;
 static sprite_t* dynamoEyeTex[4];
 
