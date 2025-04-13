@@ -1,13 +1,12 @@
 #include <libdragon.h>
+#include <t3d/t3d.h>
+
 #include "camera.h"
 #include "globals.h"
-#include "../tiny3d/src/t3d/t3d.h"
 
-float rotAngleX = 0.0f;
-float rotAngleY = 0.0f;
-float rotAngleZ = 0.0f;
-float camDist = 20.0f;
-float lastTimeMs = 0.0f;
+
+static float newRotation = 0.0f;
+static float lerpTimer = 1.0f;
 
 T3DVec3 camDir = {{0,0,1}};
 T3DVec3 upVector = (T3DVec3){{0,1,0}};
@@ -15,10 +14,10 @@ T3DVec3 upVector = (T3DVec3){{0,1,0}};
 T3DVec3 dergVector;
 T3DVec3 dynamoVector;
 
-extern
 #define RAD_360 6.28318530718f
 #define STICk_RANGE_X (RAD_360 / 2)
 #define STICk_RANGE_Y (RAD_360 / 2)
+
 Camera camera_create() {
     Camera camera = { 
         .pos = {{0.0f,50.0f,-50.0f}},
@@ -26,9 +25,6 @@ Camera camera_create() {
         .rotation = {{0.0f,0.0f,0.0f}}
     };
     return camera;
-} 
-void camera_draw() { 
-    // rdpq_text_printf(NULL, FONT_BUILTIN_DEBUG_MONO, 16, 128, "ROT ANGLE X : %.2f",  rotAngleX);
 }
 
 void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
@@ -37,18 +33,15 @@ void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
     t3d_vec3_norm(&dirVec);
 
     camera->target = *target;
-    debugf("rotVec: %.2f, %.2f, %.2f\n", camera->rotation.x, camera->rotation.y, camera->rotation.z);
 
-    debugf("dirVec: %.2f, %.2f, %.2f\n", dirVec.x, dirVec.y, dirVec.z);
+    newRotation = fm_atan2f(dirVec.z, dirVec.x);
 
-    camera->rotation.x = fm_atan2f(dirVec.z, dirVec.x);
+    lerpTimer = 0.0f;
      //camera->rotation.y = fm_atan2f(dirVec.y, dirVec.x) / 2;
-
 }
 
 
 void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
-
     float camSpeed = deltaTime * 2.0f;
     float camRotSpeed = deltaTime * 0.02f;
 
@@ -74,7 +67,12 @@ void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
       if (inputs.stick_x) camera->rotation.x += (float)inputs.stick_x * camRotSpeed;
     }
 
-      camera->rotation.x = fm_fmodf(camera->rotation.x, RAD_360);
+    if (lerpTimer < 1.0f) {
+        camera->rotation.x = t3d_lerp(camera->rotation.x,newRotation,lerpTimer);
+        lerpTimer += 0.05f;
+    }
+
+    fm_fmodf(camera->rotation.x, RAD_360);
 
     if(inputs.btn.c_up)camera->pos.v[1] += camSpeed * 15.0f;
     if(inputs.btn.c_down)camera->pos.v[1] -= camSpeed * 15.0f;
