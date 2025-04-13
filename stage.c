@@ -9,6 +9,8 @@
 
 #include "stage.h"
 
+#include "debugDraw.h"
+
 
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 3
@@ -29,6 +31,7 @@ T3DVec3 camPosScreen;
 
 static inline void t3d_draw_update(T3DViewport *viewport);
 static inline void debug_prints();
+static void sine_text(char* text, float speedFactor, float offset);
 
 int stage_setup() {
     viewport = t3d_viewport_create();
@@ -152,7 +155,6 @@ void stage_loop(int running) {
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
     if (running) {
-
         camera_update(&camera, &viewport, deltaTime);
     }
 
@@ -204,8 +206,8 @@ void stage_loop(int running) {
             check_aabbs(curActor);
         }
 
-       // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-
+        // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+        //
         // debugDrawAABB(display_get_current_framebuffer().buffer,
         //                 curActor->t3dModel->aabbMin,
         //                 curActor->t3dModel->aabbMax,
@@ -225,8 +227,9 @@ void stage_loop(int running) {
         static uint8_t fontIndex = 1;
         if (btnsPressed.d_up) fontIndex++;
         if (btnsPressed.d_down) fontIndex--;
-        rdpq_text_printf(nullptr, (fontIndex % 6) + 1, 130, 100, "PAUSED");
+        sine_text("PAUSED!", 32.0f, 96.0f);
     }
+
     rdpq_detach_show();
 
     // ===== Audio
@@ -237,10 +240,23 @@ void stage_loop(int running) {
     // </Draw>
 }
 
+static void sine_text(char* text, float speedFactor, float offset) {
+    int strLen = strlen(text);
+
+    for (int i = 0; i < strLen; i++) {
+        rdpq_text_printn(
+        nullptr,
+        6,
+        fm_fmodf((objTime * speedFactor)  + (i * 16), display_get_current_framebuffer().width),
+        (fm_sinf(objTime + i) * speedFactor * 0.5) + offset,
+        &text[i], 1);
+    }
+}
+
 static void debug_prints() {
     rdpq_text_printf(nullptr, 6, 16, 16, "FPS: %.2f", display_get_fps());
     rdpq_text_printf(nullptr, 6, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    rdpq_text_printf(nullptr, 3, 16, 48, "objTime: %.4f", objTime );
+    // rdpq_text_printf(nullptr, 3, 16, 48, "objTime: %.4f", objTime );
 }
 
 void stage_teardown() {

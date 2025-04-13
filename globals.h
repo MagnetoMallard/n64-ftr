@@ -35,5 +35,5 @@ extern joypad_buttons_t btnsUp;
 extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
 extern char* songs[SONG_COUNT];
-extern int songSelection;
+extern uint8_t songSelection;
 #endif //GLOBALS_H
