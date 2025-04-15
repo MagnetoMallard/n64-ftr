@@ -13,7 +13,7 @@
 
 
 #define ACTORS_COUNT 3
-#define DIRECTIONAL_LIGHT_COUNT 3
+#define DIRECTIONAL_LIGHT_COUNT 1
 
 static Actor actors[ACTORS_COUNT];
 static Camera camera;
@@ -21,11 +21,12 @@ static Camera camera;
 static float fogNear = 100.0f;
 static float fogFar = 250.0f;
 static color_t fogColour = {70, 70, 140, 0xFF};
+static int16_t pointSample[2];
 
 static float objTime = 0.0f;
 static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
-uint8_t ambientLightColour[4] = {80, 80, 80, 0xFF};
+uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 T3DVec3 camPosScreen;
 
@@ -53,8 +54,8 @@ int stage_setup() {
     Light pointLightThree = light_create(colorDir3, lightDirVec3, false);
 
     directionalLights[0] = pointLightOne;
-     directionalLights[1] = pointLightTwo;
-    directionalLights[2] = pointLightThree;
+    // directionalLights[1] = pointLightTwo;
+    // directionalLights[2] = pointLightThree;
 
     // ======== Init Actors
 
@@ -150,7 +151,9 @@ void stage_loop(int running) {
     float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
     objTime += deltaTime;
 
-    if (objTime == MAXFLOAT) objTime = 0;
+    // This timer is mostly used for spinning effects,
+    // so setting the maximum to be pi*2 works well :)
+    if (objTime > RAD_360) objTime = 0;
 
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
@@ -175,6 +178,7 @@ void stage_loop(int running) {
         Light* curLight = &directionalLights[i];
         if (curLight->lightUpdateFunction) {
             curLight->lightUpdateFunction(curLight, deltaTime, objTime);
+
         }
     }
 
@@ -232,11 +236,6 @@ void stage_loop(int running) {
 
     rdpq_detach_show();
 
-    // ===== Audio
-    if (running) {
-        mixer_try_play();
-    }
-
     // </Draw>
 }
 
@@ -256,7 +255,7 @@ static void sine_text(char* text, float speedFactor, float offset) {
 static void debug_prints() {
     rdpq_text_printf(nullptr, 6, 16, 16, "FPS: %.2f", display_get_fps());
     rdpq_text_printf(nullptr, 6, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
-    // rdpq_text_printf(nullptr, 3, 16, 48, "objTime: %.4f", objTime );
+    // rdpq_text_printf(nullptr, 6, 16, 48, "pointSample: %i", abs(pointSample[0]) & 0xFF);
 }
 
 void stage_teardown() {

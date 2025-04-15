@@ -81,7 +81,6 @@ int main()
     // trigger on button release
     if (btnsPressed.r) {
       songSelection++;
-
       music_load(songSelection % SONG_COUNT );
     }
 
@@ -89,7 +88,9 @@ int main()
       default:
       case STAGE:
         if (isSetup == 0) { isSetup = stage_setup(); }
+        mixer_try_play();
         stage_loop(1);
+        mixer_try_play(); // make a couple attempts, as is recommended
         break;
       case PAUSED:
         stage_loop(0);
@@ -148,6 +149,7 @@ static void music_init() {
   // SETUP SONG LIST
   songs[0] = "rom:/smallhold.xm64";
   songs[1] = "rom:/kritta-girl.xm64";
+  songs[2] = "rom:/field-day.xm64";
 
   music_load(0);
 

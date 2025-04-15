@@ -8,7 +8,7 @@
 #include <libdragon.h>
 
 #define SOUND_CHANNELS 16
-#define SONG_COUNT 2
+#define SONG_COUNT 3
 
 enum GameSate {
     MAIN_MENU,
@@ -19,7 +19,8 @@ enum GameSate {
 
 enum MusicState {
     HOLDLOOP,
-    KRITTAGIRL
+    KRITTAGIRL,
+    FIELDDAY
 };
 
 enum GameFonts {
