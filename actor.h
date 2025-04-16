@@ -41,6 +41,19 @@ void actor_update(Actor *actor, float objTime, float deltaTime);
 void actor_draw(Actor *actor, float objTime);
 void actor_delete(Actor *actor);
 void actor_attach_update_function(Actor* actor, ActorUpdateFunction updateFunction);
-Actor create_actor_from_model(char* modelName); 
+
+Actor create_actor_from_model(char* modelName);
+
+inline T3DVec3 actor_get_pos_vec(Actor *actor) {
+  return (T3DVec3){{actor->pos[0],actor->pos[1],actor->pos[2]}};
+}
+
+inline T3DVec3 actor_get_rot_vec(Actor *actor) {
+  return (T3DVec3){{actor->rot[0],actor->rot[1],actor->rot[2]}};
+}
+
+inline T3DVec3 actor_get_scale_vec(Actor *actor) {
+  return (T3DVec3){{actor->scale[0],actor->scale[1],actor->scale[2]}};
+}
 
 #endif

@@ -115,9 +115,7 @@ Actor create_actor_from_model(char *modelName) {
         debugf("material name: %s\n", it.object->material->name);
 
         if (animationCount) {
-
             t3d_model_draw_object(it.object, actor.anim.skel.boneMatricesFP);
-
         } else {
             t3d_model_draw_object(it.object, nullptr);
         }

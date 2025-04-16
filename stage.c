@@ -6,11 +6,9 @@
 #include "light_behaviours.h"
 #include "aabbHelpers.h"
 #include "libs/libxm/xm.h"
-
-#include "stage.h"
-
 #include "debugDraw.h"
 
+#include "stage.h"
 
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 2
@@ -21,7 +19,6 @@ static Camera camera;
 static float fogNear = 100.0f;
 static float fogFar = 250.0f;
 static color_t fogColour = {70, 70, 140, 0xFF};
-static int16_t pointSample[2];
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
@@ -31,10 +28,13 @@ static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
-T3DVec3 camPosScreen;
 
-static inline void t3d_draw_update(T3DViewport *viewport);
-static inline void debug_prints();
+static void t3d_draw_update(T3DViewport *viewport);
+
+static void debug_prints();
+static void regular_prints();
+
+static void check_aabbs(Actor *curActor);
 static void sine_text(char* text, float speedFactor, float offset);
 
 int stage_setup() {
@@ -52,16 +52,10 @@ int stage_setup() {
     T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
     Light pointLightTwo = light_create(colorDir2, lightDirVec2, false);
 
-    uint8_t colorDir3[4] = {0x00, 0x00, 0xFF, 0xFF};
-    T3DVec3 lightDirVec3 = {{1.0f, 1.0f, 1.0f}};
-    Light pointLightThree = light_create(colorDir3, lightDirVec3, false);
-
     directionalLights[0] = pointLightOne;
     directionalLights[1] = pointLightTwo;
-    // directionalLights[2] = pointLightThree;
 
     // ======== Init Actors
-
     Actor dragonActor = create_actor_from_model("dragon2");
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("DynamoAnimation");
@@ -86,76 +80,39 @@ int stage_setup() {
     actors[2] = dynamoActor;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
-    dergVector = (T3DVec3){
-        {
-            dragonActor.pos[0] + dragonActor.initialAabbMax[0] / 2,
-            dragonActor.pos[1] + dragonActor.initialAabbMax[1] / 2,
-            dragonActor.pos[2] + dragonActor.initialAabbMax[2] / 2
-        }
-    };
+    dergVector = actor_get_pos_vec(&dragonActor);
+    dergVector.x += dragonActor.initialAabbMax[0] / 2;
+    dergVector.y += dragonActor.initialAabbMax[1] / 2;
+    dergVector.z += dragonActor.initialAabbMax[2] / 2;
 
-    dynamoVector = (T3DVec3){
-        {
-            dynamoActor.pos[0] + dynamoActor.initialAabbMax[0] / 2,
-            dynamoActor.pos[1] + dynamoActor.initialAabbMax[1] / 2,
-            dynamoActor.pos[2] + dynamoActor.initialAabbMax[2] / 2
-        }
-    };
+    dynamoVector = actor_get_pos_vec(&dynamoActor);
+    dergVector.x += dynamoActor.initialAabbMax[0] / 2;
+    dergVector.y += dynamoActor.initialAabbMax[1] / 2;
+    dergVector.z += dynamoActor.initialAabbMax[2] / 2;
 
+    // Camera init
     camera.rotation.y = -0.48;
     camera.pos.x = -200.0f;
     camera.pos.y = 150.0f;
     camera.pos.z = -80.0f;
 
     camera_look_at(&camera, &dynamoVector, &viewport);
-    camera_update(&camera, &viewport, spinTimer);
+    camera_update(&camera, &viewport, 0.0f);
 
     return 1;
 }
 
-float modelScale = 1.0f;
-
-static void check_aabbs(Actor *curActor) {
-    T3DFrustum frustum = viewport.viewFrustum;
-
-    curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
-                                               curActor->t3dModel->aabbMax);
-
-    if (curActor->visible) {
-
-        T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
-        while (t3d_model_iter_next(&it)) {
-            // Skip fine checks for animated models
-            // It doesn't really work properly
-            if (curActor->animCount == 0) {
-                it.object->isVisible = true;
-                continue;
-            }
-
-            int16_t transposedAabbMin[3];
-            int16_t transposedAabbMax[3];
-            aabb_mat4_mult(transposedAabbMin, it.object->aabbMin, curActor->modelMatF);
-            aabb_mat4_mult(transposedAabbMax, it.object->aabbMax, curActor->modelMatF);
-
-            it.object->isVisible =
-                t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
-        }
-    }
-}
 
 void stage_loop(int running) {
     // ======== Update
-
-    // pause when button is released
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
 
-    float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
+    float deltaTime = display_get_delta_time();
     spinTimer += deltaTime;
     horizAnimationTimer += deltaTime;
     vertAnimationTimer += deltaTime;
-
 
     if (spinTimer > RAD_360 * 4) spinTimer = 0;
     if (horizAnimationTimer > viewport.size[0] * 4) horizAnimationTimer = 0;
@@ -230,7 +187,8 @@ void stage_loop(int running) {
     // = 2D
     syncPoint = rspq_syncpoint_new();
     rdpq_sync_pipe();
-  
+
+    regular_prints();
     debug_prints();
 
     if (!running) {
@@ -241,46 +199,12 @@ void stage_loop(int running) {
     }
 
     rdpq_detach_show();
-
     // </Draw>
 }
 
-static void sine_text(char* text, float speedFactor, float offset ) {
-    int strLen = strlen(text);
-
-    for (int i = 0; i < strLen; i++) {
-        rdpq_text_printn(
-        nullptr,
-        6,
-        fm_fmodf((horizAnimationTimer * speedFactor)  + (i * 16), display_get_current_framebuffer().width),
-        (fm_sinf(horizAnimationTimer + i) * speedFactor * 0.5) + offset,
-        &text[i], 1);
-    }
-}
-
-
-static void debug_prints() {
-    constexpr int charHeight = 16;
-    constexpr int margin = 32;
-
-    constexpr int fpsPos = charHeight*2;
-    int musicTitlePos = display_get_height() - charHeight*4;
-
-
-    rdpq_text_printf(nullptr, 6, margin, fpsPos, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, 6, margin, musicTitlePos, "playing song: %s", xm_get_module_name(xm.ctx));
-    // rdpq_text_printf(nullptr, 6, 16, 48, "pointSample: %i", abs(pointSample[0]) & 0xFF);
-}
-
-void stage_teardown() {
-    for (int i = 0; i < ACTORS_COUNT; i++) {
-        actor_delete(&actors[i]);
-    }
-}
-
-static inline void t3d_draw_update(T3DViewport *viewport) {
+static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
-  //  rdpq_mode_zbuf(true, true);
+    //  rdpq_mode_zbuf(true, true);
     t3d_frame_start();
     t3d_viewport_attach(viewport);
 
@@ -300,3 +224,66 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
     t3d_screen_clear_color(fogColour);
     t3d_screen_clear_depth();
 }
+
+
+static void check_aabbs(Actor *curActor) {
+    T3DFrustum frustum = viewport.viewFrustum;
+
+    curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
+                                               curActor->t3dModel->aabbMax);
+
+    if (curActor->visible) {
+
+        T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
+        while (t3d_model_iter_next(&it)) {
+            // Skip fine checks for animated models
+            // It doesn't really work properly
+            if (curActor->animCount == 0) {
+                it.object->isVisible = true;
+                continue;
+            }
+
+            int16_t transposedAabbMin[3];
+            int16_t transposedAabbMax[3];
+            aabb_mat4_mult(transposedAabbMin, it.object->aabbMin, curActor->modelMatF);
+            aabb_mat4_mult(transposedAabbMax, it.object->aabbMax, curActor->modelMatF);
+
+            it.object->isVisible =
+                t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
+        }
+    }
+}
+
+
+static void sine_text(char* text, float speedFactor, float offset ) {
+    int strLen = strlen(text);
+
+    for (int i = 0; i < strLen; i++) {
+        rdpq_text_printn(
+        nullptr,
+        6,
+        fm_fmodf((horizAnimationTimer * speedFactor)  + (i * 16), display_get_width()),
+        (fm_sinf(horizAnimationTimer + i) * speedFactor * 0.5) + offset,
+        &text[i], 1);
+    }
+}
+
+static constexpr int charHeight = 16;
+static constexpr int margin = 32;
+static constexpr int fpsPos = charHeight*2;
+
+static void regular_prints() {
+    int musicTitlePos = display_get_height() - charHeight*4;
+    rdpq_text_printf(nullptr, 6, margin, musicTitlePos, "playing song: %s", xm_get_module_name(xm.ctx));
+
+}
+static void debug_prints() {
+    rdpq_text_printf(nullptr, 6, margin, fpsPos, "FPS: %.2f", display_get_fps());
+}
+
+void stage_teardown() {
+    for (int i = 0; i < ACTORS_COUNT; i++) {
+        actor_delete(&actors[i]);
+    }
+}
+

@@ -22,7 +22,8 @@ Camera camera_create() {
     Camera camera = { 
         .pos = {{0.0f,50.0f,-50.0f}},
         .target = {{0,50,50}},
-        .rotation = {{0.0f,0.0f,0.0f}}
+        .rotation = {{0.0f,0.0f,0.0f}},
+        .inputEnabled = true
     };
     return camera;
 }
@@ -40,32 +41,43 @@ void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
      //camera->rotation.y = fm_atan2f(dirVec.y, dirVec.x) / 2;
 }
 
+void take_camera_input(Camera* camera, T3DViewport* viewport, float deltaTime) {
 
-void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
+    bool inStickRangeY = camera->rotation.y <= STICk_RANGE_Y && camera->rotation.y >= -STICk_RANGE_Y;
     float camSpeed = deltaTime * 2.0f;
     float camRotSpeed = deltaTime * 0.02f;
+
+    if(inputs.btn.z) {
+        if (inputs.stick_y && inStickRangeY) {
+            float rotY =  camera->rotation.y + (float)inputs.stick_y * camRotSpeed;
+            if (rotY <= STICk_RANGE_Y && rotY >= -STICk_RANGE_Y) {
+                camera->rotation.y = rotY;
+            }
+        }
+        camera->pos.v[0] += camDir.v[2] * (float)inputs.stick_y * -camSpeed;
+        camera->pos.v[2] -= camDir.v[0] * (float)inputs.stick_x * -camSpeed;
+    } else {
+        camera->pos.v[0] += camDir.v[0] * (float)inputs.stick_y * camSpeed;
+        camera->pos.v[1] += camDir.v[1] * (float)inputs.stick_y * camSpeed;
+        camera->pos.v[2] += camDir.v[2] * (float)inputs.stick_y * camSpeed;
+        if (inputs.stick_x) camera->rotation.x += (float)inputs.stick_x * camRotSpeed;
+    }
+
+    if(inputs.btn.c_up)camera->pos.v[1] += camSpeed * 15.0f;
+    if(inputs.btn.c_down)camera->pos.v[1] -= camSpeed * 15.0f;
+    if(btnsPressed.a)    camera_look_at(camera,&dergVector,viewport);
+    if(btnsPressed.b)    camera_look_at(camera,&dynamoVector,viewport);
+}
+
+void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
+
+    if (camera->inputEnabled) {
+        take_camera_input(camera, viewport, deltaTime);
+    }
 
     camDir.v[0] =  fm_cosf(camera->rotation.x) * fm_cosf(camera->rotation.y);
     camDir.v[1] =  fm_sinf(camera->rotation.y);
     camDir.v[2] =  fm_sinf(camera->rotation.x) * fm_cosf(camera->rotation.y);
-
-    bool inStickRangeY = camera->rotation.y <= STICk_RANGE_Y && camera->rotation.y >= -STICk_RANGE_Y;
-
-    if(inputs.btn.z) {
-      if (inputs.stick_y && inStickRangeY) {
-          float rotY =  camera->rotation.y + (float)inputs.stick_y * camRotSpeed;
-          if (rotY <= STICk_RANGE_Y && rotY >= -STICk_RANGE_Y) {
-              camera->rotation.y = rotY;
-          }
-      }
-      camera->pos.v[0] += camDir.v[2] * (float)inputs.stick_y * -camSpeed;
-      camera->pos.v[2] -= camDir.v[0] * (float)inputs.stick_x * -camSpeed;
-    } else {
-      camera->pos.v[0] += camDir.v[0] * (float)inputs.stick_y * camSpeed;
-      camera->pos.v[1] += camDir.v[1] * (float)inputs.stick_y * camSpeed;
-      camera->pos.v[2] += camDir.v[2] * (float)inputs.stick_y * camSpeed;
-      if (inputs.stick_x) camera->rotation.x += (float)inputs.stick_x * camRotSpeed;
-    }
 
     if (lerpTimer < 1.0f) {
         camera->rotation.x = t3d_lerp(camera->rotation.x,newRotation,lerpTimer);
@@ -73,11 +85,6 @@ void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
     }
 
     fm_fmodf(camera->rotation.x, RAD_360);
-
-    if(inputs.btn.c_up)camera->pos.v[1] += camSpeed * 15.0f;
-    if(inputs.btn.c_down)camera->pos.v[1] -= camSpeed * 15.0f;
-    if(btnsPressed.a)    camera_look_at(camera,&dergVector,viewport);
-    if(btnsPressed.b)    camera_look_at(camera,&dynamoVector,viewport);
 
     camera->target.v[0] = camera->pos.v[0] + camDir.v[0];
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
