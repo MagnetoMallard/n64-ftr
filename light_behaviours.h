@@ -49,9 +49,10 @@ static void light_update_traffic_light_xm(Light *light, float deltaTime, float o
         if (xmLightIndex == 4) xmLightIndex = 0;
         _lastRow = row;
     } else {
-        light->colour[3] -= 32;
+        light->colour[0] = abs(light->colour[0] - 8);
+        light->colour[1] = abs(light->colour[1] - 8);
+        light->colour[2] = abs(light->colour[2] - 8);
     }
-
 
     // int16_t pointSample[2];
     // mixer_poll(pointSample, 2);

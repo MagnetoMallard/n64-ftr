@@ -13,7 +13,7 @@
 
 
 #define ACTORS_COUNT 3
-#define DIRECTIONAL_LIGHT_COUNT 1
+#define DIRECTIONAL_LIGHT_COUNT 2
 
 static Actor actors[ACTORS_COUNT];
 static Camera camera;
@@ -23,7 +23,10 @@ static float fogFar = 250.0f;
 static color_t fogColour = {70, 70, 140, 0xFF};
 static int16_t pointSample[2];
 
-static float objTime = 0.0f;
+static float spinTimer = 0.0f;
+static float horizAnimationTimer = 0.0f;
+static float vertAnimationTimer = 0.0f;
+
 static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
@@ -40,21 +43,21 @@ int stage_setup() {
     camera = camera_create();
 
     // ======== Init Lights
-    uint8_t colorDir[4] = {0xFF, 0x44, 0x44, 0xFF};
+    uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
     pointLightOne.lightUpdateFunction = &light_update_traffic_light_xm;
 
-    uint8_t colorDir2[4] = {0xFF, 0x00, 0x00, 0xFF};
-    T3DVec3 lightDirVec2 = {{-330.0f, 60.0f, -30.0f }};
-    Light pointLightTwo = light_create(colorDir2, lightDirVec2, true);
+    uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
+    T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
+    Light pointLightTwo = light_create(colorDir2, lightDirVec2, false);
 
     uint8_t colorDir3[4] = {0x00, 0x00, 0xFF, 0xFF};
     T3DVec3 lightDirVec3 = {{1.0f, 1.0f, 1.0f}};
     Light pointLightThree = light_create(colorDir3, lightDirVec3, false);
 
     directionalLights[0] = pointLightOne;
-    // directionalLights[1] = pointLightTwo;
+    directionalLights[1] = pointLightTwo;
     // directionalLights[2] = pointLightThree;
 
     // ======== Init Actors
@@ -99,13 +102,13 @@ int stage_setup() {
         }
     };
 
-    // camera.rotation.x = 2.68;
-    camera.pos.x = 80.0f;
-    camera.pos.y = 80.0f;
+    camera.rotation.y = -0.48;
+    camera.pos.x = -200.0f;
+    camera.pos.y = 150.0f;
     camera.pos.z = -80.0f;
 
     camera_look_at(&camera, &dynamoVector, &viewport);
-    camera_update(&camera, &viewport, objTime);
+    camera_update(&camera, &viewport, spinTimer);
 
     return 1;
 }
@@ -149,11 +152,14 @@ void stage_loop(int running) {
     }
 
     float deltaTime = display_get_delta_time(); // (newTime - objTimeLast) * baseSpeed;
-    objTime += deltaTime;
+    spinTimer += deltaTime;
+    horizAnimationTimer += deltaTime;
+    vertAnimationTimer += deltaTime;
 
-    // This timer is mostly used for spinning effects,
-    // so setting the maximum to be pi*2 works well :)
-    if (objTime > RAD_360) objTime = 0;
+
+    if (spinTimer > RAD_360 * 4) spinTimer = 0;
+    if (horizAnimationTimer > viewport.size[0] * 4) horizAnimationTimer = 0;
+    if (vertAnimationTimer > viewport.size[1] * 4) vertAnimationTimer = 0;
 
     // TIES up controls:
     // Analogue Stick, C up and Down, Z
@@ -170,14 +176,14 @@ void stage_loop(int running) {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
         if (running) {
-            actor_update(curActor, objTime, deltaTime);
+            actor_update(curActor, spinTimer, deltaTime);
         }
     }
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
         Light* curLight = &directionalLights[i];
         if (curLight->lightUpdateFunction) {
-            curLight->lightUpdateFunction(curLight, deltaTime, objTime);
+            curLight->lightUpdateFunction(curLight, deltaTime, spinTimer);
 
         }
     }
@@ -217,7 +223,7 @@ void stage_loop(int running) {
         //                 curActor->t3dModel->aabbMax,
         //               &viewport, 1.0f, debugClr[0]);
 
-        actor_draw(curActor, objTime);
+        actor_draw(curActor, spinTimer);
     }
     t3d_matrix_pop(1);
 
@@ -239,22 +245,30 @@ void stage_loop(int running) {
     // </Draw>
 }
 
-static void sine_text(char* text, float speedFactor, float offset) {
+static void sine_text(char* text, float speedFactor, float offset ) {
     int strLen = strlen(text);
 
     for (int i = 0; i < strLen; i++) {
         rdpq_text_printn(
         nullptr,
         6,
-        fm_fmodf((objTime * speedFactor)  + (i * 16), display_get_current_framebuffer().width),
-        (fm_sinf(objTime + i) * speedFactor * 0.5) + offset,
+        fm_fmodf((horizAnimationTimer * speedFactor)  + (i * 16), display_get_current_framebuffer().width),
+        (fm_sinf(horizAnimationTimer + i) * speedFactor * 0.5) + offset,
         &text[i], 1);
     }
 }
 
+
 static void debug_prints() {
-    rdpq_text_printf(nullptr, 6, 16, 16, "FPS: %.2f", display_get_fps());
-    rdpq_text_printf(nullptr, 6, 16, 32, "playing song: %s", xm_get_module_name(xm.ctx));
+    constexpr int charHeight = 16;
+    constexpr int margin = 32;
+
+    constexpr int fpsPos = charHeight*2;
+    int musicTitlePos = display_get_height() - charHeight*4;
+
+
+    rdpq_text_printf(nullptr, 6, margin, fpsPos, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(nullptr, 6, margin, musicTitlePos, "playing song: %s", xm_get_module_name(xm.ctx));
     // rdpq_text_printf(nullptr, 6, 16, 48, "pointSample: %i", abs(pointSample[0]) & 0xFF);
 }
 
@@ -276,6 +290,7 @@ static inline void t3d_draw_update(T3DViewport *viewport) {
     rdpq_set_fog_color(fogColour);
 
     rdpq_mode_antialias(AA_NONE);
+    rdpq_mode_alphacompare(1);
 
     rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);

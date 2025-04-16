@@ -146,6 +146,7 @@ static void music_load(int songIndex) {
 }
 
 static void music_init() {
+  debugf("blah");
   // SETUP SONG LIST
   songs[0] = "rom:/smallhold.xm64";
   songs[1] = "rom:/kritta-girl.xm64";
