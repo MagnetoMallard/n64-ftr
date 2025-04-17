@@ -3,9 +3,9 @@ include $(N64_INST)/include/n64.mk
 include $(T3D_INST)/t3d.mk
 
 N64_CFLAGS += -std=gnu2x -Os -ffast-math
-VPATH=libs
+VPATH = libs:src:src/lights:src/actors:src/camera
 
-src = main.c actor.c camera.c lights.c stage.c actor_animated.c
+src = main.c camera.c light.c stage.c actor.c actor_animation.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)

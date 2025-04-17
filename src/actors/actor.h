@@ -5,7 +5,8 @@
 #include <libdragon.h>
 #include <t3d/t3d.h>
 
-#include "actor_animated.h"
+#include "actor_animation.h"
+
 #define RAD_360 6.28318530718f
 
 struct Actor;
@@ -23,7 +24,7 @@ typedef struct _actor {
   rspq_block_t *dpl;
   T3DMat4FP *modelMat;
   T3DMat4 *modelMatF;
-  AnimatedActor anim;
+  ActorAnimation anim;
   T3DModel *t3dModel;
   void (*updateFunction)(struct _actor*,float);
   void (*drawFunction)(struct _actor*);
