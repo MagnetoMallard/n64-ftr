@@ -1,13 +1,15 @@
 #include "actor.h"
 #include "camera.h"
-#include "actorBehaviours.h"
 #include "globals.h"
 #include "lights.h"
-#include "light_behaviours.h"
-#include "aabbHelpers.h"
 #include "libs/libxm/xm.h"
-#include "debugDraw.h"
+
+// Helpers
+#include "debug_draw.h"
+#include "aabb_helpers.h"
 #include "colour_helpers.h"
+#include "light_behaviours.h"
+#include "actor_behaviours.h"
 
 #include "stage.h"
 
@@ -40,6 +42,7 @@ static void draw_aabbs(Actor* curActor);
 static void check_aabbs(Actor *curActor);
 static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
+// ==== PUBLIC ====
 int stage_setup() {
     viewport = t3d_viewport_create();
 
@@ -200,6 +203,14 @@ void stage_loop(int running) {
     // </Draw>
 }
 
+void stage_teardown() {
+    for (int i = 0; i < ACTORS_COUNT; i++) {
+        actor_delete(&actors[i]);
+    }
+}
+
+// ==== PRIVATE ====
+
 static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
     t3d_frame_start();
@@ -296,9 +307,5 @@ static void draw_aabbs(Actor* curActor) {
                   &viewport, 1.0f, debugClr[0]);
 }
 
-void stage_teardown() {
-    for (int i = 0; i < ACTORS_COUNT; i++) {
-        actor_delete(&actors[i]);
-    }
-}
+
 

@@ -4,7 +4,6 @@
 #include "camera.h"
 #include "globals.h"
 
-
 static float newRotation = 0.0f;
 static float lerpTimer = 1.0f;
 

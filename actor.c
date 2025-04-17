@@ -1,8 +1,10 @@
 #include <t3d/t3dmodel.h>
 #include <t3d/t3dskeleton.h>
 #include "globals.h"
-#include "debugDraw.h"
-#include "aabbHelpers.h"
+
+// Helpers
+#include "debug_draw.h"
+#include "aabb_helpers.h"
 
 #include "actor.h"
 
