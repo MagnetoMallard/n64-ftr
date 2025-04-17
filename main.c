@@ -29,12 +29,8 @@ uint8_t songSelection = 0;
 
 //Let's give some font loading a try here. Font ID 0 and 1 are already registered.
 static void load_fonts() {
-  //loads individual fonts with their default settings. Conversion options to be set in makefile e.g size, monochrome.
-  rdpq_font_t *fnt2 = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_VAR);
-  rdpq_text_register_font(2, fnt2);
-
-  rdpq_font_t *fnt3 = rdpq_font_load("rom:/STAN0753.font64");
-  rdpq_text_register_font(3, fnt3);
+  ftrFont = rdpq_font_load("rom:/STAN0753.font64");
+  rdpq_text_register_font(3, ftrFont);
 
   rdpq_font_t *fnt4 = rdpq_font_load("rom:/BitDotted.font64");
   rdpq_text_register_font(4, fnt4);
@@ -44,13 +40,11 @@ static void load_fonts() {
   .color = RGBA32(255,255,0,255),
   .outline_color = RGBA32(0,0,0,255),
   });
-  rdpq_text_register_font(5, fnt4);
 
-  rdpq_font_style(fnt3,1,&(rdpq_fontstyle_t){
+  rdpq_font_style(ftrFont,1,&(rdpq_fontstyle_t){
   .color = RGBA32(255,255,255,255),
   .outline_color = RGBA32(0,0,0,255),
   });
-  rdpq_text_register_font(6, fnt3);
 
 }
 

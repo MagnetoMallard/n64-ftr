@@ -7,6 +7,7 @@
 #include "aabbHelpers.h"
 #include "libs/libxm/xm.h"
 #include "debugDraw.h"
+#include "colour_helpers.h"
 
 #include "stage.h"
 
@@ -28,14 +29,16 @@ static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
-
+rdpq_font_t* ftrFont;
+#
 static void t3d_draw_update(T3DViewport *viewport);
 
 static void debug_prints();
 static void regular_prints();
+static void draw_aabbs(Actor* curActor);
 
 static void check_aabbs(Actor *curActor);
-static void sine_text(char* text, float speedFactor, float offset);
+static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
 int stage_setup() {
     viewport = t3d_viewport_create();
@@ -161,24 +164,19 @@ void stage_loop(int running) {
     }
 
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
+
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
 
-        if (curActor->anim.animationCount) {
+        if (curActor->animCount) {
             t3d_skeleton_update(&curActor->anim.skel);
         }
-
 
         if (curActor->t3dModel) {
             check_aabbs(curActor);
         }
 
-        // uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
-        //
-        // debugDrawAABB(display_get_current_framebuffer().buffer,
-        //                 curActor->t3dModel->aabbMin,
-        //                 curActor->t3dModel->aabbMax,
-        //               &viewport, 1.0f, debugClr[0]);
+        // draw_aabbs(curActor);
 
         actor_draw(curActor, spinTimer);
     }
@@ -195,7 +193,7 @@ void stage_loop(int running) {
         static uint8_t fontIndex = 1;
         if (btnsPressed.d_up) fontIndex++;
         if (btnsPressed.d_down) fontIndex--;
-        sine_text("PAUSED!", 32.0f, 96.0f);
+        sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
     }
 
     rdpq_detach_show();
@@ -204,7 +202,6 @@ void stage_loop(int running) {
 
 static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
-    //  rdpq_mode_zbuf(true, true);
     t3d_frame_start();
     t3d_viewport_attach(viewport);
 
@@ -255,17 +252,27 @@ static void check_aabbs(Actor *curActor) {
 }
 
 
-static void sine_text(char* text, float speedFactor, float offset ) {
+
+static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
     int strLen = strlen(text);
 
+    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
+
     for (int i = 0; i < strLen; i++) {
+        rdpq_font_style(ftrFont, 1, &(rdpq_fontstyle_t){
+          .color = hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
+          .outline_color = RGBA32(0,0,0,255),
+        });
         rdpq_text_printn(
-        nullptr,
-        6,
-        fm_fmodf((horizAnimationTimer * speedFactor)  + (i * 16), display_get_width()),
-        (fm_sinf(horizAnimationTimer + i) * speedFactor * 0.5) + offset,
+        &(rdpq_textparms_t) {
+            .style_id = 1
+        },
+        3,
+        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
+        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
         &text[i], 1);
     }
+
 }
 
 static constexpr int charHeight = 16;
@@ -274,11 +281,19 @@ static constexpr int fpsPos = charHeight*2;
 
 static void regular_prints() {
     int musicTitlePos = display_get_height() - charHeight*4;
-    rdpq_text_printf(nullptr, 6, margin, musicTitlePos, "playing song: %s", xm_get_module_name(xm.ctx));
-
+    sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
 }
 static void debug_prints() {
-    rdpq_text_printf(nullptr, 6, margin, fpsPos, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(nullptr, 3, margin, fpsPos, "FPS: %.2f", display_get_fps());
+}
+
+static void draw_aabbs(Actor* curActor) {
+    uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
+
+    debugDrawAABB(display_get_current_framebuffer().buffer,
+                    curActor->t3dModel->aabbMin,
+                    curActor->t3dModel->aabbMax,
+                  &viewport, 1.0f, debugClr[0]);
 }
 
 void stage_teardown() {
