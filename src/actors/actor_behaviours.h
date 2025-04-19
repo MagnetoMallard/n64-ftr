@@ -38,7 +38,7 @@ static void dynamo_part_draw(T3DModelIter *it, T3DModelState *state, float objTi
     rspq_block_run(it->object->userBlock);
     it->object->isVisible = false;
 
-    if (strcmp(it->object->material->name, "EYES") ) {
+    if (strcmp(it->object->material->name, "EYER") ) {
         dynamo_set_eye_index(fm_fmodf(objTime, 3));
     }
 }
