@@ -203,11 +203,7 @@ void stage_loop(int running) {
         if (btnsPressed.d_up) fontIndex++;
         if (btnsPressed.d_down) fontIndex--;
         sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
-        audioMixerMasterFx = RESONANT_LP_DIVE;
-    } else {
-        audioMixerMasterFx = NONE;
     }
-
 
     rdpq_detach_show();
     // </Draw>

@@ -89,9 +89,13 @@ int main()
       default:
       case STAGE:
         if (isSetup == 0) { isSetup = stage_setup(); }
+        audioMixerMasterFx = NONE;
+
         stage_loop(1);
         break;
       case PAUSED:
+        audioMixerMasterFx = RESONANT_LP_SWEEP;
+
         stage_loop(0);
         // if(inputs.btn.b) { isRunning = 0; }
         break;
@@ -161,13 +165,13 @@ static void music_init() {
 }
 
 static void mixer_try_play_custom() {
-
   if (audio_can_write())
   {
-    int bufferLength = audio_get_buffer_length() ;
+    int bufferLength = audio_get_buffer_length();
+
     short *buf = audio_write_begin();
     mixer_poll(buf, bufferLength);
-    audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx);
+    audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx );
 
     audio_write_end();
   }

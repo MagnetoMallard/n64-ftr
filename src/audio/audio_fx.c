@@ -55,4 +55,3 @@ void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float 
         }
     }
 }
-
