@@ -17,6 +17,8 @@
 #include "globals.h"
 #include "stage.h"
 
+#include "audio/audio_fx.h"
+
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 2
 
@@ -201,7 +203,11 @@ void stage_loop(int running) {
         if (btnsPressed.d_up) fontIndex++;
         if (btnsPressed.d_down) fontIndex--;
         sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
+        audioMixerMasterFx = RESONANT_LP_SWEEP;
+    } else {
+        audioMixerMasterFx = NONE;
     }
+
 
     rdpq_detach_show();
     // </Draw>

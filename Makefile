@@ -2,10 +2,10 @@ BUILD_DIR=build
 include $(N64_INST)/include/n64.mk
 include $(T3D_INST)/t3d.mk
 
-N64_CFLAGS += -std=gnu2x -Os -ffast-math
+N64_CFLAGS += -std=gnu2x -O2 -ffast-math
 VPATH = libs:src:src/lights:src/actors:src/camera
 
-src = main.c camera.c light.c stage.c actor.c actor_animation.c
+src = main.c camera.c light.c stage.c actor.c actor_animation.c audio/audio_fx.c
 
 assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)

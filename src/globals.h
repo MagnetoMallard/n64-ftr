@@ -9,6 +9,7 @@
 
 #define SOUND_CHANNELS 16
 #define SONG_COUNT 3
+#define RAD_360 6.28318530718f
 
 enum GameSate {
     MAIN_MENU,
