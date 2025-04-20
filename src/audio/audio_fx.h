@@ -14,7 +14,7 @@ void audio_fx_lopass_fp(short *buf, int bufferLength, float cutoff);
 // you can view how the effects are composed in mixer_try_play_custom
 // in main.c
 // Individual audio_fx should do one operation
-enum MasterFxType {
+enum AudioFxPreset {
     NONE,
     RESONANT_LP_SWEEP,
     FIXEDPONT_LP_SWEEP,
@@ -22,5 +22,32 @@ enum MasterFxType {
     FIXEDPONT_LP_DIVE,
 };
 
-extern enum MasterFxType audioMixerMasterFx;
+static void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
+
+    static float filterTimer = 0;
+    float sinSweep = (fm_cosf(filterTimer+=0.05f) + 1.0f) * 0.4f;
+
+    switch (audioFxPreset) {
+        case RESONANT_LP_SWEEP:
+            audio_fx_lopass_resonant(buf, bufferLength<<1, sinSweep, 0.2f);
+        break;
+        case FIXEDPONT_LP_SWEEP:
+            audio_fx_lopass_fp(buf, bufferLength<<1, sinSweep);
+        break;
+        case RESONANT_LP_DIVE:
+            audio_fx_lopass_resonant(buf, bufferLength<<1, 0.001f, 0.5f);
+        break;
+        case FIXEDPONT_LP_DIVE:
+            audio_fx_lopass_fp(buf, bufferLength<<1, 0.2f);
+        break;
+        case NONE:
+            default:
+    }
+}
+
+
+// Master Bus FX
+extern enum AudioFxPreset audioMixerMasterFx;
+
+
 #endif //AUDIO_FX_H

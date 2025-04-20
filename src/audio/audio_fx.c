@@ -2,6 +2,9 @@
 // Created by mallard on 20/04/2025.
 //
 
+#define  FP_FAC 3
+
+
 // Cribbed From
 // https://beammyselfintothefuture.wordpress.com/2015/02/16/simple-c-code-for-resonant-lpf-hpf-filters-and-high-low-shelving-eqs/
 void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float resonance) {
@@ -13,21 +16,20 @@ void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float 
 
     for (int i = 0; i < bufferLength; i++) {
         if (i % 2) {
-            float distanceToGoL = (buf[i]>>1) - bufL;
+            float distanceToGoL = (buf[i]>>FP_FAC) - bufL;
             momentumL += distanceToGoL * cutoff; // Lower / higher number here will lower / raise the cutoff frequency
             bufL += momentumL + distanceToGoL * resonance; // Higher number here (max 1) lessens resonance
-            buf[i] = (short)(bufL)<<1;
+            buf[i] = (short)(bufL)<<FP_FAC;
         } else {
-            float distanceToGoR = (buf[i]>>1)  - bufR;
+            float distanceToGoR = (buf[i]>>FP_FAC)  - bufR;
             momentumR += distanceToGoR * cutoff; // Lower / higher number here will lower / raise the cutoff frequency
             bufR +=  momentumR + distanceToGoR * resonance;// Higher number here (max 1) lessens resonance
-            buf[i] = (short)(bufR)<<1;
+            buf[i] = (short)(bufR)<<FP_FAC;
         }
     }
 }
 
 
-#define  FP_FAC 3
 // Cribbed from
 // https://kiritchatterjee.wordpress.com/2014/11/10/a-simple-digital-low-pass-filter-in-c/
  void audio_fx_lopass_fp(short *buf, int bufferLength, float cutoff) {

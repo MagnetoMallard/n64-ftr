@@ -22,7 +22,7 @@ xm64player_t xm;
 
 enum GameSate gameState = STAGE;
 enum GameSate musicState = HOLDLOOP;
-enum MasterFxType audioMixerMasterFx = NONE;
+enum AudioFxPreset audioMixerMasterFx = NONE;
 
 joypad_inputs_t inputs;
 joypad_buttons_t btnsUp;
@@ -167,26 +167,7 @@ static void mixer_try_play_custom() {
     int bufferLength = audio_get_buffer_length() ;
     short *buf = audio_write_begin();
     mixer_poll(buf, bufferLength);
-
-    static float filterTimer = 0;
-    float sinSweep = (fm_cosf(filterTimer+=0.05f) + 1.0f) * 0.4f;
-
-    switch (audioMixerMasterFx) {
-      case RESONANT_LP_SWEEP:
-        audio_fx_lopass_resonant(buf, bufferLength<<1, sinSweep, 0.2f);
-      break;
-      case FIXEDPONT_LP_SWEEP:
-        audio_fx_lopass_fp(buf, bufferLength<<1, sinSweep);
-      break;
-      case RESONANT_LP_DIVE:
-        audio_fx_lopass_resonant(buf, bufferLength<<1, 55.1f, 0.5f);
-      break;
-      case FIXEDPONT_LP_DIVE:
-        audio_fx_lopass_fp(buf, bufferLength<<1, 0.2f);
-      break;
-      case NONE:
-        default:
-      }
+    audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx);
 
     audio_write_end();
   }
