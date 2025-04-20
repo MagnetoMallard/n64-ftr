@@ -9,7 +9,7 @@
 #include "audio/audio_fx.h"
 
 
-float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
+float get_time_s() { return (float) ((double) get_ticks_ms() / 1000.0); }
 
 static void engine_init();
 static void engine_teardown();
@@ -37,24 +37,28 @@ static void load_fonts() {
   ftrFont = rdpq_font_load("rom:/STAN0753.font64");
   rdpq_text_register_font(3, ftrFont);
 
-  rdpq_font_t *fnt4 = rdpq_font_load("rom:/BitDotted.font64");
+  rdpq_font_t* fnt4 = rdpq_font_load("rom:/BitDotted.font64");
   rdpq_text_register_font(4, fnt4);
 
   //use the fonts with different colours, outlines, etc
-  rdpq_font_style(fnt4,0,&(rdpq_fontstyle_t){
-  .color = RGBA32(255,255,0,255),
-  .outline_color = RGBA32(0,0,0,255),
-  });
+  rdpq_font_style(fnt4,
+                  0,
+                  &(rdpq_fontstyle_t){
+                    .color = RGBA32(255, 255, 0, 255),
+                    .outline_color = RGBA32(0, 0, 0, 255),
+                  }
+  );
 
-  rdpq_font_style(ftrFont,1,&(rdpq_fontstyle_t){
-  .color = RGBA32(255,255,255,255),
-  .outline_color = RGBA32(0,0,0,255),
-  });
-
+  rdpq_font_style(ftrFont,
+                  1,
+                  &(rdpq_fontstyle_t){
+                    .color = RGBA32(255, 255, 255, 255),
+                    .outline_color = RGBA32(0, 0, 0, 255),
+                  }
+  );
 }
 
-int main()
-{
+int main() {
   engine_init();
   load_fonts();
   music_init();
@@ -65,7 +69,6 @@ int main()
   usb_initialize();
 
   while (isRunning) {
-
     joypad_poll();
     btnsUp = joypad_get_buttons_released(0);
     btnsPressed = joypad_get_buttons_pressed(0);
@@ -74,13 +77,13 @@ int main()
     // trigger on button release
     if (btnsPressed.l) {
       songSelection--;
-      music_load(songSelection % SONG_COUNT );
+      music_load(songSelection % SONG_COUNT);
     }
 
     // trigger on button release
     if (btnsPressed.r) {
       songSelection++;
-      music_load(songSelection % SONG_COUNT );
+      music_load(songSelection % SONG_COUNT);
     }
 
     mixer_try_play_custom();
@@ -97,7 +100,7 @@ int main()
         audioMixerMasterFx = RESONANT_LP_SWEEP;
 
         stage_loop(0);
-        // if(inputs.btn.b) { isRunning = 0; }
+      // if(inputs.btn.b) { isRunning = 0; }
         break;
     }
 
@@ -121,8 +124,18 @@ static void engine_init() {
   asset_init_compression(2);
 
   dfs_init(DFS_DEFAULT_LOCATION);
-  const resolution_t RESOLUTION_320x240_PAL = {.width = 320, .height = 240, .interlaced = INTERLACE_OFF, .pal60 = true};
-  const resolution_t RESOLUTION_640x480_PAL = {.width = 640, .height = 480, .interlaced = INTERLACE_HALF, .pal60 = true};
+  const resolution_t RESOLUTION_320x240_PAL = {
+    .width = 320,
+    .height = 240,
+    .interlaced = INTERLACE_OFF,
+    .pal60 = true
+  };
+  const resolution_t RESOLUTION_640x480_PAL = {
+    .width = 640,
+    .height = 480,
+    .interlaced = INTERLACE_HALF,
+    .pal60 = true
+  };
 
   display_init(RESOLUTION_320x240_PAL, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
 
@@ -141,14 +154,12 @@ static void engine_teardown() {
   t3d_destroy();
 }
 
-
 static void music_load(int songIndex) {
   if (xm.playing) {
     xm64player_close(&xm);
   }
   xm64player_open(&xm, songs[songIndex]);
   xm64player_play(&xm, 0);
-
 }
 
 static void music_init() {
@@ -165,13 +176,12 @@ static void music_init() {
 }
 
 static void mixer_try_play_custom() {
-  if (audio_can_write())
-  {
+  if (audio_can_write()) {
     int bufferLength = audio_get_buffer_length();
 
-    short *buf = audio_write_begin();
+    short* buf = audio_write_begin();
     mixer_poll(buf, bufferLength);
-    audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx );
+    audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx);
 
     audio_write_end();
   }

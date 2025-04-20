@@ -6,9 +6,9 @@
 #define AUDIO_FX_H
 
 // these functions all apply a single effect to a single set of samples
-void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float resonance);
+void audio_fx_lopass_resonant(short* buf, int bufferLength, float cutoff, float resonance);
 
-void audio_fx_lopass_fp(short *buf, int bufferLength, float cutoff);
+void audio_fx_lopass_fp(short* buf, int bufferLength, float cutoff);
 
 // Use these different cases to compose effects together
 // and set the masterFx param to apply effects to the master mixer
@@ -25,7 +25,7 @@ enum AudioFxPreset {
 
 static float filterTimer = 0;
 
-static void audio_fx_preset_apply(short *buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
+static void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
     float sinSweep = (fm_cosf(filterTimer += 0.05f) + 1.0f) * 0.4f;
 
     switch (audioFxPreset) {
@@ -43,7 +43,6 @@ static void audio_fx_preset_apply(short *buf, int bufferLength, enum AudioFxPres
             break;
         case NONE:
         default:
-
     }
 }
 #endif //AUDIO_FX_H
