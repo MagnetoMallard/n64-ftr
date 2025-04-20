@@ -13,15 +13,15 @@ void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float 
 
     for (int i = 0; i < bufferLength; i++) {
         if (i % 2) {
-            float distanceToGoL = (buf[i]) - bufL;
+            float distanceToGoL = (buf[i]>>1) - bufL;
             momentumL += distanceToGoL * cutoff; // Lower / higher number here will lower / raise the cutoff frequency
             bufL += momentumL + distanceToGoL * resonance; // Higher number here (max 1) lessens resonance
-            buf[i] = (short)(bufL);
+            buf[i] = (short)(bufL)<<1;
         } else {
-            float distanceToGoR = (buf[i])  - bufR;
+            float distanceToGoR = (buf[i]>>1)  - bufR;
             momentumR += distanceToGoR * cutoff; // Lower / higher number here will lower / raise the cutoff frequency
             bufR +=  momentumR + distanceToGoR * resonance;// Higher number here (max 1) lessens resonance
-            buf[i] = (short)(bufR);
+            buf[i] = (short)(bufR)<<1;
         }
     }
 }

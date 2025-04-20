@@ -179,7 +179,7 @@ static void mixer_try_play_custom() {
         audio_fx_lopass_fp(buf, bufferLength<<1, sinSweep);
       break;
       case RESONANT_LP_DIVE:
-        audio_fx_lopass_resonant(buf, bufferLength<<1, 0.11f, 0.5f);
+        audio_fx_lopass_resonant(buf, bufferLength<<1, 55.1f, 0.5f);
       break;
       case FIXEDPONT_LP_DIVE:
         audio_fx_lopass_fp(buf, bufferLength<<1, 0.2f);
