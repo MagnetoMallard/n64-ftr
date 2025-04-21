@@ -34,13 +34,11 @@ void audio_playback_init() {
 }
 
 void audio_playback_take_input() {
-    // trigger on button release
     if (btnsPressed.l) {
         songSelection--;
         music_load(songSelection % SONG_COUNT);
     }
 
-    // trigger on button release
     if (btnsPressed.r) {
         songSelection++;
         music_load(songSelection % SONG_COUNT);

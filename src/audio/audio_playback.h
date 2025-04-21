@@ -17,8 +17,25 @@ enum MusicState {
 
 #include "audio_fx.h"
 
+/**
+ * @brief Initializes libdragon audio subsystem and XM playback
+ *
+ * MUST BE CALLED BEFORE ANY OTHER AUDIO COMMANDS
+ */
 void audio_playback_init();
+
+/**
+ * @brief Wraps mixer_try_play and applies selected master audio effect
+ *
+ * Call twice a frame
+ */
 void audio_playback_try_play();
+
+/**
+ * @brief Handle input for music playback
+ *
+ * Ties up: L, R Buttons.
+ */
 void audio_playback_take_input();
 
 extern xm64player_t xm;
