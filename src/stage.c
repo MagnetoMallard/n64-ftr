@@ -12,6 +12,8 @@
 #include "actors/actor.h"
 #include "actors/actor_behaviours.h"
 
+#include "audio/audio_playback.h"
+
 #include "camera/camera.h"
 
 #include "globals.h"
@@ -24,7 +26,9 @@
 
 static Actor actors[ACTORS_COUNT];
 static Camera camera;
+static bool _cameraDirty;
 
+static float deltaTime = 0.0f;
 static float fogNear = 100.0f;
 static float fogFar = 250.0f;
 static color_t fogColour = {70, 70, 140, 0xFF};
@@ -108,20 +112,34 @@ int stage_setup() {
     camera.pos.y = 150.0f;
     camera.pos.z = -80.0f;
 
-    camera_look_at(&camera, &dynamoVector, &viewport);
+    camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
 
     return 1;
 }
 
+void stage_take_input(enum GameSate passedGameState) {
 
-void stage_loop(int running) {
-    // ======== Update
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
 
-    float deltaTime = display_get_delta_time();
+    if (passedGameState == STAGE) {
+        // TIES up controls:
+        // Analogue Stick, C up and Down, Z
+        camera_take_input(&camera, &viewport, deltaTime);
+    }
+
+    if (inputs.btn.d_up) fogNear--;
+    if (inputs.btn.d_down) fogNear++;
+
+    if (inputs.btn.d_left) fogFar --;
+    if (inputs.btn.d_right) fogFar ++;
+}
+
+void stage_render_frame(enum GameSate passedGameState) {
+    // ======== Update
+    deltaTime = display_get_delta_time();
     spinTimer += deltaTime;
     horizAnimationTimer += deltaTime;
     vertAnimationTimer += deltaTime;
@@ -130,21 +148,11 @@ void stage_loop(int running) {
     if (horizAnimationTimer > viewport.size[0] * 4) horizAnimationTimer = 0;
     if (vertAnimationTimer > viewport.size[1] * 4) vertAnimationTimer = 0;
 
-    // TIES up controls:
-    // Analogue Stick, C up and Down, Z
-    if (running) {
-        camera_update(&camera, &viewport, deltaTime);
-    }
-
-    if (inputs.btn.d_up) fogNear--;
-    if (inputs.btn.d_down) fogNear++;
-
-    if (inputs.btn.d_left) fogFar --;
-    if (inputs.btn.d_right) fogFar ++;
+    camera_update(&camera, &viewport, deltaTime);
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
         Actor* curActor = &actors[i];
-        if (running) {
+        if (passedGameState == STAGE) {
             actor_update(curActor, spinTimer, deltaTime);
         }
     }
@@ -198,10 +206,7 @@ void stage_loop(int running) {
     regular_prints();
     debug_prints();
 
-    if (!running) {
-        static uint8_t fontIndex = 1;
-        if (btnsPressed.d_up) fontIndex++;
-        if (btnsPressed.d_down) fontIndex--;
+    if (passedGameState == PAUSED) {
         sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
     }
 

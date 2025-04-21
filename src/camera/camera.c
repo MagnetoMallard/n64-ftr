@@ -27,7 +27,7 @@ Camera camera_create() {
     return camera;
 }
 
-void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
+void camera_look_at(Camera* camera, T3DVec3 *target) {
     T3DVec3 dirVec;
     t3d_vec3_diff(&dirVec,target, &camera->pos);
     t3d_vec3_norm(&dirVec);
@@ -40,7 +40,8 @@ void camera_look_at(Camera* camera, T3DVec3 *target, T3DViewport* viewport) {
      //camera->rotation.y = fm_atan2f(dirVec.y, dirVec.x) / 2;
 }
 
-void take_camera_input(Camera* camera, T3DViewport* viewport, float deltaTime) {
+void camera_take_input(Camera* camera, T3DViewport* viewport, float deltaTime) {
+    if (!camera->inputEnabled) return;
 
     bool inStickRangeY = camera->rotation.y <= STICk_RANGE_Y && camera->rotation.y >= -STICk_RANGE_Y;
     float camSpeed = deltaTime * 2.0f;
@@ -64,16 +65,11 @@ void take_camera_input(Camera* camera, T3DViewport* viewport, float deltaTime) {
 
     if(inputs.btn.c_up)camera->pos.v[1] += camSpeed * 15.0f;
     if(inputs.btn.c_down)camera->pos.v[1] -= camSpeed * 15.0f;
-    if(btnsPressed.a)    camera_look_at(camera,&dergVector,viewport);
-    if(btnsPressed.b)    camera_look_at(camera,&dynamoVector,viewport);
+    if(btnsPressed.a)    camera_look_at(camera,&dergVector);
+    if(btnsPressed.b)    camera_look_at(camera,&dynamoVector);
 }
 
 void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
-
-    if (camera->inputEnabled) {
-        take_camera_input(camera, viewport, deltaTime);
-    }
-
     camDir.v[0] =  fm_cosf(camera->rotation.x) * fm_cosf(camera->rotation.y);
     camDir.v[1] =  fm_sinf(camera->rotation.y);
     camDir.v[2] =  fm_sinf(camera->rotation.x) * fm_cosf(camera->rotation.y);

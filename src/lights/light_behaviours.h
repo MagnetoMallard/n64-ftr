@@ -7,7 +7,7 @@
 #ifndef LIGHTBEHAVIOURS_H
 
 #include "light.h"
-#include "../globals.h"
+#include "../audio/audio_playback.h"
 
 /** @section Light Behaviours
  * fuel for light->lightUpdateFunction
