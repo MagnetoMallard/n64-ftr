@@ -8,6 +8,8 @@
    - function names should also be in snake_case `actor_update()`
    - variable names should be in camelCase: `int spinTimer`
    - types should be in PascalCase: `struct GameState`
+   - pointer types should be declared like `int* pointedThing` not `int *pointedThing`
+   - enumerators should be `CAPS_UNDERSCORE` style like `enum EnumeratedThing { OPTION_1, OPTION_2}`
    - top level vars should be static wherever possible
    - make parsimonious use of `globals.h`
    - use british english spelling where possible
