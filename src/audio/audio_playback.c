@@ -7,12 +7,15 @@
 static void music_load(int songIndex);
 static void music_init();
 static bool mute[SOUND_CHANNELS] = {0};
+uint16_t currentPeak;
 
 // externs
 xm64player_t xm;
 char* songs[SONG_COUNT];
-enum AudioFxPreset audioMixerMasterFx = NONE;
 enum GameSate musicState = HOLDLOOP;
+
+// private
+static enum AudioFxPreset audioMixerMasterFx = NONE;
 uint8_t songSelection = 0;
 
 void audio_playback_try_play() {
@@ -22,15 +25,17 @@ void audio_playback_try_play() {
         short* buf = audio_write_begin();
         mixer_poll(buf, bufferLength);
         audio_fx_preset_apply(buf, bufferLength, audioMixerMasterFx);
-
+        currentPeak = buf[0];
         audio_write_end();
     }
 }
 
 void audio_playback_init() {
+    debugf("Audio System Initializing");
     audio_init(44100, 8);
     mixer_init(SOUND_CHANNELS);
     music_init();
+    debugf("Audio System Initialized");
 }
 
 void audio_playback_take_input() {
@@ -45,6 +50,9 @@ void audio_playback_take_input() {
     }
 }
 
+void audio_set_master_fx(enum AudioFxPreset fx) {
+  audioMixerMasterFx = fx;
+}
 
 static void music_load(int songIndex) {
     if (xm.playing) {
@@ -56,7 +64,6 @@ static void music_load(int songIndex) {
 }
 
 void music_init() {
-    debugf("blah");
     // SETUP SONG LIST
     songs[0] = "rom:/smallhold.xm64";
     songs[1] = "rom:/kritta-girl.xm64";

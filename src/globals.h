@@ -28,6 +28,5 @@ extern joypad_inputs_t inputs;
 extern joypad_buttons_t btnsUp;
 extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
-extern uint8_t songSelection;
 extern rdpq_font_t* ftrFont;
 #endif //GLOBALS_H

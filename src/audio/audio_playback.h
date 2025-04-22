@@ -38,10 +38,17 @@ void audio_playback_try_play();
  */
 void audio_playback_take_input();
 
+/**
+ * @brief Sets the effect to be applied to the master buss of the audio
+ *
+ * These effects run on the CPU
+ * @param fx
+ */
+void audio_set_master_fx(enum AudioFxPreset fx);
+
 extern xm64player_t xm;
 extern char* songs[SONG_COUNT];
-extern enum AudioFxPreset audioMixerMasterFx ;
 extern enum GameSate musicState;
-extern uint8_t songSelection;
+extern uint16_t currentPeak;
 
 #endif //AUDIO_PLAYBACK_H

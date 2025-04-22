@@ -62,7 +62,7 @@ int stage_setup() {
     uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
-    pointLightOne.lightUpdateFunction = &light_update_traffic_light_xm;
+    pointLightOne.lightUpdateFunction = &light_update_vol_follow;
 
     uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
     T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
@@ -157,16 +157,15 @@ void stage_render_frame(enum GameSate passedGameState) {
         }
     }
 
+
+    if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
+
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
         Light* curLight = &directionalLights[i];
         if (curLight->lightUpdateFunction) {
             curLight->lightUpdateFunction(curLight, deltaTime, spinTimer);
-
         }
     }
-
-    if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
-
     // <Draw>
     t3d_draw_update(&viewport);
 

@@ -31,18 +31,19 @@ int main() {
   while (isRunning) {
     inputs_update();
     audio_playback_take_input();
+
     audio_playback_try_play();
 
     switch (gameState) {
       default:
       case STAGE:
         if (isSetup == 0) { isSetup = stage_setup(); }
-        audioMixerMasterFx = NONE;
+        audio_set_master_fx(NONE);
         stage_take_input(STAGE);
         stage_render_frame(STAGE);
         break;
       case PAUSED:
-        audioMixerMasterFx = RESONANT_LP_SWEEP;
+        audio_set_master_fx(RESONANT_LP_SWEEP);
         stage_take_input(PAUSED);
         stage_render_frame(PAUSED);
         break;
