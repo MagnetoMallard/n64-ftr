@@ -17,6 +17,8 @@
 #include "globals.h"
 #include "stage.h"
 
+#include "audio/audio_fx.h"
+
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 2
 
