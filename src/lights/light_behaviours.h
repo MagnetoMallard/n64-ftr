@@ -7,7 +7,8 @@
 #ifndef LIGHTBEHAVIOURS_H
 
 #include "light.h"
-#include "../globals.h"
+#include "../audio/audio_playback.h"
+#include <libdragon.h>
 
 /** @section Light Behaviours
  * fuel for light->lightUpdateFunction
@@ -53,13 +54,31 @@ static void light_update_traffic_light_xm(Light *light, float deltaTime, float o
         light->colour[1] = abs(light->colour[1] - 8);
         light->colour[2] = abs(light->colour[2] - 8);
     }
-
-    // int16_t pointSample[2];
-    // mixer_poll(pointSample, 2);
-    //
-    // light->colour[2] = abs(pointSample[0]) & 0xFF ; // get an 8 bit val
-
 }
+static long strobe[2] = {0x00000000, 0xFFFFFFFF};
+bool strobeFlick = true;
+
+static void light_update_xm_tekno_strobe(Light *light, float deltaTime, float objTime) {
+    static int _lastRow = 0;
+    int row;
+    xm64player_tell(&xm, nullptr, &row, nullptr);
+
+    if ((row + 1) % 0x02 == 0 && row != _lastRow) {
+        memcpy(light->colour, &strobe[strobeFlick] , sizeof(uint8_t[3]));
+        strobeFlick = !strobeFlick;
+        _lastRow = row;
+    }
+}
+
+static void light_update_vol_follow(Light *light, float deltaTime, float objTime) {
+    uint8_t val = ((currentPeak & 0xff00)  >> 8) * 0.5;
+    light->colour[0] =  val;
+    light->colour[1] = val;
+    light->colour[2] =  val;
+    light->colour[3] = val;
+}
+
+
 
 #define LIGHTBEHAVIOURS_H
 
