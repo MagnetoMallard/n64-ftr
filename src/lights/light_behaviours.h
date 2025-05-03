@@ -10,6 +10,11 @@
 #include "../audio/audio_playback.h"
 #include <libdragon.h>
 
+typedef struct _lightBehaviour {
+    LightUpdateFunction updateFunction;
+    char name[32];
+} LightBehaviour;
+
 /** @section Light Behaviours
  * fuel for light->lightUpdateFunction
 */

@@ -3,7 +3,11 @@
 //
 
 #define  FP_FAC 3
+#include <mixer.h>
 
+#include "audio_playback.h"
+#include "audio_fx.h"
+#include "../../libs/libxm/xm_internal.h"
 
 // Cribbed From
 // https://beammyselfintothefuture.wordpress.com/2015/02/16/simple-c-code-for-resonant-lpf-hpf-filters-and-high-low-shelving-eqs/
@@ -39,7 +43,7 @@ void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float 
     static long long bufFPR = 0;
     short cutoffFP = (short)(cutoff*10);
 
-    for (int i = 0; i <=bufferLength ; i++) {
+    for (int i = 0; i < bufferLength ; i++) {
         if (i%2) {
             bufFPL = buf[i] ;
             smoothDataFPL = (smoothDataFPL << cutoffFP)-smoothDataFPL;
@@ -53,5 +57,55 @@ void audio_fx_lopass_resonant(short *buf, int bufferLength, float cutoff, float 
             smoothDataFPR >>= cutoffFP;
             buf[i] = smoothDataFPR << cutoffFP/FP_FAC; // Roughly normalise based on cutoff fac
         }
+    }
+}
+
+void audio_fx_phase(short *buf, int bufferLength, int phaseDelay) {
+    for (int i = 0; i < bufferLength; i++) {
+        if (i > phaseDelay) {
+            buf[i] = (buf[i]>>1) + (buf[(i - phaseDelay)]>>1);
+        }
+    }
+}
+//
+// void audio_fx_phase(short *buf, int bufferLength, int interval) {
+//     static short* delayLine[8129];
+//
+//     for (int i = 0; i < bufferLength; i++) {
+//         delayLine[i] = buf;
+//
+//         if (i % interval == 0) {
+//             buf[i] = buf[i]>>1 + delayLine[i - interval];
+//         }
+//         // if (i > phaseDelay) {
+//         //     buf[i] = (buf[i]>>1) + (buf[(i - phaseDelay)]>>1);
+//         // }
+//     }
+// }
+
+void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
+    float sinSweep = (fm_cosf(filterTimer += 0.05f) + 1.0f) * 0.4f;
+
+    switch (audioFxPreset) {
+        case RESONANT_LP_SWEEP:
+            audio_fx_lopass_resonant(buf, bufferLength << 1, sinSweep, 0.2f);
+        break;
+        case FIXEDPONT_LP_SWEEP:
+            audio_fx_lopass_fp(buf, bufferLength << 1, sinSweep);
+        break;
+        case RESONANT_LP_DIVE:
+            audio_fx_lopass_resonant(buf, bufferLength << 1, 0.001f, 0.5f);
+        break;
+        case FIXEDPONT_LP_DIVE:
+            audio_fx_lopass_fp(buf, bufferLength << 1, 0.2f);
+        break;
+        case PHASE:
+            audio_fx_lopass_resonant(buf, bufferLength << 1, sinSweep, 0.2f);
+            audio_fx_phase(buf, bufferLength << 1, (12 * fabs(sinSweep)) + 4);
+        break;
+        case SLOWDOWN:
+            (xm.ctx)->tempo = (xm.ctx)->tempo / 2;
+        case NONE:
+            default:
     }
 }

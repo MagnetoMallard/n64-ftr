@@ -47,6 +47,28 @@ void camera_take_input(Camera* camera, T3DViewport* viewport, float deltaTime) {
     float camSpeed = deltaTime * 2.0f;
     float camRotSpeed = deltaTime * 0.02f;
 
+    if (inputs.stick_y && inStickRangeY) {
+        float rotY =  camera->rotation.y + (float)inputs.stick_y * camRotSpeed;
+        if (rotY <= STICk_RANGE_Y && rotY >= -STICk_RANGE_Y) {
+            camera->rotation.y = rotY;
+        }
+    }
+
+    if (inputs.stick_x) camera->rotation.x += (float)inputs.stick_x * camRotSpeed;
+
+    if(btnsPressed.a)    camera_look_at(camera,&dergVector);
+    if(btnsPressed.b)    camera_look_at(camera,&dynamoVector);
+}
+
+
+
+void camera_take_input_debug(Camera* camera, T3DViewport* viewport, float deltaTime) {
+    if (!camera->inputEnabled) return;
+
+    bool inStickRangeY = camera->rotation.y <= STICk_RANGE_Y && camera->rotation.y >= -STICk_RANGE_Y;
+    float camSpeed = deltaTime * 2.0f;
+    float camRotSpeed = deltaTime * 0.02f;
+
     if(inputs.btn.z) {
         if (inputs.stick_y && inStickRangeY) {
             float rotY =  camera->rotation.y + (float)inputs.stick_y * camRotSpeed;

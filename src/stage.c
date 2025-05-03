@@ -19,8 +19,6 @@
 #include "globals.h"
 #include "stage.h"
 
-#include "audio/audio_fx.h"
-
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 2
 
@@ -42,7 +40,29 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
-#
+
+
+static LightBehaviour lightBehaviourArray[4] = {
+    {
+    .name = "traffic light",
+    .updateFunction = &light_update_traffic_light
+    },
+{
+    .name = "synced traffic light",
+    .updateFunction = &light_update_traffic_light_xm
+    },
+{
+    .name = "synced tekno strobe",
+    .updateFunction = &light_update_xm_tekno_strobe
+    },
+{
+    .name = "mono volume follow",
+    .updateFunction = &light_update_vol_follow
+    },
+};
+
+static int lightBehaviourIndex = 0;
+
 static void t3d_draw_update(T3DViewport *viewport);
 
 static void debug_prints();
@@ -62,7 +82,7 @@ int stage_setup() {
     uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
-    pointLightOne.lightUpdateFunction = &light_update_vol_follow;
+    pointLightOne.lightUpdateFunction = lightBehaviourArray[0].updateFunction;
 
     uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
     T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
@@ -119,7 +139,6 @@ int stage_setup() {
 }
 
 void stage_take_input(enum GameSate passedGameState) {
-
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
@@ -130,11 +149,12 @@ void stage_take_input(enum GameSate passedGameState) {
         camera_take_input(&camera, &viewport, deltaTime);
     }
 
-    if (inputs.btn.d_up) fogNear--;
-    if (inputs.btn.d_down) fogNear++;
+    if (btnsPressed.d_up)  lightBehaviourIndex++;
+    if (btnsPressed.d_down)  lightBehaviourIndex--;
 
-    if (inputs.btn.d_left) fogFar --;
-    if (inputs.btn.d_right) fogFar ++;
+    if (lightBehaviourIndex > 3) lightBehaviourIndex = 0;
+    if (lightBehaviourIndex < 0) lightBehaviourIndex = 3;
+
 }
 
 void stage_render_frame(enum GameSate passedGameState) {
@@ -159,6 +179,8 @@ void stage_render_frame(enum GameSate passedGameState) {
 
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
+
+    directionalLights[0].lightUpdateFunction = lightBehaviourArray[lightBehaviourIndex].updateFunction;
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
         Light* curLight = &directionalLights[i];
@@ -234,7 +256,7 @@ static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_antialias(AA_NONE);
     rdpq_mode_alphacompare(1);
 
-    rdpq_mode_mipmap(MIPMAP_NONE, 0);
+    rdpq_mode_mipmap(MIPMAP_INTERPOLATE, 1);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
     t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED );
@@ -303,6 +325,7 @@ static constexpr int fpsPos = charHeight*2;
 static void regular_prints() {
     int musicTitlePos = display_get_height() - charHeight*4;
     sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
+    rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }
 static void debug_prints() {
     rdpq_text_printf(nullptr, 3, margin, fpsPos, "FPS: %.2f", display_get_fps());

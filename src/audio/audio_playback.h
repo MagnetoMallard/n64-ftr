@@ -6,13 +6,14 @@
 #define AUDIO_PLAYBACK_H
 #include "../globals.h"
 
-#define SOUND_CHANNELS 16
-#define SONG_COUNT 3
+#define SOUND_CHANNELS 32
+#define SONG_COUNT 4
 
 enum MusicState {
     HOLDLOOP,
     KRITTAGIRL,
-    FIELDDAY
+    FIELDDAY,
+    SONGOFSTORMS
 };
 
 #include "audio_fx.h"
