@@ -8,12 +8,17 @@
 
 #include "stage.h"
 #include "lights/light.h"
+#include "helpers/colour_helpers.h"
 #include "../libs/libxm/xm.h"
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
 static float vertAnimationTimer = 0.0f;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
+
+static constexpr int charHeight = 16;
+static constexpr int margin = 32;
+static constexpr int fpsPos = charHeight*2;
 
 static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
     int strLen = strlen(text);
@@ -38,15 +43,15 @@ static void sine_text(const char* text, float speedFactor, float xOffset, float 
 }
 
 void hud_setup() {
-    stage_get_directional_lights();
 }
 
 void hud_update() {
 
 }
 
-void hud_draw() {
+void hud_draw(LightBehaviour* lightBehaviourArray) {
     int musicTitlePos = display_get_height() - charHeight*4;
+    sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
     sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
     rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }

@@ -1,5 +1,6 @@
 
 #include "../libs/libxm/xm.h"
+#include "../libs/libxm/xm_internal.h"
 
 // Helpers
 #include "helpers/debug_draw.h"
@@ -72,6 +73,10 @@ static void draw_aabbs(Actor* curActor);
 static void check_aabbs(Actor *curActor);
 static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
+static sprite_t* playBtnUp;
+static sprite_t* playBtnDown;
+static rspq_block_t* hudBlock;
+
 // ==== PUBLIC ====
 int stage_setup() {
     viewport = t3d_viewport_create();
@@ -134,6 +139,9 @@ int stage_setup() {
 
     camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
+
+    playBtnDown = sprite_load("rom:/play-btn-down.sprite");
+    playBtnUp = sprite_load("rom:/play-btn-up.sprite");
 
     return 1;
 }
@@ -256,7 +264,7 @@ static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_antialias(AA_NONE);
     rdpq_mode_alphacompare(1);
 
-    rdpq_mode_mipmap(MIPMAP_INTERPOLATE, 1);
+    rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
     t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED );
@@ -323,10 +331,32 @@ static constexpr int margin = 32;
 static constexpr int fpsPos = charHeight*2;
 
 static void regular_prints() {
-    int musicTitlePos = display_get_height() - charHeight*4;
+     int musicTitlePos = display_get_height() - charHeight*4;
+     int artistTitlePos = display_get_height() - charHeight*5;
+    rdpq_set_mode_copy(false);
+
+    //rspq_block_run(hudBlock);
+    switch (gameState) {
+        default:
+        case STAGE:
+            rdpq_sprite_blit(playBtnDown, margin + 64, 20, nullptr);
+            break;
+        case PAUSED:
+            rdpq_sprite_blit(playBtnUp, margin + 64, 20, nullptr);
+            break;
+    }
+
+    rdpq_set_mode_standard();
+    rdpq_mode_filter(FILTER_BILINEAR);
+    rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
+
+    sine_text(xm.ctx->module.instruments[0].name, 4.0f, 32.0f ,  artistTitlePos, false);
     sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
     rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }
+
+
+
 static void debug_prints() {
     rdpq_text_printf(nullptr, 3, margin, fpsPos, "FPS: %.2f", display_get_fps());
 }

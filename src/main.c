@@ -32,7 +32,6 @@ int main() {
     inputs_update();
     audio_playback_take_input();
 
-    audio_playback_try_play();
 
     switch (gameState) {
       default:
@@ -42,6 +41,7 @@ int main() {
         audio_playback_try_play();
         stage_take_input(STAGE);
         stage_render_frame(STAGE);
+        audio_playback_try_play();
         break;
       case PAUSED:
         audio_set_master_fx(PHASE);
