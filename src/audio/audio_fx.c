@@ -67,21 +67,6 @@ void audio_fx_phase(short *buf, int bufferLength, int phaseDelay) {
         }
     }
 }
-//
-// void audio_fx_phase(short *buf, int bufferLength, int interval) {
-//     static short* delayLine[8129];
-//
-//     for (int i = 0; i < bufferLength; i++) {
-//         delayLine[i] = buf;
-//
-//         if (i % interval == 0) {
-//             buf[i] = buf[i]>>1 + delayLine[i - interval];
-//         }
-//         // if (i > phaseDelay) {
-//         //     buf[i] = (buf[i]>>1) + (buf[(i - phaseDelay)]>>1);
-//         // }
-//     }
-// }
 
 void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
     float sinSweep = (fm_cosf(filterTimer += 0.05f) + 1.0f) * 0.4f;
