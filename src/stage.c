@@ -1,5 +1,6 @@
 
 #include "../libs/libxm/xm.h"
+#include "../libs/libxm/xm_internal.h"
 
 // Helpers
 #include "helpers/debug_draw.h"
@@ -18,8 +19,6 @@
 
 #include "globals.h"
 #include "stage.h"
-
-#include "audio/audio_fx.h"
 
 #define ACTORS_COUNT 3
 #define DIRECTIONAL_LIGHT_COUNT 2
@@ -42,7 +41,29 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
-#
+
+
+static LightBehaviour lightBehaviourArray[4] = {
+    {
+    .name = "traffic light",
+    .updateFunction = &light_update_traffic_light
+    },
+{
+    .name = "synced traffic light",
+    .updateFunction = &light_update_traffic_light_xm
+    },
+{
+    .name = "synced tekno strobe",
+    .updateFunction = &light_update_xm_tekno_strobe
+    },
+{
+    .name = "mono volume follow",
+    .updateFunction = &light_update_vol_follow
+    },
+};
+
+static int lightBehaviourIndex = 0;
+
 static void t3d_draw_update(T3DViewport *viewport);
 
 static void debug_prints();
@@ -51,6 +72,12 @@ static void draw_aabbs(Actor* curActor);
 
 static void check_aabbs(Actor *curActor);
 static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
+
+static sprite_t* playBtnUpSprite;
+static sprite_t* playBtnDownSprite;
+static sprite_t* trackBackSprite;
+static sprite_t* trackFwdSprite;
+static rspq_block_t* hudBlock;
 
 // ==== PUBLIC ====
 int stage_setup() {
@@ -62,7 +89,7 @@ int stage_setup() {
     uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
-    pointLightOne.lightUpdateFunction = &light_update_vol_follow;
+    pointLightOne.lightUpdateFunction = lightBehaviourArray[0].updateFunction;
 
     uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
     T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
@@ -115,11 +142,15 @@ int stage_setup() {
     camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
 
+    playBtnDownSprite = sprite_load("rom:/play-btn-down.sprite");
+    playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
+    trackBackSprite = sprite_load("rom:/track-back.sprite");
+    trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
+
     return 1;
 }
 
 void stage_take_input(enum GameSate passedGameState) {
-
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
     }
@@ -130,11 +161,12 @@ void stage_take_input(enum GameSate passedGameState) {
         camera_take_input(&camera, &viewport, deltaTime);
     }
 
-    if (inputs.btn.d_up) fogNear--;
-    if (inputs.btn.d_down) fogNear++;
+    if (btnsPressed.d_up)  lightBehaviourIndex++;
+    if (btnsPressed.d_down)  lightBehaviourIndex--;
 
-    if (inputs.btn.d_left) fogFar --;
-    if (inputs.btn.d_right) fogFar ++;
+    if (lightBehaviourIndex > 3) lightBehaviourIndex = 0;
+    if (lightBehaviourIndex < 0) lightBehaviourIndex = 3;
+
 }
 
 void stage_render_frame(enum GameSate passedGameState) {
@@ -159,6 +191,8 @@ void stage_render_frame(enum GameSate passedGameState) {
 
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
+
+    directionalLights[0].lightUpdateFunction = lightBehaviourArray[lightBehaviourIndex].updateFunction;
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
         Light* curLight = &directionalLights[i];
@@ -217,6 +251,10 @@ void stage_teardown() {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         actor_delete(&actors[i]);
     }
+    sprite_free(trackFwdSprite);
+    sprite_free(trackBackSprite);
+    sprite_free(playBtnDownSprite);
+    sprite_free(playBtnUpSprite);
 }
 
 // ==== PRIVATE ====
@@ -301,9 +339,37 @@ static constexpr int margin = 32;
 static constexpr int fpsPos = charHeight*2;
 
 static void regular_prints() {
-    int musicTitlePos = display_get_height() - charHeight*4;
-    sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
+     int musicTitlePos = display_get_height() - charHeight*4;
+     int artistTitlePos = display_get_height() - charHeight*5;
+    rdpq_set_mode_copy(true);
+    rdpq_mode_push();
+    rdpq_mode_tlut(TLUT_RGBA16);
+    //rspq_block_run(hudBlock);
+    switch (gameState) {
+        default:
+        case STAGE:
+            rdpq_sprite_blit(playBtnDownSprite, margin + 64, 20, nullptr);
+            break;
+        case PAUSED:
+            rdpq_sprite_blit(playBtnUpSprite, margin + 64, 20, nullptr);
+            break;
+    }
+
+
+    rdpq_sprite_blit(trackBackSprite, 32, musicTitlePos-16, nullptr );
+    rdpq_sprite_blit(trackFwdSprite,260 , musicTitlePos-16, nullptr );
+    rdpq_set_mode_standard();
+    rdpq_mode_filter(FILTER_BILINEAR);
+    rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
+    rdpq_mode_pop();
+
+    sine_text(xm.ctx->module.instruments[0].name, 4.0f, 70.0f ,  artistTitlePos, false);
+    sine_text(xm_get_module_name(xm.ctx), 4.0f, 70.0f ,  musicTitlePos, false);
+    rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }
+
+
+
 static void debug_prints() {
     rdpq_text_printf(nullptr, 3, margin, fpsPos, "FPS: %.2f", display_get_fps());
 }

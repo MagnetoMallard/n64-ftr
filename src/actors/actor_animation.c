@@ -12,7 +12,6 @@ ActorAnimation create_from_model(const T3DModel* model, uint32_t animationCount)
         .animations = NULL,
         .animationInstances = NULL,
         .skel = t3d_skeleton_create(model),
-
     };
 
     debugf("model pointer %p\n", model);

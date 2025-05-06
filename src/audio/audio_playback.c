@@ -48,7 +48,23 @@ void audio_playback_take_input() {
         songSelection++;
         music_load(songSelection % SONG_COUNT);
     }
+
+    if (inputs.btn.c_up) {
+        audio_set_master_fx(RESONANT_LP_SWEEP);
+    } else if (inputs.btn.c_right) {
+        audio_set_master_fx(FIXEDPONT_LP_SWEEP);
+    } else if (inputs.btn.c_left) {
+        audio_set_master_fx(PHASE);
+    } else if (inputs.btn.c_down) {
+        audio_set_master_fx(FIXEDPONT_LP_DIVE);
+    } else {
+        audio_set_master_fx(NONE);
+    }
+
+
 }
+
+
 
 void audio_set_master_fx(enum AudioFxPreset fx) {
   audioMixerMasterFx = fx;
@@ -68,6 +84,7 @@ void music_init() {
     songs[0] = "rom:/smallhold.xm64";
     songs[1] = "rom:/kritta-girl.xm64";
     songs[2] = "rom:/field-day.xm64";
+    songs[3] = "rom:/song-of-storms.xm64";
 
     music_load(0);
 

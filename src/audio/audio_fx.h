@@ -4,7 +4,6 @@
 
 #ifndef AUDIO_FX_H
 #define AUDIO_FX_H
-
 // these functions all apply a single effect to a single set of samples
 
 /**
@@ -39,6 +38,16 @@ void audio_fx_lopass_resonant(short* buf, int bufferLength, float cutoff, float 
  */
 void audio_fx_lopass_fp(short* buf, int bufferLength, float cutoff);
 
+
+/**
+ * @brief a real shitty phase thats in progress
+ *
+ * @param buf pointer to first element of an array of 16 bit samples.
+ * @param bufferLength length of that array. Needs to be at least 16 for this to work.
+ * @param bufferPhase the amount of samples to offset phase  by
+ */
+void audio_fx_phase(short *buf, int bufferLength, int phaseDelay);
+
 // Use these different cases to compose effects together
 // and set the masterFx param to apply effects to the master mixer
 // you can view how the effects are composed in mixer_try_play_custom
@@ -50,6 +59,8 @@ enum AudioFxPreset {
     FIXEDPONT_LP_SWEEP,
     RESONANT_LP_DIVE,
     FIXEDPONT_LP_DIVE,
+    PHASE,
+    SLOWDOWN
 };
 
 
@@ -73,24 +84,5 @@ static float filterTimer = 0;
  * @param bufferLength length of that array. Needs to be at least 2 for this to work.
  * @param audioFxPreset choose from a list of presets to apply!
  */
-static void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset) {
-    float sinSweep = (fm_cosf(filterTimer += 0.05f) + 1.0f) * 0.4f;
-
-    switch (audioFxPreset) {
-        case RESONANT_LP_SWEEP:
-            audio_fx_lopass_resonant(buf, bufferLength << 1, sinSweep, 0.2f);
-            break;
-        case FIXEDPONT_LP_SWEEP:
-            audio_fx_lopass_fp(buf, bufferLength << 1, sinSweep);
-            break;
-        case RESONANT_LP_DIVE:
-            audio_fx_lopass_resonant(buf, bufferLength << 1, 0.001f, 0.5f);
-            break;
-        case FIXEDPONT_LP_DIVE:
-            audio_fx_lopass_fp(buf, bufferLength << 1, 0.2f);
-            break;
-        case NONE:
-        default:
-    }
-}
+void audio_fx_preset_apply(short* buf, int bufferLength, enum AudioFxPreset audioFxPreset);
 #endif //AUDIO_FX_H
