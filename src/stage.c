@@ -73,8 +73,10 @@ static void draw_aabbs(Actor* curActor);
 static void check_aabbs(Actor *curActor);
 static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
-static sprite_t* playBtnUp;
-static sprite_t* playBtnDown;
+static sprite_t* playBtnUpSprite;
+static sprite_t* playBtnDownSprite;
+static sprite_t* trackBackSprite;
+static sprite_t* trackFwdSprite;
 static rspq_block_t* hudBlock;
 
 // ==== PUBLIC ====
@@ -140,8 +142,10 @@ int stage_setup() {
     camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
 
-    playBtnDown = sprite_load("rom:/play-btn-down.sprite");
-    playBtnUp = sprite_load("rom:/play-btn-up.sprite");
+    playBtnDownSprite = sprite_load("rom:/play-btn-down.sprite");
+    playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
+    trackBackSprite = sprite_load("rom:/track-back.sprite");
+    trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
 
     return 1;
 }
@@ -247,6 +251,10 @@ void stage_teardown() {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         actor_delete(&actors[i]);
     }
+    sprite_free(trackFwdSprite);
+    sprite_free(trackBackSprite);
+    sprite_free(playBtnDownSprite);
+    sprite_free(playBtnUpSprite);
 }
 
 // ==== PRIVATE ====
@@ -333,25 +341,30 @@ static constexpr int fpsPos = charHeight*2;
 static void regular_prints() {
      int musicTitlePos = display_get_height() - charHeight*4;
      int artistTitlePos = display_get_height() - charHeight*5;
-    rdpq_set_mode_copy(false);
-
+    rdpq_set_mode_copy(true);
+    rdpq_mode_push();
+    rdpq_mode_tlut(TLUT_RGBA16);
     //rspq_block_run(hudBlock);
     switch (gameState) {
         default:
         case STAGE:
-            rdpq_sprite_blit(playBtnDown, margin + 64, 20, nullptr);
+            rdpq_sprite_blit(playBtnDownSprite, margin + 64, 20, nullptr);
             break;
         case PAUSED:
-            rdpq_sprite_blit(playBtnUp, margin + 64, 20, nullptr);
+            rdpq_sprite_blit(playBtnUpSprite, margin + 64, 20, nullptr);
             break;
     }
 
+
+    rdpq_sprite_blit(trackBackSprite, 32, musicTitlePos-16, nullptr );
+    rdpq_sprite_blit(trackFwdSprite,260 , musicTitlePos-16, nullptr );
     rdpq_set_mode_standard();
     rdpq_mode_filter(FILTER_BILINEAR);
     rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
+    rdpq_mode_pop();
 
-    sine_text(xm.ctx->module.instruments[0].name, 4.0f, 32.0f ,  artistTitlePos, false);
-    sine_text(xm_get_module_name(xm.ctx), 4.0f, 32.0f ,  musicTitlePos, false);
+    sine_text(xm.ctx->module.instruments[0].name, 4.0f, 70.0f ,  artistTitlePos, false);
+    sine_text(xm_get_module_name(xm.ctx), 4.0f, 70.0f ,  musicTitlePos, false);
     rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }
 
