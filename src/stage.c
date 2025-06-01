@@ -158,7 +158,7 @@ void stage_take_input(enum GameSate passedGameState) {
     if (passedGameState == STAGE) {
         // TIES up controls:
         // Analogue Stick, C up and Down, Z
-        camera_take_input(&camera, &viewport, deltaTime);
+        camera_take_input_debug(&camera, &viewport, deltaTime);
     }
 
     if (btnsPressed.d_up)  lightBehaviourIndex++;
@@ -188,7 +188,6 @@ void stage_render_frame(enum GameSate passedGameState) {
             actor_update(curActor, spinTimer, deltaTime);
         }
     }
-
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 

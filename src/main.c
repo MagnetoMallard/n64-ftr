@@ -32,25 +32,20 @@ int main() {
     inputs_update();
     audio_playback_take_input();
 
-
     switch (gameState) {
       default:
       case STAGE:
         if (isSetup == 0) { isSetup = stage_setup(); }
-      //  audio_set_master_fx(NONE);
         audio_playback_try_play();
         stage_take_input(STAGE);
         stage_render_frame(STAGE);
-        audio_playback_try_play();
+        audio_playback_try_play(); // make a couple attempts, as is recommended
         break;
       case PAUSED:
-        audio_set_master_fx(PHASE);
         stage_take_input(PAUSED);
         stage_render_frame(PAUSED);
         break;
     }
-
-    // make a couple attempts, as is recommended
 
     if (usb_poll()) {
       isRunning = 0;
@@ -58,7 +53,6 @@ int main() {
   }
 
   stage_teardown();
-
   engine_teardown();
 
   return 0;
