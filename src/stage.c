@@ -30,7 +30,8 @@ static bool _cameraDirty;
 static float deltaTime = 0.0f;
 static float fogNear = 100.0f;
 static float fogFar = 250.0f;
-static color_t fogColour = {70, 70, 140, 0xFF};
+//static color_t fogColour = {70, 70, 70, 0xFF};
+static color_t fogColour = {80, 80, 80, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
@@ -38,7 +39,7 @@ static float vertAnimationTimer = 0.0f;
 
 static T3DViewport viewport;
 static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
-uint8_t ambientLightColour[4] = {80, 80, 80, 0x7f};
+uint8_t ambientLightColour[4] = {100, 100, 100, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
 
@@ -77,6 +78,8 @@ static sprite_t* playBtnUpSprite;
 static sprite_t* playBtnDownSprite;
 static sprite_t* trackBackSprite;
 static sprite_t* trackFwdSprite;
+static sprite_t* koboldPoliceTape;
+static sprite_t* koboldShortTape;
 static rspq_block_t* hudBlock;
 
 // ==== PUBLIC ====
@@ -146,6 +149,8 @@ int stage_setup() {
     playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
     trackBackSprite = sprite_load("rom:/track-back.sprite");
     trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
+    koboldPoliceTape =sprite_load("rom:/kobold-police-tape.sprite");
+    koboldShortTape =sprite_load("rom:/kob.sprite");
 
     return 1;
 }
@@ -255,6 +260,8 @@ void stage_teardown() {
     sprite_free(trackBackSprite);
     sprite_free(playBtnDownSprite);
     sprite_free(playBtnUpSprite);
+    sprite_free(koboldPoliceTape);
+    sprite_free(koboldShortTape);
 }
 
 // ==== PRIVATE ====
@@ -319,8 +326,8 @@ static void sine_text(const char* text, float speedFactor, float xOffset, float 
 
     for (int i = 0; i < strLen; i++) {
         rdpq_font_style(ftrFont, 1, &(rdpq_fontstyle_t){
-          .color = hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
-          .outline_color = RGBA32(0,0,0,255),
+          .color = RGBA32(187,244,139,255), //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
+          .outline_color = RGBA32(109-40,176-40,53-40,255),
         });
         rdpq_text_printn(
         &(rdpq_textparms_t) {
@@ -334,13 +341,13 @@ static void sine_text(const char* text, float speedFactor, float xOffset, float 
 
 }
 
-static constexpr int charHeight = 16;
-static constexpr int margin = 32;
+static constexpr int charHeight = 8;
+static constexpr int margin = 8;
 static constexpr int fpsPos = charHeight*2;
 
 static void regular_prints() {
      int musicTitlePos = display_get_height() - charHeight*4;
-     int artistTitlePos = display_get_height() - charHeight*5;
+     int artistTitlePos = display_get_height() - charHeight*6;
     rdpq_set_mode_copy(true);
     rdpq_mode_push();
     rdpq_mode_tlut(TLUT_RGBA16);
@@ -348,23 +355,26 @@ static void regular_prints() {
     switch (gameState) {
         default:
         case STAGE:
-            rdpq_sprite_blit(playBtnDownSprite, margin + 64, 20, nullptr);
+            rdpq_sprite_blit(playBtnDownSprite, margin, 20, nullptr);
             break;
         case PAUSED:
-            rdpq_sprite_blit(playBtnUpSprite, margin + 64, 20, nullptr);
+            rdpq_sprite_blit(playBtnUpSprite, margin, 20, nullptr);
             break;
     }
 
+	rdpq_sprite_blit(koboldPoliceTape, -128, 224, nullptr);
+    rdpq_sprite_blit(koboldPoliceTape, -64, 0, nullptr);
 
-    rdpq_sprite_blit(trackBackSprite, 32, musicTitlePos-16, nullptr );
-    rdpq_sprite_blit(trackFwdSprite,260 , musicTitlePos-16, nullptr );
+
+    rdpq_sprite_blit(trackBackSprite, 16, 184, nullptr );
+    rdpq_sprite_blit(trackFwdSprite,272, 184, nullptr );
     rdpq_set_mode_standard();
     rdpq_mode_filter(FILTER_BILINEAR);
     rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
     rdpq_mode_pop();
 
-    sine_text(xm.ctx->module.instruments[0].name, 4.0f, 70.0f ,  artistTitlePos, false);
-    sine_text(xm_get_module_name(xm.ctx), 4.0f, 70.0f ,  musicTitlePos, false);
+    sine_text(xm.ctx->module.instruments[0].name, 2.0f, 56.0f ,  artistTitlePos, false);
+    sine_text(xm_get_module_name(xm.ctx), 2.0f, 56.0f ,  musicTitlePos, false);
     rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
 }
 
