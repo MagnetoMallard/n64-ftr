@@ -34,16 +34,13 @@ static void dynamo_set_eye_index(int eyeIndex) {
 }
 
 static void dynamo_part_draw(T3DModelIter *it, T3DModelState *state, float objTime) {
-
     if (strcmp(it->object->material->name, "EYEL") || strcmp(it->object->material->name, "EYER") ) {
         dynamo_set_eye_index(fm_fmodf(objTime, 3));
     }
-
+   // rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
     t3d_model_draw_material(it->object->material, state);
     rspq_block_run(it->object->userBlock);
     it->object->isVisible = false;
-
-
 }
 
 

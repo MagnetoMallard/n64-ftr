@@ -16,4 +16,5 @@ Camera camera_create();
 void camera_look_at(Camera* camera, T3DVec3 *target);
 void camera_update(Camera* camera, T3DViewport* viewport, float objTime);
 void camera_take_input(Camera* camera, T3DViewport* viewport, float deltaTime);
+void camera_take_input_debug(Camera* camera, T3DViewport* viewport, float deltaTime);
 #endif
