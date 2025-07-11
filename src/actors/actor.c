@@ -43,7 +43,7 @@ void actor_update(Actor *actor, float objTime, float deltaTime) {
     }
 
     if (actor->anim.animationCount) {
-        t3d_anim_update(&actor->anim.animationInstances[1], deltaTime );
+        t3d_anim_update(&actor->anim.animationInstances[actor->anim.currentAnimation], deltaTime );
     }
 
     t3d_mat4_from_srt_euler(actor->modelMatF, actor->scale, actor->rot,actor->pos );
@@ -113,8 +113,8 @@ Actor create_actor_from_model(char *modelName) {
     T3DModelIter it = t3d_model_iter_create(actorModel, T3D_CHUNK_TYPE_OBJECT);
     while (t3d_model_iter_next(&it)) {
         rspq_block_begin();
-        //debugf("part name: %s\n", it.object->name);
-       // debugf("material name: %s\n", it.object->material->name);
+        debugf("part name: %s\n", it.object->name);
+        debugf("material name: %s\n", it.object->material->name);
 
         if (animationCount) {
             t3d_model_draw_object(it.object, actor.anim.skel.boneMatricesFP);
