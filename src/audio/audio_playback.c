@@ -81,12 +81,11 @@ static void music_load(int songIndex) {
 
 void music_init() {
     // SETUP SONG LIST
-    songs[0] = "rom:/smallhold.xm64";
+    songs[0] = "rom:/song-of-storms.xm64";
     songs[1] = "rom:/kritta-girl.xm64";
     songs[2] = "rom:/field-day.xm64";
-    songs[3] = "rom:/song-of-storms.xm64";
-    songs[4] = "rom:/jungle-test.xm64";
-    songs[5] = "rom:/summer-nights.xm64";
+    songs[3] = "rom:/jungle-test.xm64";
+    songs[4] = "rom:/summer-nights.xm64";
 
     music_load(0);
 

@@ -68,7 +68,8 @@ static void engine_init() {
     .width = 320,
     .height = 240,
     .interlaced = INTERLACE_OFF,
-    .pal60 = true
+    .pal60 = true,
+    .overscan_margin = VI_CRT_MARGIN
   };
   const resolution_t RESOLUTION_640x480_PAL = {
     .width = 640,

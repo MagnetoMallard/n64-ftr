@@ -7,7 +7,7 @@
 #include "../globals.h"
 
 #define SOUND_CHANNELS 32
-#define SONG_COUNT 6
+#define SONG_COUNT 5
 
 enum MusicState {
     HOLDLOOP,

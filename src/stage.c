@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "stage.h"
 
-#define ACTORS_COUNT 3
+#define ACTORS_COUNT 5
 #define DIRECTIONAL_LIGHT_COUNT 2
 
 static Actor actors[ACTORS_COUNT];
@@ -31,7 +31,7 @@ static float deltaTime = 0.0f;
 static float fogNear = 100.0f;
 static float fogFar = 250.0f;
 //static color_t fogColour = {70, 70, 70, 0xFF};
-static color_t fogColour = {80, 80, 80, 0xFF};
+static color_t fogColour = {80, 80, 125, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
@@ -42,13 +42,9 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {100, 100, 100, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
+surface_t* disp;
 
-
-static LightBehaviour lightBehaviourArray[4] = {
-    {
-    .name = "traffic light",
-    .updateFunction = &light_update_traffic_light
-    },
+static LightBehaviour lightBehaviourArray[3] = {
 {
     .name = "synced traffic light",
     .updateFunction = &light_update_traffic_light_xm
@@ -87,7 +83,7 @@ int stage_setup() {
     viewport = t3d_viewport_create();
 
     camera = camera_create();
-
+    //disp = display_get();
     // ======== Init Lights
     uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
@@ -106,14 +102,32 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
+    Actor koboldActor = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor2 = create_actor_from_model("KoboldWithAnims");
+
     dynamo_init();
+    kobold_init(&koboldActor2, (color_t){000,240,000,100});
 
     dragonActor.updateFunction = &dragon_update;
+    koboldActor2.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
     dynamoActor.pos[0] = -330.0f;
     dynamoActor.pos[1] = 30.0f;
     dynamoActor.pos[2] = -30.0f;
+
+    koboldActor.pos[0] = -284.0f;
+    koboldActor.pos[1] = 75.0f;
+    koboldActor.pos[2] = 147.0f;
+
+    koboldActor2.pos[0] = -240.0f;
+    koboldActor2.pos[1] = 30.0f;
+    koboldActor2.pos[2] = -190.0f;
+
+    koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
+    koboldActor2.rot[1] = T3D_DEG_TO_RAD(-95);
+
+    animations_change(&koboldActor.anim, 2, 0.4f);
 
     dragonActor.scale[0] = 2.0f;
     dragonActor.scale[1] = 2.0f;
@@ -121,9 +135,12 @@ int stage_setup() {
 
     dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
 
+
     actors[0] = dragonActor;
     actors[1] = stageActor;
     actors[2] = dynamoActor;
+    actors[3] = koboldActor;
+    actors[4] = koboldActor2;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
     dergVector = actor_get_pos_vec(&dragonActor);
@@ -169,8 +186,8 @@ void stage_take_input(enum GameSate passedGameState) {
     if (btnsPressed.d_up)  lightBehaviourIndex++;
     if (btnsPressed.d_down)  lightBehaviourIndex--;
 
-    if (lightBehaviourIndex > 3) lightBehaviourIndex = 0;
-    if (lightBehaviourIndex < 0) lightBehaviourIndex = 3;
+    if (lightBehaviourIndex > 2) lightBehaviourIndex = 0;
+    if (lightBehaviourIndex < 0) lightBehaviourIndex = 2;
 
 }
 
@@ -241,7 +258,7 @@ void stage_render_frame(enum GameSate passedGameState) {
     rdpq_sync_pipe();
 
     regular_prints();
-    debug_prints();
+   // debug_prints();
 
     if (passedGameState == PAUSED) {
         sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
@@ -343,30 +360,45 @@ static void sine_text(const char* text, float speedFactor, float xOffset, float 
 static constexpr int charHeight = 8;
 static constexpr int margin = 8;
 static constexpr int fpsPos = charHeight*2;
+static constexpr int overScan = 38;
 
 static void regular_prints() {
-     int musicTitlePos = display_get_height() - charHeight*4;
-     int artistTitlePos = display_get_height() - charHeight*6;
+    int displayHeight = display_get_height();
+
+    int musicTitlePos = displayHeight - charHeight*4 - overScan;
+    int artistTitlePos = displayHeight - charHeight*6 - overScan;
+    int tapePos = displayHeight - 26 - overScan;
+    int btnPos = displayHeight - 64 - overScan;
+
     rdpq_set_mode_copy(true);
     rdpq_mode_push();
     rdpq_mode_tlut(TLUT_RGBA16);
     //rspq_block_run(hudBlock);
-    switch (gameState) {
-        default:
-        case STAGE:
-            rdpq_sprite_blit(playBtnDownSprite, margin, 20, nullptr);
-            break;
-        case PAUSED:
-            rdpq_sprite_blit(playBtnUpSprite, margin, 20, nullptr);
-            break;
-    }
+    // switch (gameState) {
+    //     default:
+    //     case STAGE:
+    //         rdpq_sprite_blit(playBtnDownSprite, margin, 20, nullptr);
+    //         break;
+    //     case PAUSED:
+    //         rdpq_sprite_blit(playBtnUpSprite, margin, 20, nullptr);
+    //         break;
+    // }
 
-	rdpq_sprite_blit(koboldPoliceTape, -128, 224, nullptr);
-    rdpq_sprite_blit(koboldPoliceTape, -64, 0, nullptr);
+	rdpq_sprite_blit(koboldPoliceTape, -128, tapePos, &(rdpq_blitparms_t) {
+        .filtering = false
+    });
+
+   // rdpq_mode_tlut(TLUT_RGBA16);
+   // rdpq_tex_upload_tlut(sprite_get_palette(koboldPoliceTape), 0, 2);
+    // rdpq_tex_upload(TILE0, &tape_surf, nullptr);
+    // rdpq_tex_blit(disp, -64, 0, &(rdpq_blitparms_t) {
+    //     .filtering = false,
+    //     .cx = horizAnimationTimer * 20,
+    // });
 
 
-    rdpq_sprite_blit(trackBackSprite, 16, 184, nullptr );
-    rdpq_sprite_blit(trackFwdSprite,272, 184, nullptr );
+    rdpq_sprite_blit(trackBackSprite, 16, btnPos, nullptr );
+    rdpq_sprite_blit(trackFwdSprite,272, btnPos, nullptr );
     rdpq_set_mode_standard();
     rdpq_mode_filter(FILTER_BILINEAR);
     rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)

@@ -15,9 +15,11 @@ typedef struct _animatedActor {
     T3DChunkAnim **animations;
     T3DAnim *animationInstances;
     T3DSkeleton skel;
+    int currentAnimation;
 } ActorAnimation;
 
 ActorAnimation create_from_model(const T3DModel* model, uint32_t animationCount);
 void animations_teardown(ActorAnimation animationStruct);
+void animations_change(ActorAnimation* animationStruct, int number, float speed);
 
 #endif //ACTOR_ANIMATED_H
