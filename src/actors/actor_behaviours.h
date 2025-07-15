@@ -48,18 +48,23 @@ static void dynamo_part_draw(T3DModelIter *it, T3DModelState *state, float objTi
  * @section Kobolds.
  */
 
-static void kobold_init(Actor* actorModel, const color_t color) {
+static void kobold_init(Actor* actorModel, const color_t color, const color_t color2) {
     T3DModelIter it = t3d_model_iter_create(actorModel->t3dModel, T3D_CHUNK_TYPE_OBJECT);
     while (t3d_model_iter_next(&it)) {
 
         rspq_block_begin();
-            // if (strcmp(it.object->material->name, "Body")
-            //     || strcmp(it.object->material->name, "Scales")
-            //     || strcmp(it.object->material->name, "Snout")
-            //     || strcmp(it.object->material->name, "Eyes")
-            //     ) {
+             if (strcmp(it.object->material->name, "Body")
+                 || strcmp(it.object->material->name, "Scales")
+                 || strcmp(it.object->material->name, "Snout")
+                 || strcmp(it.object->material->name, "Eyes")
+                 ) {
                 rdpq_set_prim_color(color);
-            // }
+             }
+             else if (strcmp(it.object->material->name, "Belly")
+                      || strcmp(it.object->material->name, "Ear")
+                      ) {
+               rdpq_set_prim_color(color2);
+               }
             t3d_model_draw_object(it.object, actorModel->anim.skel.boneMatricesFP);
         it.object->userBlock = rspq_block_end();
 

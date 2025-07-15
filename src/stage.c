@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "stage.h"
 
-#define ACTORS_COUNT 5
+#define ACTORS_COUNT 11
 #define DIRECTIONAL_LIGHT_COUNT 2
 
 static Actor actors[ACTORS_COUNT];
@@ -102,38 +102,106 @@ int stage_setup() {
     Actor stageActor = create_actor_from_model("MainBarArea");
     Actor dynamoActor = create_actor_from_model("DynamoAnimation");
 
+    //Init Stage Kobolds
     Actor koboldActor = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor2 = create_actor_from_model("KoboldWithAnims");
 
+    //Init Dancefloor Kobolds
+    Actor koboldActor3 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor4 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor5 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor6 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
+
+    //I don't know why this is here but honestly I'm scared to move it at this point.
     dynamo_init();
-    kobold_init(&koboldActor2, (color_t){000,240,000,100});
+
+    //---
+    //Colour change of the kobolds, RGBA. Final alpha seems to be unnecessary.
+    //Set kobold model's vertex colours to white.
+    //---
+
+    //Colour Stage Kobolds
+    kobold_init(&koboldActor, (color_t){255,255,255}, (color_t){255,0,0});
+    kobold_init(&koboldActor2, (color_t){255,100,100}, (color_t){24,0,100});
+
+    //Colour Dancefloor kobolds
+    kobold_init(&koboldActor3, (color_t){0,100,100}, (color_t){0,100,100});
+    kobold_init(&koboldActor4, (color_t){100,100,255}, (color_t){20,100,15});
+    kobold_init(&koboldActor5, (color_t){100,255,100}, (color_t){100,80,100});
+    kobold_init(&koboldActor6, (color_t){255,100,100}, (color_t){255,80,80});
+    kobold_init(&koboldActor7, (color_t){100,0,100}, (color_t){0,0,100});
+    kobold_init(&koboldActor8, (color_t){100,100,0}, (color_t){255,100,0});
 
     dragonActor.updateFunction = &dragon_update;
     koboldActor2.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
-    dynamoActor.pos[0] = -330.0f;
-    dynamoActor.pos[1] = 30.0f;
-    dynamoActor.pos[2] = -30.0f;
+	//START POSITIONS, ROTATION, AND ANIM
+    //Start postions of actors as a vec3, 0 on all vecs are centred. .pos[1] is equal to Blender's Z direction (Y here?)
+    //Models start faced towards the entrance, there's be a better way to represent this later I'm sure.
 
-    koboldActor.pos[0] = -284.0f;
-    koboldActor.pos[1] = 75.0f;
-    koboldActor.pos[2] = 147.0f;
-
-    koboldActor2.pos[0] = -240.0f;
-    koboldActor2.pos[1] = 30.0f;
-    koboldActor2.pos[2] = -190.0f;
-
-    koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
-    koboldActor2.rot[1] = T3D_DEG_TO_RAD(-95);
-
-    animations_change(&koboldActor.anim, 2, 0.4f);
-
-    dragonActor.scale[0] = 2.0f;
-    dragonActor.scale[1] = 2.0f;
-    dragonActor.scale[2] = 2.0f;
-
+    //DJ
+    dynamoActor.pos[0] = -340.0f;
+    dynamoActor.pos[1] = 10.0f;
+    dynamoActor.pos[2] = -100.0f;
     dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
+
+    //Stage kobolds
+    koboldActor.pos[0] = -284.0f;
+    koboldActor.pos[1] = 10.0f;
+    koboldActor.pos[2] = 100.0f;
+    koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&koboldActor.anim, 2, 0.3f);
+
+    koboldActor2.pos[0] = -260.0f;
+    koboldActor2.pos[1] = 10.0f;
+    koboldActor2.pos[2] = -230.0f;
+    koboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&koboldActor2.anim, 1, 0.3f);
+
+    //Dancefloor Kobolds
+    koboldActor3.pos[0] = 160.0f;
+    koboldActor3.pos[1] = 0.0f;
+    koboldActor3.pos[2] = 0.0f;
+    koboldActor3.rot[1] = T3D_DEG_TO_RAD(90);
+    animations_change(&koboldActor3.anim, 2, 0.4f);
+
+    koboldActor4.pos[0] = -160.0f;
+    koboldActor4.pos[1] = 0.0f;
+    koboldActor4.pos[2] = 0.0f;
+    koboldActor4.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&koboldActor4.anim, 2, 0.3f);
+
+    koboldActor5.pos[0] = 80.0f;
+    koboldActor5.pos[1] = 0.0f;
+    koboldActor5.pos[2] = 160.0f;
+    koboldActor5.rot[1] = T3D_DEG_TO_RAD(-200);
+    animations_change(&koboldActor5.anim, 2, 0.5f);
+
+    koboldActor6.pos[0] = 80.0f;
+    koboldActor6.pos[1] = 0.0f;
+    koboldActor6.pos[2] = -160.0f;
+    koboldActor6.rot[1] = T3D_DEG_TO_RAD(20);
+    animations_change(&koboldActor6.anim, 2, 0.25f);
+
+    koboldActor7.pos[0] = -80.0f;
+    koboldActor7.pos[1] = 0.0f;
+    koboldActor7.pos[2] = 160.0f;
+    koboldActor7.rot[1] = T3D_DEG_TO_RAD(-160);
+    animations_change(&koboldActor7.anim, 2, 0.35f);
+
+    koboldActor8.pos[0] = -80.0f;
+    koboldActor8.pos[1] = 0.0f;
+    koboldActor8.pos[2] = -160.0f;
+    koboldActor8.rot[1] = T3D_DEG_TO_RAD(340);
+    animations_change(&koboldActor8.anim, 2, 0.45f);
+
+    //Putting the dragon stuff here too
+    dragonActor.scale[0] = 1.75f;
+    dragonActor.scale[1] = 1.75f;
+    dragonActor.scale[2] = 1.75f;
 
 
     actors[0] = dragonActor;
@@ -141,6 +209,12 @@ int stage_setup() {
     actors[2] = dynamoActor;
     actors[3] = koboldActor;
     actors[4] = koboldActor2;
+    actors[5] = koboldActor3;
+    actors[6] = koboldActor4;
+    actors[7] = koboldActor5;
+    actors[8] = koboldActor6;
+    actors[9] = koboldActor7;
+    actors[10] = koboldActor8;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
     dergVector = actor_get_pos_vec(&dragonActor);
@@ -162,6 +236,7 @@ int stage_setup() {
     camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
 
+    //Sprite loading for UI
     playBtnDownSprite = sprite_load("rom:/play-btn-down.sprite");
     playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
     trackBackSprite = sprite_load("rom:/track-back.sprite");
@@ -360,7 +435,7 @@ static void sine_text(const char* text, float speedFactor, float xOffset, float 
 static constexpr int charHeight = 8;
 static constexpr int margin = 8;
 static constexpr int fpsPos = charHeight*2;
-static constexpr int overScan = 38;
+static constexpr int overScan = 0;
 
 static void regular_prints() {
     int displayHeight = display_get_height();
@@ -407,13 +482,14 @@ static void regular_prints() {
     sine_text(xm.ctx->module.instruments[0].name, 2.0f, 56.0f ,  artistTitlePos, false);
     sine_text(xm_get_module_name(xm.ctx), 2.0f, 56.0f ,  musicTitlePos, false);
     rdpq_text_printf(nullptr, 3, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
-}
-
-
-
-static void debug_prints() {
     rdpq_text_printf(nullptr, 3, margin, fpsPos, "FPS: %.2f", display_get_fps());
 }
+
+
+
+//static void debug_prints() {
+//    rdpq_text_printf(nullptr, 3, /*margin*/ 220.0f, fpsPos, "FPS: %.2f", display_get_fps());
+//}
 
 static void draw_aabbs(Actor* curActor) {
     uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};

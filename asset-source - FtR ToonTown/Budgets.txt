@@ -1,0 +1,51 @@
+Keep to the general colours of FtR, anachronous elements are ok just keep the theme vibe there and keep the style consistent. Maybe cut down on the polys put in place for baked lighting, and add spot lighting via additive/multiplicative textures.
+
+General 'vibes'
+
+- ToonTown (NOT the Disney Game!)
+- Rubber hose animation
+- 1920s
+- flapper girl!
+- prohibition, underground poteen, secretive, SPEAKEASY.
+- ye olde queers? how did they do shit?
+- americana
+- opulence, wood and velvet
+- jazz fuckers. put dynamo in a zoot suit.
+- BIG BAND? give those/that dragon a/some trumpets.
+- Keep a balance!
+- Felix the cat!
+- That other cat that kept shagging people!
+- Fake Disney shit (check in with team)
+- Lackadaisical?
+- Cuphead?
+- Make it a little clowny?
+- Art deco
+
+Stage Budget sans Dynamo = 450
+- avoid large polygon overlap
+- reuse detail textures where possible.
+- allow for transformable elements (spinning decks, twitchy old projector, bouncing speakers)
+- Maybe get the video running?
+
+Dynamo = 750ish
+- sort out some of the gaps and optimise where possible.
+- zhoosh up the costume? Check with Mal.
+- switch animation to non interpolated.
+- attempt some form of cel shading (try Tiny3D's implementation, if that doesn't work, attempt reduced poly convex hull)
+
+Dragon = 450
+- add some bones for animation. rubber neck.
+- jazz ties.
+- toot.
+
+The kobolds = 128 PRECISELY.
+- can they have different hats?
+- small customised elements.
+
+To be done =
+- Bar area
+- Make the dressing area actually look like something.
+- add activity around the place.
+- improve windows and doors
+- add something to the photo stage
+- cloakroom?

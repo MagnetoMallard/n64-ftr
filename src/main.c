@@ -77,8 +77,15 @@ static void engine_init() {
     .interlaced = INTERLACE_HALF,
     .pal60 = true
   };
+    const resolution_t RESOLUTION_360x288_PAL = {
+    .width = 360,
+    .height = 288,
+    .interlaced = INTERLACE_OFF,
+    .pal60 = true,
+    .overscan_margin = VI_CRT_MARGIN
+  };
 
-  display_init(RESOLUTION_320x240_PAL, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
+  display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
   rdpq_init();
   timer_init();
   joypad_init();

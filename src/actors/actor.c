@@ -14,7 +14,7 @@ Actor actor_create(
     ActorDrawFunction actorDrawFunction
 ) {
     Actor actor = (Actor){
-        .pos = {0, 25, 50},
+        .pos = {0, 0, 0},//0,25,50
         .rot = {0, 0, 0},
         .scale = {1.0, 1.0, 1.0},
         .visible = true,
