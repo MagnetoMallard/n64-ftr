@@ -28,10 +28,10 @@ static Camera camera;
 static bool _cameraDirty;
 
 static float deltaTime = 0.0f;
-static float fogNear = 100.0f;
-static float fogFar = 250.0f;
+static float fogNear = 150.0f;
+static float fogFar = 300.0f;
 //static color_t fogColour = {70, 70, 70, 0xFF};
-static color_t fogColour = {80, 80, 125, 0xFF};
+static color_t fogColour = {87, 110, 168, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
@@ -144,7 +144,7 @@ int stage_setup() {
 
     //DJ
     dynamoActor.pos[0] = -340.0f;
-    dynamoActor.pos[1] = 10.0f;
+    dynamoActor.pos[1] = 50.0f;
     dynamoActor.pos[2] = -100.0f;
     dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
 
