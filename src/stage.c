@@ -31,7 +31,8 @@ static float deltaTime = 0.0f;
 static float fogNear = 150.0f;
 static float fogFar = 300.0f;
 //static color_t fogColour = {70, 70, 70, 0xFF};
-static color_t fogColour = {87, 110, 168, 0xFF};
+static color_t fogColour = {87, 110, 168, 0xFF}; //nice colour :)
+//static color_t fogColour = {255, 255, 255, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;

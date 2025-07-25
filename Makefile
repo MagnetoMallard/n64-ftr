@@ -39,7 +39,7 @@ filesystem/%.xm64: assets/%.XM
 filesystem/%.sprite: assets/%.png
 	@mkdir -p $(dir $@)
 	@echo "    [SPRITE] $@"
-	$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -o filesystem "$<"
+	$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -c 2 -o filesystem "$<"
 
 filesystem/%.t3dm:  assets/%.glb
 	@mkdir -p $(dir $@)
