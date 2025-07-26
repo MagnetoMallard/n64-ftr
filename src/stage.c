@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "stage.h"
 
-#define ACTORS_COUNT 11
+#define ACTORS_COUNT 13
 #define DIRECTIONAL_LIGHT_COUNT 2
 
 static Actor actors[ACTORS_COUNT];
@@ -107,6 +107,10 @@ int stage_setup() {
     Actor koboldActor = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor2 = create_actor_from_model("KoboldWithAnims");
 
+    //Init Usher Kobolds
+    Actor usherKoboldActor = create_actor_from_model("KoboldCelUsher");
+    Actor usherKoboldActor2 = create_actor_from_model("KoboldCelUsher");
+
     //Init Dancefloor Kobolds
     Actor koboldActor3 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor4 = create_actor_from_model("KoboldWithAnims");
@@ -126,6 +130,10 @@ int stage_setup() {
     //Colour Stage Kobolds
     kobold_init(&koboldActor, (color_t){255,255,255}, (color_t){255,0,0});
     kobold_init(&koboldActor2, (color_t){255,100,100}, (color_t){24,0,100});
+
+    //Colour Usher Kobolds
+    kobold_init(&usherKoboldActor, (color_t){255,200,255}, (color_t){255,0,100});
+    kobold_init(&usherKoboldActor2, (color_t){255,255,200}, (color_t){24,0,100});
 
     //Colour Dancefloor kobolds
     kobold_init(&koboldActor3, (color_t){0,100,100}, (color_t){0,100,100});
@@ -161,6 +169,19 @@ int stage_setup() {
     koboldActor2.pos[2] = -230.0f;
     koboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
     animations_change(&koboldActor2.anim, 1, 0.3f);
+
+    //Usher Kobolds
+    usherKoboldActor.pos[0] = 75.0f;
+    usherKoboldActor.pos[1] = 20.0f;
+    usherKoboldActor.pos[2] = 610.0f;
+    usherKoboldActor.rot[1] = T3D_DEG_TO_RAD(-100);
+    animations_change(&usherKoboldActor.anim, 3, 0.2f);
+
+    usherKoboldActor2.pos[0] = 75.0f;
+    usherKoboldActor2.pos[1] = 55.0f;
+    usherKoboldActor2.pos[2] = 680.0f;
+    usherKoboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&usherKoboldActor2.anim, 2, 0.25f);
 
     //Dancefloor Kobolds
     koboldActor3.pos[0] = 160.0f;
@@ -216,6 +237,8 @@ int stage_setup() {
     actors[8] = koboldActor6;
     actors[9] = koboldActor7;
     actors[10] = koboldActor8;
+    actors[11] = usherKoboldActor;
+    actors[12] = usherKoboldActor2;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
     dergVector = actor_get_pos_vec(&dragonActor);
