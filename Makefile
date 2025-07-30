@@ -16,7 +16,8 @@ assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
 			  $(addprefix filesystem/,$(notdir $(assets_ttf:%.ttf=%.font64))) \
 			  $(addprefix filesystem/,$(notdir $(assets_gltf:%.glb=%.t3dm))) \
 			  $(addprefix filesystem/,$(notdir $(assets_xm1:%.xm=%.xm64))) \
-			  $(addprefix filesystem/,$(notdir $(assets_xm2:%.XM=%.xm64)))
+			  $(addprefix filesystem/,$(notdir $(assets_xm2:%.XM=%.xm64))) \
+			  filesystem/video.m1v
 
 AUDIOCONV_FLAGS ?=
 
@@ -40,6 +41,11 @@ filesystem/%.sprite: assets/%.png
 	@mkdir -p $(dir $@)
 	@echo "    [SPRITE] $@"
 	$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -c 2 -o filesystem "$<"
+
+filesystem/video.m1v: assets/video.m1v
+	@mkdir -p $(dir $@)
+	@echo "    [VIDEO] $@"
+	cp assets/video.m1v filesystem/video.m1v
 
 filesystem/%.t3dm:  assets/%.glb
 	@mkdir -p $(dir $@)

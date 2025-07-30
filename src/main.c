@@ -109,27 +109,45 @@ static void inputs_update() {
 
 
 //Let's give some font loading a try here. Font ID 0 and 1 are already registered.
-static void load_fonts() {
+//Base fontstyles (0) are all white with black outlines.
+static void load_fonts()
+	{
+
+  //Main FTR font
   ftrFont = rdpq_font_load("rom:/STAN0753.font64");
   rdpq_text_register_font(3, ftrFont);
 
-  rdpq_font_t* fnt4 = rdpq_font_load("rom:/BitDotted.font64");
-  rdpq_text_register_font(4, fnt4);
+  	rdpq_font_style(ftrFont, 0, &(rdpq_fontstyle_t){
+      .color = RGBA32(225, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 0, 255),
+    });
 
-  //use the fonts with different colours, outlines, etc
-  rdpq_font_style(fnt4,
-                  0,
-                  &(rdpq_fontstyle_t){
-                    .color = RGBA32(255, 255, 0, 255),
-                    .outline_color = RGBA32(0, 0, 0, 255),
-                  }
-  );
+  	rdpq_font_style(ftrFont, 1, &(rdpq_fontstyle_t){
+      .color = RGBA32(100, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 100, 255),
+    });
 
-  rdpq_font_style(ftrFont,
-                  1,
-                  &(rdpq_fontstyle_t){
-                    .color = RGBA32(255, 255, 255, 255),
-                    .outline_color = RGBA32(0, 0, 0, 255),
-                  }
-  );
+  //Main FTR font, but skinny
+  ftrFontSkinny = rdpq_font_load("rom:/STAN0754.font64");
+  rdpq_text_register_font(4, ftrFontSkinny);
+
+    rdpq_font_style(ftrFontSkinny, 0, &(rdpq_fontstyle_t){
+      .color = RGBA32(225, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 0, 255),
+    });
+
+    rdpq_font_style(ftrFontSkinny, 1, &(rdpq_fontstyle_t){
+      .color = RGBA32(225, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 0, 255),
+    });
+
+  //BitDotted
+  bitDotted = rdpq_font_load("rom:/BitDotted.font64");
+  rdpq_text_register_font(5, bitDotted);
+
+   	rdpq_font_style(bitDotted, 0, &(rdpq_fontstyle_t){
+      .color = RGBA32(225, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 0, 255),
+    });
+
 }

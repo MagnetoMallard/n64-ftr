@@ -28,5 +28,7 @@ extern joypad_inputs_t inputs;
 extern joypad_buttons_t btnsUp;
 extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
-extern rdpq_font_t* ftrFont;
+extern rdpq_font_t *ftrFont;
+extern rdpq_font_t *bitDotted;
+extern rdpq_font_t *ftrFontSkinny;
 #endif //GLOBALS_H
