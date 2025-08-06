@@ -12,7 +12,7 @@ uint16_t currentPeak;
 // externs
 xm64player_t xm;
 char* songs[SONG_COUNT];
-enum GameSate musicState = HOLDLOOP;
+enum GameState musicState = HOLDLOOP;
 
 // private
 static enum AudioFxPreset audioMixerMasterFx = NONE;

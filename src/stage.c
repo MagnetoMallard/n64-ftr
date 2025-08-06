@@ -1,6 +1,7 @@
 
 #include "../libs/libxm/xm.h"
 #include "../libs/libxm/xm_internal.h"
+#include <libdragon.h>
 
 // Helpers
 #include "helpers/debug_draw.h"
@@ -43,21 +44,27 @@ static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {100, 100, 100, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
-rdpq_font_t* bitDotted;
+rdpq_font_t* V5PRC___;
 rdpq_font_t* ftrFontSkinny;
+rdpq_font_t* ftrFontBig;
 surface_t* disp;
+
+int randintx = 0;
+int randinty = 0;
+int* randx = &randintx;
+int* randy = &randinty;
 
 static LightBehaviour lightBehaviourArray[3] = {
 {
-    .name = "synced traffic light",
+    .name = "Synced Traffic Light",
     .updateFunction = &light_update_traffic_light_xm
     },
 {
-    .name = "synced tekno strobe",
+    .name = "Synced Tekno Strobe",
     .updateFunction = &light_update_xm_tekno_strobe
     },
 {
-    .name = "mono volume follow",
+    .name = "Mono Volume Follow",
     .updateFunction = &light_update_vol_follow
     },
 };
@@ -70,15 +77,17 @@ static void debug_prints();
 static void regular_prints();
 static void draw_aabbs(Actor* curActor);
 
+void text_box(const char text, int box_screenpos_x, int box_screenpos_y);
+
 static void check_aabbs(Actor *curActor);
-static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
+//static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
 static sprite_t* playBtnUpSprite;
 static sprite_t* playBtnDownSprite;
 static sprite_t* trackBackSprite;
 static sprite_t* trackFwdSprite;
-//static sprite_t* koboldPoliceTape;
-//static sprite_t* koboldShortTape;
+static sprite_t* dragonBackdrop;
+static sprite_t* transBG1;
 static rspq_block_t* hudBlock;
 
 // ==== PUBLIC ====
@@ -267,15 +276,20 @@ int stage_setup() {
     playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
     trackBackSprite = sprite_load("rom:/track-back.sprite");
     trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
-    //koboldPoliceTape =sprite_load("rom:/kobold-police-tape.sprite");
-    //koboldShortTape =sprite_load("rom:/kob.sprite");
+    transBG1 = sprite_load("rom:/TransBG1.sprite");
+    dragonBackdrop =sprite_load("rom:/TestImageDragon3.sprite");
 
     return 1;
 }
 
-void stage_take_input(enum GameSate passedGameState) {
+void stage_take_input(enum GameState passedGameState) {
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
+        for (int i=1;i<360;i++){
+          int randintx = rand();
+          int randinty = rand();
+          return;
+          }
     }
 
     if (passedGameState == STAGE) {
@@ -292,7 +306,7 @@ void stage_take_input(enum GameSate passedGameState) {
 
 }
 
-void stage_render_frame(enum GameSate passedGameState) {
+void stage_render_frame(enum GameState passedGameState) {
     // ======== Update
     deltaTime = display_get_delta_time();
     spinTimer += deltaTime;
@@ -362,12 +376,33 @@ void stage_render_frame(enum GameSate passedGameState) {
    // debug_prints();
 
     if (passedGameState == PAUSED) {
-        sine_text("PAUSED!", 16.0f, 112.0f, 96.0f, false );
+
+      rdpq_mode_push();
+      rdpq_set_mode_standard();
+      rdpq_mode_blender(RDPQ_BLENDER_ADDITIVE);
+      rdpq_sprite_blit(dragonBackdrop,0,0,NULL);
+      rdpq_mode_pop();
+
+      text_box(
+          "Non dolores est esse dolore. Ut quia dolorem id commodi dignissimos soluta. Dolore eum atque quia enim suscipit. Fuga repellendus quis soluta quia autem adipisci reiciendis veritatis. Molestiae debitis aliquid iste iusto.",
+          *randx,
+          *randy
+          );
+
+        rdpq_text_printf(
+          &(rdpq_textparms_t){
+              .width = display_get_width()-16,
+              .height = display_get_height()-16,
+              .align = ALIGN_CENTER,
+              .valign = VALIGN_CENTER,
+        }, 6, 16, 16, "You've pressed pause.\nPress START to unpause.");
+
     }
 
     rdpq_detach_show();
     // </Draw>
 }
+
 
 void stage_teardown() {
     for (int i = 0; i < ACTORS_COUNT; i++) {
@@ -377,11 +412,42 @@ void stage_teardown() {
     sprite_free(trackBackSprite);
     sprite_free(playBtnDownSprite);
     sprite_free(playBtnUpSprite);
-    //sprite_free(koboldPoliceTape);
+    sprite_free(dragonBackdrop);
+    sprite_free(transBG1);
     //sprite_free(koboldShortTape);
 }
 
+
+
 // ==== PRIVATE ====
+
+
+//Generate a random text box somewhere in the screen
+void text_box(const char *text, int box_screenpos_x, int box_screenpos_y) {
+
+  int	res_x = 320;
+  int 	res_y = 240;
+  int	box_width = 200;
+  int	box_height = 50;
+  int	border = 4;
+
+  rdpq_set_mode_fill(RGBA32(128,50,128,255));
+  rdpq_fill_rectangle(
+      box_screenpos_x,
+      box_screenpos_y,
+      box_screenpos_x + box_width,
+      box_screenpos_y + box_height
+  );
+  rdpq_text_printf(&(rdpq_textparms_t) {
+      .width = box_width - border*2,
+      .height = box_height - border*2,
+      .align = ALIGN_LEFT,
+      .valign = VALIGN_CENTER,
+      .wrap = WRAP_WORD,
+      .line_spacing = 1
+      }, 4, box_screenpos_x + border, box_screenpos_y + border, text);
+
+};
 
 static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
@@ -436,31 +502,34 @@ static void check_aabbs(Actor *curActor) {
 
 
 
-static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
-    int strLen = strlen(text);
 
-    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
+//static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
+//    int strLen = strlen(text);
+//
+//    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
+//
+//    for (int i = 0; i < strLen; i++) {
+//        rdpq_font_style(bitDotted, 0, &(rdpq_fontstyle_t){
+//          .color = RGBA32(187,244,139,255),
+//          .outline_color = RGBA32(0,0,0,255),
+//          //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
+//        });
+//        rdpq_text_printn(
+//        &(rdpq_textparms_t) {
+//            .style_id = 0,
+//        },
+//        5,
+//        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
+//        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
+//        &text[i], 1);
+//    }
+//
+//}
 
-    for (int i = 0; i < strLen; i++) {
-        rdpq_font_style(ftrFontSkinny, 4, &(rdpq_fontstyle_t){
-          .color = RGBA32(187,244,139,255), hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
-        });
-        rdpq_text_printn(
-        &(rdpq_textparms_t) {
-            .style_id = 1,
-        },
-        4,
-        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
-        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
-        &text[i], 1);
-    }
-
-}
-
-static constexpr int charHeight = 8;
-static constexpr int margin = 8;
-static constexpr int fpsPos = charHeight*2;
-static constexpr int overScan = 0;
+static const int charHeight = 8;
+static int margin = 8;
+static int fpsPos = charHeight*2;
+static int overScan = 0;
 
 static void regular_prints() {
     int displayHeight = display_get_height();
@@ -468,26 +537,53 @@ static void regular_prints() {
     int musicTitlePos = displayHeight - charHeight*4 - overScan;
     int artistTitlePos = displayHeight - charHeight*6 - overScan;
     int tapePos = displayHeight - 26 - overScan;
-    int btnPos = displayHeight - 64 - overScan;
+    int btnPos = displayHeight - 40 - overScan;
 
-    rdpq_set_mode_copy(true);
     rdpq_mode_push();
-    rdpq_mode_tlut(TLUT_RGBA16);
-
-
-    rdpq_sprite_blit(trackBackSprite, 16, btnPos, nullptr );
-    rdpq_sprite_blit(trackFwdSprite,272, btnPos, nullptr );
     rdpq_set_mode_standard();
-    rdpq_mode_filter(FILTER_POINT);
-    rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
+    rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
+    rdpq_sprite_blit(transBG1,0, btnPos, NULL);
+    rdpq_set_mode_copy(true);
+    rdpq_sprite_blit(trackBackSprite, 16, btnPos, NULL);
+    rdpq_sprite_blit(trackFwdSprite,272, btnPos, NULL);
+    //rdpq_set_mode_standard();
+    //rdpq_mode_filter(FILTER_POINT);
+    //rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
     rdpq_mode_pop();
 
-   sine_text(xm.ctx->module.instruments[0].name, 2.0f, 56.0f ,  artistTitlePos, false);
-   sine_text(xm_get_module_name(xm.ctx), 2.0f, 56.0f ,  musicTitlePos, false);
+//   sine_text(xm.ctx->module.instruments[0].name, 2.0f, 56.0f ,  artistTitlePos, false);
+//   sine_text(xm_get_module_name(xm.ctx), 2.0f, 56.0f ,  musicTitlePos, false);
 
 
-    rdpq_text_printf(nullptr, 4, 220.0f ,  fpsPos, lightBehaviourArray[lightBehaviourIndex].name);
-    rdpq_text_printf(nullptr, 4, margin, fpsPos, "FPS: %.2f", display_get_fps());
+    rdpq_text_printf(
+        &(rdpq_textparms_t){
+            .width = 320-margin,
+            .height = 32,
+            .align = ALIGN_RIGHT,
+            .valign = VALIGN_TOP,
+        }, 4, 0, margin, lightBehaviourArray[lightBehaviourIndex].name);
+    rdpq_text_printf(
+        &(rdpq_textparms_t){
+            .width = 320,
+            .height = 32,
+            .align = ALIGN_LEFT,
+            .valign = VALIGN_TOP,
+        }, 4, margin, margin, "Speedicity: %.0f", display_get_fps());
+    rdpq_text_printf(
+        &(rdpq_textparms_t){
+			.width = 320,
+            .height = 32,
+            .align = ALIGN_CENTER,
+            .valign = VALIGN_TOP,
+		}, 5, 0, 200, xm.ctx->module.instruments[0].name);
+     rdpq_text_printf(
+        &(rdpq_textparms_t){
+			.width = 320,
+            .height = 32,
+            .align = ALIGN_CENTER,
+            .valign = VALIGN_BOTTOM,
+		}, 5, 0, 200, xm_get_module_name(xm.ctx));
+
 }
 
 

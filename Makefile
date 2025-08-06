@@ -11,23 +11,41 @@ assets_png = $(wildcard assets/*.png)
 assets_gltf = $(wildcard assets/*.glb)
 assets_xm1 = $(wildcard assets/*.xm)
 assets_xm2 = $(wildcard assets/*.XM)
-assets_ttf = $(wildcard assets/*.ttf)
+assets_ttf1 = $(wildcard assets/STAN0754.ttf)
+assets_ttf2 = $(wildcard assets/STAN0753.ttf)
+assets_ttf3 = $(wildcard assets/V5PRC___.ttf)
+assets_ttf4 = $(wildcard assets/STAN0753big.ttf)
 assets_conv = $(addprefix filesystem/,$(notdir $(assets_png:%.png=%.sprite))) \
-			  $(addprefix filesystem/,$(notdir $(assets_ttf:%.ttf=%.font64))) \
 			  $(addprefix filesystem/,$(notdir $(assets_gltf:%.glb=%.t3dm))) \
 			  $(addprefix filesystem/,$(notdir $(assets_xm1:%.xm=%.xm64))) \
 			  $(addprefix filesystem/,$(notdir $(assets_xm2:%.XM=%.xm64))) \
-			  filesystem/video.m1v
+			  $(addprefix filesystem/,$(notdir $(assets_ttf1:STAN0754.ttf=STAN0754.font64))) \
+			  $(addprefix filesystem/,$(notdir $(assets_ttf2:STAN0753.ttf=STAN0753.font64))) \
+			  $(addprefix filesystem/,$(notdir $(assets_ttf3:V5PRC___.ttf=V5PRC___.font64))) \
+			  $(addprefix filesystem/,$(notdir $(assets_ttf4:STAN0753big.ttf=STAN0753big.font64))) \
+			  filesystem/video.m1v \
 
 AUDIOCONV_FLAGS ?=
 
 all: ftrCart.z64
 
 #Sizes for fonts are FTR=8 and Dot=10, change only in values of x2 for pixel perfection
-filesystem/%.font64: assets/%.ttf
+filesystem/STAN0754.font64: assets/STAN0754.ttf
 	@mkdir -p $(dir $@)
 	@echo "    [FONT] $@"
 	$(N64_MKFONT) --monochrome --outline 1 --size 8 $(MKFONT_FLAGS) -o filesystem "$<"
+filesystem/STAN0753.font64: assets/STAN0753.ttf
+	@mkdir -p $(dir $@)
+	@echo "    [FONT] $@"
+	$(N64_MKFONT) --monochrome --outline 1 --size 8 $(MKFONT_FLAGS) -o filesystem "$<"
+filesystem/V5PRC___.font64: assets/V5PRC___.ttf
+	@mkdir -p $(dir $@)
+	@echo "    [FONT] $@"
+	$(N64_MKFONT) --size 19 --outline 1 --monochrome $(MKFONT_FLAGS) -o filesystem "$<"
+filesystem/STAN0753big.font64: assets/STAN0753big.ttf
+	@mkdir -p $(dir $@)
+	@echo "    [FONT] $@"
+	$(N64_MKFONT) --monochrome --outline 2 --size 16 $(MKFONT_FLAGS) -o filesystem "$<"
 filesystem/%.xm64: assets/%.xm
 	@mkdir -p $(dir $@)
 	@echo "    [AUDIO] $@"
@@ -36,17 +54,14 @@ filesystem/%.xm64: assets/%.XM
 	@mkdir -p $(dir $@)
 	@echo "    [AUDIO] $@"
 	@$(N64_AUDIOCONV) $(AUDIOCONV_FLAGS) -o filesystem "$<"
-
 filesystem/%.sprite: assets/%.png
 	@mkdir -p $(dir $@)
 	@echo "    [SPRITE] $@"
 	$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -c 2 -o filesystem "$<"
-
 filesystem/video.m1v: assets/video.m1v
 	@mkdir -p $(dir $@)
 	@echo "    [VIDEO] $@"
 	cp assets/video.m1v filesystem/video.m1v
-
 filesystem/%.t3dm:  assets/%.glb
 	@mkdir -p $(dir $@)
 	@echo "    [T3D-MODEL] $@"

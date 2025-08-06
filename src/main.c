@@ -5,6 +5,8 @@
 #include "stage.h"
 #include "audio/audio_playback.h"
 
+enum GameState gameState = STAGE;
+
 float get_time_s() { return (float) ((double) get_ticks_ms() / 1000.0); }
 
 static void engine_init();
@@ -12,7 +14,7 @@ static void engine_teardown();
 static void inputs_update();
 static void load_fonts();
 
-enum GameSate gameState = STAGE;
+
 
 joypad_inputs_t inputs;
 joypad_buttons_t btnsUp;
@@ -86,11 +88,12 @@ static void engine_init() {
   };
 
   display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
-  display_set_fps_limit(30);
+  display_set_fps_limit(60);
   rdpq_init();
   timer_init();
   joypad_init();
   timer_init(); // needed for hashmaps!
+  yuv_init();
   debug_init_isviewer();
   t3d_init((T3DInitParams){});
   rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO));
@@ -141,13 +144,26 @@ static void load_fonts()
       .outline_color = RGBA32(0, 0, 0, 255),
     });
 
-  //BitDotted
-  bitDotted = rdpq_font_load("rom:/BitDotted.font64");
-  rdpq_text_register_font(5, bitDotted);
+  //V5PRC___
+  V5PRC___ = rdpq_font_load("rom:/V5PRC___.font64");
+  rdpq_text_register_font(5, V5PRC___);
 
-   	rdpq_font_style(bitDotted, 0, &(rdpq_fontstyle_t){
+   	rdpq_font_style(V5PRC___, 0, &(rdpq_fontstyle_t){
+      .color = RGBA32(255, 255, 0, 255),
+    });
+
+  //Main FTR font but BIG.
+  ftrFontBig = rdpq_font_load("rom:/STAN0753big.font64");
+  rdpq_text_register_font(6, ftrFontBig);
+
+  	rdpq_font_style(ftrFontBig, 0, &(rdpq_fontstyle_t){
       .color = RGBA32(225, 255, 255, 255),
       .outline_color = RGBA32(0, 0, 0, 255),
+    });
+
+  	rdpq_font_style(ftrFontBig, 1, &(rdpq_fontstyle_t){
+      .color = RGBA32(100, 255, 255, 255),
+      .outline_color = RGBA32(0, 0, 100, 255),
     });
 
 }
