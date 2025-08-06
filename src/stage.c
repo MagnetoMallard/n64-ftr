@@ -49,10 +49,10 @@ rdpq_font_t* ftrFontSkinny;
 rdpq_font_t* ftrFontBig;
 surface_t* disp;
 
-int randintx = 0;
-int randinty = 0;
-int* randx = &randintx;
-int* randy = &randinty;
+static int boxWidth = 200;
+static int boxHeight = 50;
+static int textBoxPosX;
+static int textBoxPosY;
 
 static LightBehaviour lightBehaviourArray[3] = {
 {
@@ -70,14 +70,14 @@ static LightBehaviour lightBehaviourArray[3] = {
 };
 
 static int lightBehaviourIndex = 0;
+static int* lightPointer = &lightBehaviourIndex;
 
 static void t3d_draw_update(T3DViewport *viewport);
 
 static void debug_prints();
 static void regular_prints();
+static void text_box(const char* text, int boxScreenposX, int boxScreenposY);
 static void draw_aabbs(Actor* curActor);
-
-void text_box(const char text, int box_screenpos_x, int box_screenpos_y);
 
 static void check_aabbs(Actor *curActor);
 //static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
@@ -88,6 +88,7 @@ static sprite_t* trackBackSprite;
 static sprite_t* trackFwdSprite;
 static sprite_t* dragonBackdrop;
 static sprite_t* transBG1;
+
 static rspq_block_t* hudBlock;
 
 // ==== PUBLIC ====
@@ -129,6 +130,9 @@ int stage_setup() {
     Actor koboldActor6 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
+
+    textBoxPosX = rand() % (display_get_width() - boxWidth);
+    textBoxPosY = rand() % (display_get_height() - boxHeight);
 
     //I don't know why this is here but honestly I'm scared to move it at this point.
     dynamo_init();
@@ -236,7 +240,6 @@ int stage_setup() {
     dragonActor.scale[1] = 1.75f;
     dragonActor.scale[2] = 1.75f;
 
-
     actors[0] = dragonActor;
     actors[1] = stageActor;
     actors[2] = dynamoActor;
@@ -285,11 +288,8 @@ int stage_setup() {
 void stage_take_input(enum GameState passedGameState) {
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
-        for (int i=1;i<360;i++){
-          int randintx = rand();
-          int randinty = rand();
-          return;
-          }
+        textBoxPosX = rand() % (display_get_width() - boxWidth);
+        textBoxPosY = rand() % (display_get_width() - boxHeight);
     }
 
     if (passedGameState == STAGE) {
@@ -377,26 +377,25 @@ void stage_render_frame(enum GameState passedGameState) {
 
     if (passedGameState == PAUSED) {
 
-      rdpq_mode_push();
-      rdpq_set_mode_standard();
-      rdpq_mode_blender(RDPQ_BLENDER_ADDITIVE);
-      rdpq_sprite_blit(dragonBackdrop,0,0,NULL);
-      rdpq_mode_pop();
+        rdpq_mode_push();
+        rdpq_set_mode_standard();
+        rdpq_mode_blender(RDPQ_BLENDER_ADDITIVE);
+        rdpq_sprite_blit(dragonBackdrop,0,0,NULL);
+        rdpq_mode_pop();
 
-      text_box(
-          "Non dolores est esse dolore. Ut quia dolorem id commodi dignissimos soluta. Dolore eum atque quia enim suscipit. Fuga repellendus quis soluta quia autem adipisci reiciendis veritatis. Molestiae debitis aliquid iste iusto.",
-          *randx,
-          *randy
-          );
+        text_box(
+            "Non dolores est esse dolore. Ut quia dolorem id commodi dignissimos soluta. Dolore eum atque quia enim suscipit. Fuga repellendus quis soluta quia autem adipisci reiciendis veritatis. Molestiae debitis aliquid iste iusto.",
+            textBoxPosX,
+            textBoxPosY
+        );
 
         rdpq_text_printf(
-          &(rdpq_textparms_t){
-              .width = display_get_width()-16,
-              .height = display_get_height()-16,
-              .align = ALIGN_CENTER,
-              .valign = VALIGN_CENTER,
-        }, 6, 16, 16, "You've pressed pause.\nPress START to unpause.");
-
+            &(rdpq_textparms_t){
+                .width = display_get_width() - 16,
+                .height = display_get_height() - 16,
+                .align = ALIGN_CENTER,
+                .valign = VALIGN_CENTER,
+            }, 6, 16, 16, "You've pressed pause.\nPress START to unpause.");
     }
 
     rdpq_detach_show();
@@ -423,30 +422,25 @@ void stage_teardown() {
 
 
 //Generate a random text box somewhere in the screen
-void text_box(const char *text, int box_screenpos_x, int box_screenpos_y) {
+static void text_box(const char *text, int boxScreenposX, int boxScreenposY) {
+    int border = 4;
 
-  int	res_x = 320;
-  int 	res_y = 240;
-  int	box_width = 200;
-  int	box_height = 50;
-  int	border = 4;
+    rdpq_set_mode_fill(RGBA32(128,50,128,255));
+    rdpq_fill_rectangle(
+        boxScreenposX,
+        boxScreenposY,
+        boxScreenposX + boxWidth,
+        boxScreenposY + boxHeight
+    );
 
-  rdpq_set_mode_fill(RGBA32(128,50,128,255));
-  rdpq_fill_rectangle(
-      box_screenpos_x,
-      box_screenpos_y,
-      box_screenpos_x + box_width,
-      box_screenpos_y + box_height
-  );
-  rdpq_text_printf(&(rdpq_textparms_t) {
-      .width = box_width - border*2,
-      .height = box_height - border*2,
-      .align = ALIGN_LEFT,
-      .valign = VALIGN_CENTER,
-      .wrap = WRAP_WORD,
-      .line_spacing = 1
-      }, 4, box_screenpos_x + border, box_screenpos_y + border, text);
-
+    rdpq_text_printf(&(rdpq_textparms_t) {
+        .width = boxWidth - border*2,
+        .height = boxHeight - border*2,
+        .align = ALIGN_LEFT,
+        .valign = VALIGN_CENTER,
+        .wrap = WRAP_WORD,
+        .line_spacing = 1
+    }, 4, boxScreenposX + border, boxScreenposY + border, text);
 };
 
 static void t3d_draw_update(T3DViewport *viewport) {
@@ -479,7 +473,6 @@ static void check_aabbs(Actor *curActor) {
                                                curActor->t3dModel->aabbMax);
 
     if (curActor->visible) {
-
         T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
         while (t3d_model_iter_next(&it)) {
             // Skip fine checks for animated models
@@ -503,33 +496,34 @@ static void check_aabbs(Actor *curActor) {
 
 
 
-//static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
-//    int strLen = strlen(text);
-//
-//    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
-//
-//    for (int i = 0; i < strLen; i++) {
-//        rdpq_font_style(bitDotted, 0, &(rdpq_fontstyle_t){
-//          .color = RGBA32(187,244,139,255),
-//          .outline_color = RGBA32(0,0,0,255),
-//          //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
-//        });
-//        rdpq_text_printn(
-//        &(rdpq_textparms_t) {
-//            .style_id = 0,
-//        },
-//        5,
-//        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
-//        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
-//        &text[i], 1);
-//    }
-//
-//}
+static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
+    unsigned int strLen = strlen(text);
+
+    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
+
+    for (int i = 0; i < strLen; i++) {
+        rdpq_font_style(ftrFontBig, 0, &(rdpq_fontstyle_t){
+          .color = RGBA32(187,244,139,255),
+          .outline_color = RGBA32(0,0,0,255),
+          //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
+        });
+        rdpq_text_printn(
+        &(rdpq_textparms_t) {
+            .style_id = 0,
+        },
+        5,
+        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
+        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
+        &text[i], 1);
+    }
+
+}
 
 static const int charHeight = 8;
 static int margin = 8;
 static int fpsPos = charHeight*2;
 static int overScan = 0;
+
 
 static void regular_prints() {
     int displayHeight = display_get_height();
