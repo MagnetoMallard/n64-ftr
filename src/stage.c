@@ -49,10 +49,25 @@ rdpq_font_t* ftrFontSkinny;
 rdpq_font_t* ftrFontBig;
 surface_t* disp;
 
-static int boxWidth = 200;
-static int boxHeight = 50;
+static int boxWidth = 140;
+static int boxHeight = 38;
 static int textBoxPosX;
 static int textBoxPosY;
+
+//---SOME TEST THINGS FOR THE TEXT SYSTEM---
+typedef struct{
+    char speakerName[11];
+    char speakerText[141];
+}textSystems;
+
+textSystems kob[3];
+textSystems dyn[4];
+textSystems rnb[4];
+
+int textSegment = 1;
+int swc = 0;//for the switch statement
+    //segments of 140 chars each, how many segments, which character
+//---OK BACK TO NORMALITY---
 
 static LightBehaviour lightBehaviourArray[3] = {
 {
@@ -76,7 +91,8 @@ static void t3d_draw_update(T3DViewport *viewport);
 
 static void debug_prints();
 static void regular_prints();
-static void text_box(const char* text, int boxScreenposX, int boxScreenposY);
+//static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
+static void text_box(int textSegment, int boxScreenposX, int boxScreenposY);
 static void draw_aabbs(Actor* curActor);
 
 static void check_aabbs(Actor *curActor);
@@ -131,8 +147,8 @@ int stage_setup() {
     Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
 
-    textBoxPosX = rand() % (display_get_width() - boxWidth);
-    textBoxPosY = rand() % (display_get_height() - boxHeight);
+	textBoxPosX = rand() % ((display_get_width() - boxWidth));
+	textBoxPosY = rand() % ((display_get_height() - boxHeight));
 
     //I don't know why this is here but honestly I'm scared to move it at this point.
     dynamo_init();
@@ -283,13 +299,67 @@ int stage_setup() {
     dragonBackdrop =sprite_load("rom:/TestImageDragon3.sprite");
 
     return 1;
-}
+
+    //---IT'S TEXT BABY---
+//switch (textSegment){
+//  case 1:
+//  do {
+//    printf("%s\n", kob[swc].speakerName);
+//    printf("%s\n", kob[swc].speakerText);
+//    swc++;
+//    }
+//    while (swc < 3);
+//    break;
+//  case 2:
+//  do {
+//    printf("%s\n", dyn[swc].speakerName);
+//    printf("%s\n", dyn[swc].speakerText);
+//    swc++;
+//    }
+//    while (swc < 4);
+//    break;
+//  case 3:
+//  do {
+//    printf("%s\n", rnb[swc].speakerName);
+//    printf("%s\n", rnb[swc].speakerText);
+//    swc++;
+//    }
+//    while (swc < 4);
+//    break;
+//  default:
+//    printf("Something is wrong, fuckface!");
+//    break;
+//    }
+//    return 0;
+};
+
+textSystems kob[3] = {
+    {"Kobold", "i fukkin eat rocks and u cant stop me"},
+    {"Kobold", "wait is this u stoppin me?"},
+    {"Kobold", "well that fukin SUCKs..."}
+};
+
+textSystems dyn[4] = {
+    {"Dynamo", "[Doing things]"},
+    {"Dynamo", "[Still doing things]"},
+    {"Dynamo", "*stares at u*"},
+    {"Dynamo", "Oh hey there lil guy! :) always nice to meet a fan! :)"}
+};
+
+textSystems rnb[4] = {
+    {"Redd & Blu", "*absolutely filled to the brim with girlish glee*"},
+    {"Redd", "THIS IS THE BEST NIGHT OF LIFE."},
+    {"Blu", "CONTINUE TO DANCE LEST YE INCUR OUR WRATH, MORTAL."},
+    {"Redd & Blu", "WHEEEEEEEE! HOORAY! :)"}
+};
+//---DONE WITH THE TEXT NOW--
+
 
 void stage_take_input(enum GameState passedGameState) {
     if (btnsPressed.start) {
         gameState = gameState == STAGE ? PAUSED : STAGE;
-        textBoxPosX = rand() % (display_get_width() - boxWidth);
-        textBoxPosY = rand() % (display_get_width() - boxHeight);
+        textBoxPosX = rand() % ((display_get_width() - boxWidth));
+        textBoxPosY = rand() % ((display_get_height() - boxHeight));
     }
 
     if (passedGameState == STAGE) {
@@ -375,6 +445,7 @@ void stage_render_frame(enum GameState passedGameState) {
     regular_prints();
    // debug_prints();
 
+
     if (passedGameState == PAUSED) {
 
         rdpq_mode_push();
@@ -383,11 +454,7 @@ void stage_render_frame(enum GameState passedGameState) {
         rdpq_sprite_blit(dragonBackdrop,0,0,NULL);
         rdpq_mode_pop();
 
-        text_box(
-            "Non dolores est esse dolore. Ut quia dolorem id commodi dignissimos soluta. Dolore eum atque quia enim suscipit. Fuga repellendus quis soluta quia autem adipisci reiciendis veritatis. Molestiae debitis aliquid iste iusto.",
-            textBoxPosX,
-            textBoxPosY
-        );
+
 
         rdpq_text_printf(
             &(rdpq_textparms_t){
@@ -396,11 +463,24 @@ void stage_render_frame(enum GameState passedGameState) {
                 .align = ALIGN_CENTER,
                 .valign = VALIGN_CENTER,
             }, 6, 16, 16, "You've pressed pause.\nPress START to unpause.");
+
+        text_box(kob[swc].speakerText, kob[swc].speakerName, textBoxPosX, textBoxPosY);
+
+        if (btnsUp.a) {
+          swc++;
+        }
+        else if (swc >=4) {
+          swc = 0;
+          gameState = STAGE;
+          }
+
     }
 
     rdpq_detach_show();
     // </Draw>
 }
+
+
 
 
 void stage_teardown() {
@@ -422,9 +502,16 @@ void stage_teardown() {
 
 
 //Generate a random text box somewhere in the screen
-static void text_box(const char *text, int boxScreenposX, int boxScreenposY) {
+//static void text_box(const char *textCont, const char *textName, int boxScreenposX, int boxScreenposY) {
+static void text_box(int textSegment, int boxScreenposX, int boxScreenposY) {
     int border = 4;
 
+//    typedef struct{
+//    char speakerName[11];
+//    char speakerText[141];
+//}textSystems;
+
+    //text bg
     rdpq_set_mode_fill(RGBA32(128,50,128,255));
     rdpq_fill_rectangle(
         boxScreenposX,
@@ -432,15 +519,31 @@ static void text_box(const char *text, int boxScreenposX, int boxScreenposY) {
         boxScreenposX + boxWidth,
         boxScreenposY + boxHeight
     );
+    //namebox bg
+    rdpq_set_mode_fill(RGBA32(128+100,50+100,128+100,255));
+    rdpq_fill_rectangle(
+        boxScreenposX,
+        boxScreenposY -10,
+        boxScreenposX + (boxWidth/2),
+        boxScreenposY
+    );
+
+    rdpq_text_printf(&(rdpq_textparms_t) {
+		.width = boxWidth,
+        .height = boxHeight,
+        .align = ALIGN_LEFT,
+        .valign = VALIGN_TOP,
+    }, 4, boxScreenposX + border, boxScreenposY - 8, textName);//this isn't right, but it works for now.
 
     rdpq_text_printf(&(rdpq_textparms_t) {
         .width = boxWidth - border*2,
         .height = boxHeight - border*2,
         .align = ALIGN_LEFT,
-        .valign = VALIGN_CENTER,
+        .valign = VALIGN_TOP,
         .wrap = WRAP_WORD,
         .line_spacing = 1
-    }, 4, boxScreenposX + border, boxScreenposY + border, text);
+    }, 4, boxScreenposX + border, boxScreenposY + border, textCont);
+
 };
 
 static void t3d_draw_update(T3DViewport *viewport) {
