@@ -1,4 +1,3 @@
-
 #include "../libs/libxm/xm.h"
 #include "../libs/libxm/xm_internal.h"
 #include <libdragon.h>
@@ -20,6 +19,7 @@
 
 #include "globals.h"
 #include "stage.h"
+#include "dialogue.h"
 
 #define ACTORS_COUNT 13
 #define DIRECTIONAL_LIGHT_COUNT 2
@@ -54,48 +54,38 @@ static int boxHeight = 38;
 static int textBoxPosX;
 static int textBoxPosY;
 
-//---SOME TEST THINGS FOR THE TEXT SYSTEM---
-typedef struct{
-    char speakerName[11];
-    char speakerText[141];
-}textSystems;
-
-textSystems kob[3];
-textSystems dyn[4];
-textSystems rnb[4];
 
 int textSegment = 1;
-int swc = 0;//for the switch statement
-    //segments of 140 chars each, how many segments, which character
+int koboldDialogueCounter = 0; //for the switch statement
+//segments of 140 chars each, how many segments, which character
 //---OK BACK TO NORMALITY---
 
 static LightBehaviour lightBehaviourArray[3] = {
-{
-    .name = "Synced Traffic Light",
-    .updateFunction = &light_update_traffic_light_xm
+    {
+        .name = "Synced Traffic Light",
+        .updateFunction = &light_update_traffic_light_xm
     },
-{
-    .name = "Synced Tekno Strobe",
-    .updateFunction = &light_update_xm_tekno_strobe
+    {
+        .name = "Synced Tekno Strobe",
+        .updateFunction = &light_update_xm_tekno_strobe
     },
-{
-    .name = "Mono Volume Follow",
-    .updateFunction = &light_update_vol_follow
+    {
+        .name = "Mono Volume Follow",
+        .updateFunction = &light_update_vol_follow
     },
 };
 
 static int lightBehaviourIndex = 0;
 static int* lightPointer = &lightBehaviourIndex;
 
-static void t3d_draw_update(T3DViewport *viewport);
+static void t3d_draw_update(T3DViewport* viewport);
 
 static void debug_prints();
 static void regular_prints();
 //static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
-static void text_box(int textSegment, int boxScreenposX, int boxScreenposY);
 static void draw_aabbs(Actor* curActor);
 
-static void check_aabbs(Actor *curActor);
+static void check_aabbs(Actor* curActor);
 //static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
 static sprite_t* playBtnUpSprite;
@@ -120,7 +110,7 @@ int stage_setup() {
     pointLightOne.lightUpdateFunction = lightBehaviourArray[0].updateFunction;
 
     uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
-    T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f }};
+    T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f}};
     Light pointLightTwo = light_create(colorDir2, lightDirVec2, false);
 
     directionalLights[0] = pointLightOne;
@@ -147,8 +137,8 @@ int stage_setup() {
     Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
 
-	textBoxPosX = rand() % ((display_get_width() - boxWidth));
-	textBoxPosY = rand() % ((display_get_height() - boxHeight));
+    textBoxPosX = rand() % ((display_get_width() - boxWidth));
+    textBoxPosY = rand() % ((display_get_height() - boxHeight));
 
     //I don't know why this is here but honestly I'm scared to move it at this point.
     dynamo_init();
@@ -159,26 +149,26 @@ int stage_setup() {
     //---
 
     //Colour Stage Kobolds
-    kobold_init(&koboldActor, (color_t){255,255,255}, (color_t){255,0,0});
-    kobold_init(&koboldActor2, (color_t){255,100,100}, (color_t){24,0,100});
+    kobold_init(&koboldActor, (color_t){255, 255, 255}, (color_t){255, 0, 0});
+    kobold_init(&koboldActor2, (color_t){255, 100, 100}, (color_t){24, 0, 100});
 
     //Colour Usher Kobolds
-    kobold_init(&usherKoboldActor, (color_t){255,200,255}, (color_t){255,0,100});
-    kobold_init(&usherKoboldActor2, (color_t){255,255,200}, (color_t){24,0,100});
+    kobold_init(&usherKoboldActor, (color_t){255, 200, 255}, (color_t){255, 0, 100});
+    kobold_init(&usherKoboldActor2, (color_t){255, 255, 200}, (color_t){24, 0, 100});
 
     //Colour Dancefloor kobolds
-    kobold_init(&koboldActor3, (color_t){0,100,100}, (color_t){0,100,100});
-    kobold_init(&koboldActor4, (color_t){100,100,255}, (color_t){20,100,15});
-    kobold_init(&koboldActor5, (color_t){100,255,100}, (color_t){100,80,100});
-    kobold_init(&koboldActor6, (color_t){255,100,100}, (color_t){255,80,80});
-    kobold_init(&koboldActor7, (color_t){100,0,100}, (color_t){0,0,100});
-    kobold_init(&koboldActor8, (color_t){100,100,0}, (color_t){255,100,0});
+    kobold_init(&koboldActor3, (color_t){0, 100, 100}, (color_t){0, 100, 100});
+    kobold_init(&koboldActor4, (color_t){100, 100, 255}, (color_t){20, 100, 15});
+    kobold_init(&koboldActor5, (color_t){100, 255, 100}, (color_t){100, 80, 100});
+    kobold_init(&koboldActor6, (color_t){255, 100, 100}, (color_t){255, 80, 80});
+    kobold_init(&koboldActor7, (color_t){100, 0, 100}, (color_t){0, 0, 100});
+    kobold_init(&koboldActor8, (color_t){100, 100, 0}, (color_t){255, 100, 0});
 
     dragonActor.updateFunction = &dragon_update;
     koboldActor2.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
-	//START POSITIONS, ROTATION, AND ANIM
+    //START POSITIONS, ROTATION, AND ANIM
     //Start postions of actors as a vec3, 0 on all vecs are centred. .pos[1] is equal to Blender's Z direction (Y here?)
     //Models start faced towards the entrance, there's be a better way to represent this later I'm sure.
 
@@ -296,67 +286,18 @@ int stage_setup() {
     trackBackSprite = sprite_load("rom:/track-back.sprite");
     trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
     transBG1 = sprite_load("rom:/TransBG1.sprite");
-    dragonBackdrop =sprite_load("rom:/TestImageDragon3.sprite");
+    dragonBackdrop = sprite_load("rom:/TestImageDragon3.sprite");
 
     return 1;
 
-    //---IT'S TEXT BABY---
-//switch (textSegment){
-//  case 1:
-//  do {
-//    printf("%s\n", kob[swc].speakerName);
-//    printf("%s\n", kob[swc].speakerText);
-//    swc++;
-//    }
-//    while (swc < 3);
-//    break;
-//  case 2:
-//  do {
-//    printf("%s\n", dyn[swc].speakerName);
-//    printf("%s\n", dyn[swc].speakerText);
-//    swc++;
-//    }
-//    while (swc < 4);
-//    break;
-//  case 3:
-//  do {
-//    printf("%s\n", rnb[swc].speakerName);
-//    printf("%s\n", rnb[swc].speakerText);
-//    swc++;
-//    }
-//    while (swc < 4);
-//    break;
-//  default:
-//    printf("Something is wrong, fuckface!");
-//    break;
-//    }
-//    return 0;
 };
 
-textSystems kob[3] = {
-    {"Kobold", "i fukkin eat rocks and u cant stop me"},
-    {"Kobold", "wait is this u stoppin me?"},
-    {"Kobold", "well that fukin SUCKs..."}
-};
-
-textSystems dyn[4] = {
-    {"Dynamo", "[Doing things]"},
-    {"Dynamo", "[Still doing things]"},
-    {"Dynamo", "*stares at u*"},
-    {"Dynamo", "Oh hey there lil guy! :) always nice to meet a fan! :)"}
-};
-
-textSystems rnb[4] = {
-    {"Redd & Blu", "*absolutely filled to the brim with girlish glee*"},
-    {"Redd", "THIS IS THE BEST NIGHT OF LIFE."},
-    {"Blu", "CONTINUE TO DANCE LEST YE INCUR OUR WRATH, MORTAL."},
-    {"Redd & Blu", "WHEEEEEEEE! HOORAY! :)"}
-};
 //---DONE WITH THE TEXT NOW--
 
 
 void stage_take_input(enum GameState passedGameState) {
     if (btnsPressed.start) {
+        koboldDialogueCounter = 0;
         gameState = gameState == STAGE ? PAUSED : STAGE;
         textBoxPosX = rand() % ((display_get_width() - boxWidth));
         textBoxPosY = rand() % ((display_get_height() - boxHeight));
@@ -368,12 +309,15 @@ void stage_take_input(enum GameState passedGameState) {
         camera_take_input_debug(&camera, &viewport, deltaTime);
     }
 
-    if (btnsPressed.d_up)  lightBehaviourIndex++;
-    if (btnsPressed.d_down)  lightBehaviourIndex--;
+    if (passedGameState == PAUSED) {
+        if (btnsUp.a) koboldDialogueCounter++;
+    }
+
+    if (btnsPressed.d_up) lightBehaviourIndex++;
+    if (btnsPressed.d_down) lightBehaviourIndex--;
 
     if (lightBehaviourIndex > 2) lightBehaviourIndex = 0;
     if (lightBehaviourIndex < 0) lightBehaviourIndex = 2;
-
 }
 
 void stage_render_frame(enum GameState passedGameState) {
@@ -443,18 +387,14 @@ void stage_render_frame(enum GameState passedGameState) {
     rdpq_sync_pipe();
 
     regular_prints();
-   // debug_prints();
-
+    // debug_prints();
 
     if (passedGameState == PAUSED) {
-
         rdpq_mode_push();
         rdpq_set_mode_standard();
         rdpq_mode_blender(RDPQ_BLENDER_ADDITIVE);
-        rdpq_sprite_blit(dragonBackdrop,0,0,NULL);
+        rdpq_sprite_blit(dragonBackdrop, 0, 0,NULL);
         rdpq_mode_pop();
-
-
 
         rdpq_text_printf(
             &(rdpq_textparms_t){
@@ -462,25 +402,29 @@ void stage_render_frame(enum GameState passedGameState) {
                 .height = display_get_height() - 16,
                 .align = ALIGN_CENTER,
                 .valign = VALIGN_CENTER,
-            }, 6, 16, 16, "You've pressed pause.\nPress START to unpause.");
+            },
+            6,
+            16,
+            16,
+            "You've pressed pause.\nPress START to unpause."
+        );
 
-        text_box(kob[swc].speakerText, kob[swc].speakerName, textBoxPosX, textBoxPosY);
+        TextBoxParams koboldTexBox = {
+            .textBoxContent = &kob[koboldDialogueCounter],
+            .boxScreenPosX = textBoxPosX,
+            .boxScreenPosY = textBoxPosY,
+            .boxWidth = boxWidth,
+            .boxHeight = boxHeight,
+        };
 
-        if (btnsUp.a) {
-          swc++;
+        if (koboldDialogueCounter < 3) {
+            text_box(&koboldTexBox);
         }
-        else if (swc >=4) {
-          swc = 0;
-          gameState = STAGE;
-          }
-
     }
 
     rdpq_detach_show();
     // </Draw>
 }
-
-
 
 
 void stage_teardown() {
@@ -493,60 +437,14 @@ void stage_teardown() {
     sprite_free(playBtnUpSprite);
     sprite_free(dragonBackdrop);
     sprite_free(transBG1);
-    //sprite_free(koboldShortTape);
+    // sprite_free(koboldShortTape);
 }
-
 
 
 // ==== PRIVATE ====
 
 
-//Generate a random text box somewhere in the screen
-//static void text_box(const char *textCont, const char *textName, int boxScreenposX, int boxScreenposY) {
-static void text_box(int textSegment, int boxScreenposX, int boxScreenposY) {
-    int border = 4;
-
-//    typedef struct{
-//    char speakerName[11];
-//    char speakerText[141];
-//}textSystems;
-
-    //text bg
-    rdpq_set_mode_fill(RGBA32(128,50,128,255));
-    rdpq_fill_rectangle(
-        boxScreenposX,
-        boxScreenposY,
-        boxScreenposX + boxWidth,
-        boxScreenposY + boxHeight
-    );
-    //namebox bg
-    rdpq_set_mode_fill(RGBA32(128+100,50+100,128+100,255));
-    rdpq_fill_rectangle(
-        boxScreenposX,
-        boxScreenposY -10,
-        boxScreenposX + (boxWidth/2),
-        boxScreenposY
-    );
-
-    rdpq_text_printf(&(rdpq_textparms_t) {
-		.width = boxWidth,
-        .height = boxHeight,
-        .align = ALIGN_LEFT,
-        .valign = VALIGN_TOP,
-    }, 4, boxScreenposX + border, boxScreenposY - 8, textName);//this isn't right, but it works for now.
-
-    rdpq_text_printf(&(rdpq_textparms_t) {
-        .width = boxWidth - border*2,
-        .height = boxHeight - border*2,
-        .align = ALIGN_LEFT,
-        .valign = VALIGN_TOP,
-        .wrap = WRAP_WORD,
-        .line_spacing = 1
-    }, 4, boxScreenposX + border, boxScreenposY + border, textCont);
-
-};
-
-static void t3d_draw_update(T3DViewport *viewport) {
+static void t3d_draw_update(T3DViewport* viewport) {
     rdpq_attach(display_get(), display_get_zbuf());
     t3d_frame_start();
     t3d_viewport_attach(viewport);
@@ -562,18 +460,20 @@ static void t3d_draw_update(T3DViewport *viewport) {
     rdpq_mode_mipmap(MIPMAP_NONE, 0);
     t3d_fog_set_range(fogNear, fogFar);
     t3d_fog_set_enabled(true);
-    t3d_state_set_drawflags( T3D_FLAG_DEPTH | T3D_FLAG_SHADED );
+    t3d_state_set_drawflags(T3D_FLAG_DEPTH | T3D_FLAG_SHADED);
 
     t3d_screen_clear_color(fogColour);
     t3d_screen_clear_depth();
 }
 
 
-static void check_aabbs(Actor *curActor) {
+static void check_aabbs(Actor* curActor) {
     T3DFrustum frustum = viewport.viewFrustum;
 
-    curActor->visible = t3d_frustum_vs_aabb_s16(&frustum, curActor->t3dModel->aabbMin,
-                                               curActor->t3dModel->aabbMax);
+    curActor->visible = t3d_frustum_vs_aabb_s16(&frustum,
+                                                curActor->t3dModel->aabbMin,
+                                                curActor->t3dModel->aabbMax
+    );
 
     if (curActor->visible) {
         T3DModelIter it = t3d_model_iter_create(curActor->t3dModel, T3D_CHUNK_TYPE_OBJECT);
@@ -591,112 +491,116 @@ static void check_aabbs(Actor *curActor) {
             aabb_mat4_mult(transposedAabbMax, it.object->aabbMax, curActor->modelMatF);
 
             it.object->isVisible =
-                t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
+                    t3d_frustum_vs_aabb_s16(&frustum, transposedAabbMin, transposedAabbMax);
         }
     }
 }
 
 
 
-
-static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll ) {
-    unsigned int strLen = strlen(text);
-
-    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
-
-    for (int i = 0; i < strLen; i++) {
-        rdpq_font_style(ftrFontBig, 0, &(rdpq_fontstyle_t){
-          .color = RGBA32(187,244,139,255),
-          .outline_color = RGBA32(0,0,0,255),
-          //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
-        });
-        rdpq_text_printn(
-        &(rdpq_textparms_t) {
-            .style_id = 0,
-        },
-        5,
-        fm_fmodf(xScroll  + (i * 12), display_get_width()) + xOffset,
-        (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
-        &text[i], 1);
-    }
-
-}
-
-static const int charHeight = 8;
 static int margin = 8;
-static int fpsPos = charHeight*2;
 static int overScan = 0;
-
 
 static void regular_prints() {
     int displayHeight = display_get_height();
-
-    int musicTitlePos = displayHeight - charHeight*4 - overScan;
-    int artistTitlePos = displayHeight - charHeight*6 - overScan;
-    int tapePos = displayHeight - 26 - overScan;
     int btnPos = displayHeight - 40 - overScan;
 
     rdpq_mode_push();
     rdpq_set_mode_standard();
     rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
-    rdpq_sprite_blit(transBG1,0, btnPos, NULL);
+    rdpq_sprite_blit(transBG1, 0, btnPos, NULL);
     rdpq_set_mode_copy(true);
     rdpq_sprite_blit(trackBackSprite, 16, btnPos, NULL);
-    rdpq_sprite_blit(trackFwdSprite,272, btnPos, NULL);
-    //rdpq_set_mode_standard();
-    //rdpq_mode_filter(FILTER_POINT);
-    //rdpq_mode_alphacompare(1);                // colorkey (draw pixel with alpha >= 1)
+    rdpq_sprite_blit(trackFwdSprite, 272, btnPos, NULL);
     rdpq_mode_pop();
-
-//   sine_text(xm.ctx->module.instruments[0].name, 2.0f, 56.0f ,  artistTitlePos, false);
-//   sine_text(xm_get_module_name(xm.ctx), 2.0f, 56.0f ,  musicTitlePos, false);
 
 
     rdpq_text_printf(
         &(rdpq_textparms_t){
-            .width = 320-margin,
+            .width = 320 - margin,
             .height = 32,
             .align = ALIGN_RIGHT,
             .valign = VALIGN_TOP,
-        }, 4, 0, margin, lightBehaviourArray[lightBehaviourIndex].name);
+        },
+        4,
+        0,
+        margin,
+        lightBehaviourArray[lightBehaviourIndex].name
+    );
     rdpq_text_printf(
         &(rdpq_textparms_t){
             .width = 320,
             .height = 32,
             .align = ALIGN_LEFT,
             .valign = VALIGN_TOP,
-        }, 4, margin, margin, "Speedicity: %.0f", display_get_fps());
+        },
+        4,
+        margin,
+        margin,
+        "Speedicity: %.0f",
+        display_get_fps()
+    );
     rdpq_text_printf(
         &(rdpq_textparms_t){
-			.width = 320,
+            .width = 320,
             .height = 32,
             .align = ALIGN_CENTER,
             .valign = VALIGN_TOP,
-		}, 5, 0, 200, xm.ctx->module.instruments[0].name);
-     rdpq_text_printf(
+        },
+        5,
+        0,
+        200,
+        xm.ctx->module.instruments[0].name
+    );
+    rdpq_text_printf(
         &(rdpq_textparms_t){
-			.width = 320,
+            .width = 320,
             .height = 32,
             .align = ALIGN_CENTER,
             .valign = VALIGN_BOTTOM,
-		}, 5, 0, 200, xm_get_module_name(xm.ctx));
-
+        },
+        5,
+        0,
+        200,
+        xm_get_module_name(xm.ctx)
+    );
 }
 
+static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll) {
+    unsigned int strLen = strlen(text);
 
+    int xScroll = scroll ? horizAnimationTimer * speedFactor : 0;
 
-//static void debug_prints() {
-//    rdpq_text_printf(nullptr, 3, /*margin*/ 220.0f, fpsPos, "FPS: %.2f", display_get_fps());
-//}
+    for (int i = 0; i < strLen; i++) {
+        rdpq_font_style(ftrFontBig,
+                        0,
+                        &(rdpq_fontstyle_t){
+                            .color = RGBA32(187, 244, 139, 255),
+                            .outline_color = RGBA32(0, 0, 0, 255),
+                            //hsla2rgba( 0.01f * spinTimer,fm_sinf(spinTimer + i),0.5f,1.0f),
+                        }
+        );
+        rdpq_text_printn(
+            &(rdpq_textparms_t){
+                .style_id = 0,
+            },
+            5,
+            fm_fmodf(xScroll + (i * 12), display_get_width()) + xOffset,
+            (fm_sinf(horizAnimationTimer + i) * speedFactor) + yOffset,
+            &text[i],
+            1
+        );
+    }
+}
 
 static void draw_aabbs(Actor* curActor) {
     uint16_t debugClr[4] = {0xFF, 0x00, 0x00, 0xFF};
 
     debugDrawAABB(display_get_current_framebuffer().buffer,
-                    curActor->t3dModel->aabbMin,
-                    curActor->t3dModel->aabbMax,
-                  &viewport, 1.0f, debugClr[0]);
+                  curActor->t3dModel->aabbMin,
+                  curActor->t3dModel->aabbMax,
+                  &viewport,
+                  1.0f,
+                  debugClr[0]
+    );
 }
-
-
-
