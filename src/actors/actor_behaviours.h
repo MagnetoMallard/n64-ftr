@@ -12,6 +12,13 @@ static void dragon_update(Actor *self, float objTime) {
 }
 
 /**
+* @section Camash.
+*/
+static void camash_update(Actor *self, float objTime) {
+  self->pos[2] = fm_fmodf(objTime, 1);
+}
+
+/**
  * @section Dynamo.
  */
 static surface_t dynamoEyeSurface;

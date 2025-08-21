@@ -107,6 +107,6 @@ void camera_update(Camera* camera, T3DViewport* viewport, float deltaTime) {
     camera->target.v[1] = camera->pos.v[1] + camDir.v[1];
     camera->target.v[2] = camera->pos.v[2] + camDir.v[2];
 
-    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(60.0f), 10.0f, 350.0f);
+    t3d_viewport_set_projection(viewport, T3D_DEG_TO_RAD(60.0f), 10.0f, 300.0f);
     t3d_viewport_look_at(viewport, &camera->pos, &camera->target, &upVector);
 }

@@ -33,7 +33,7 @@ static float fogNear = 150.0f;
 static float fogFar = 300.0f;
 //static color_t fogColour = {70, 70, 70, 0xFF};
 static color_t fogColour = {87, 110, 168, 0xFF}; //nice colour :)
-//static color_t fogColour = {255, 255, 255, 0xFF};
+//static color_t fogColour = {163, 142, 103, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
@@ -135,7 +135,7 @@ int stage_setup() {
     Actor koboldActor5 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor6 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
+    Actor camashActor = create_actor_from_model("CamashFF7");
 
     textBoxPosX = rand() % ((display_get_width() - boxWidth));
     textBoxPosY = rand() % ((display_get_height() - boxHeight));
@@ -162,8 +162,8 @@ int stage_setup() {
     kobold_init(&koboldActor5, (color_t){100, 255, 100}, (color_t){100, 80, 100});
     kobold_init(&koboldActor6, (color_t){255, 100, 100}, (color_t){255, 80, 80});
     kobold_init(&koboldActor7, (color_t){100, 0, 100}, (color_t){0, 0, 100});
-    kobold_init(&koboldActor8, (color_t){100, 100, 0}, (color_t){255, 100, 0});
 
+    //camashActor.updateFunction = &camash_update;
     dragonActor.updateFunction = &dragon_update;
     koboldActor2.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
@@ -177,6 +177,13 @@ int stage_setup() {
     dynamoActor.pos[1] = 50.0f;
     dynamoActor.pos[2] = -100.0f;
     dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
+
+//    //Camash
+//    camashActor.pos[0] = 0.0f;
+//    camashActor.pos[1] = 100.0f;
+//    camashActor.pos[2] = 0.0f;
+//    camashActor.rot[1] = T3D_DEG_TO_RAD(-90);
+//    animations_change(&camashActor.anim, 1, .5f);
 
     //Stage kobolds
     koboldActor.pos[0] = -284.0f;
@@ -235,16 +242,32 @@ int stage_setup() {
     koboldActor7.rot[1] = T3D_DEG_TO_RAD(-160);
     animations_change(&koboldActor7.anim, 2, 0.35f);
 
-    koboldActor8.pos[0] = -80.0f;
-    koboldActor8.pos[1] = 0.0f;
-    koboldActor8.pos[2] = -160.0f;
-    koboldActor8.rot[1] = T3D_DEG_TO_RAD(340);
-    animations_change(&koboldActor8.anim, 2, 0.45f);
+    //Camash
+    //1=stand
+    //2=shake
+    //3=walk
+    //4=passdrink
+    //5=shrug
+    //6=dance
+
+//    float val1 = 200.0f;
+//    float val2 = 100.0f;
+//    float valstore;
+
+    camashActor.pos[0] = 650.0f;
+    camashActor.pos[1] = 20.0f;
+    camashActor.pos[2] = 200.0f;
+    camashActor.scale[0] = 1.30f;
+    camashActor.scale[1] = 1.30f;
+    camashActor.scale[2] = 1.30f;
+    camashActor.rot[1] = T3D_DEG_TO_RAD(90);
+    animations_change(&camashActor.anim, 2, 1.0f);
 
     //Putting the dragon stuff here too
-    dragonActor.scale[0] = 1.75f;
-    dragonActor.scale[1] = 1.75f;
-    dragonActor.scale[2] = 1.75f;
+    dragonActor.scale[0] = .30f;
+    dragonActor.scale[1] = .30f;
+    dragonActor.scale[2] = .30f;
+    animations_change(&dragonActor.anim, 1, 1.0f);
 
     actors[0] = dragonActor;
     actors[1] = stageActor;
@@ -256,7 +279,7 @@ int stage_setup() {
     actors[7] = koboldActor5;
     actors[8] = koboldActor6;
     actors[9] = koboldActor7;
-    actors[10] = koboldActor8;
+    actors[10] = camashActor;
     actors[11] = usherKoboldActor;
     actors[12] = usherKoboldActor2;
 
