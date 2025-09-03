@@ -118,8 +118,11 @@ int stage_setup() {
 
     // ======== Init Actors
     Actor dragonActor = create_actor_from_model("dragon2");
+
     Actor stageActor = create_actor_from_model("MainBarArea");
-    Actor dynamoActor = create_actor_from_model("DynamoAnimation");
+
+    Actor dynamoActor = create_actor_from_model("DynamoAnimationToontown");
+//    Actor grifActor = create_actor_from_model("grif");
 
     //Init Stage Kobolds
     Actor koboldActor = create_actor_from_model("KoboldWithAnims");
@@ -163,7 +166,6 @@ int stage_setup() {
     kobold_init(&koboldActor6, (color_t){255, 100, 100}, (color_t){255, 80, 80});
     kobold_init(&koboldActor7, (color_t){100, 0, 100}, (color_t){0, 0, 100});
 
-    //camashActor.updateFunction = &camash_update;
     dragonActor.updateFunction = &dragon_update;
     koboldActor2.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
@@ -178,19 +180,21 @@ int stage_setup() {
     dynamoActor.pos[2] = -100.0f;
     dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
 
-//    //Camash
-//    camashActor.pos[0] = 0.0f;
-//    camashActor.pos[1] = 100.0f;
-//    camashActor.pos[2] = 0.0f;
-//    camashActor.rot[1] = T3D_DEG_TO_RAD(-90);
-//    animations_change(&camashActor.anim, 1, .5f);
+    //Grif
+//    grifActor.pos[0] = 0.0f;
+//    grifActor.pos[1] = 0.0f;
+//    grifActor.pos[2] = -100.0f;
+//    grifActor.scale[0] = .25f;
+//    grifActor.scale[1] = .25f;
+//    grifActor.scale[2] = .25f;
+//    animations_change(&grifActor.anim, 1, 0.3f);
 
     //Stage kobolds
     koboldActor.pos[0] = -284.0f;
     koboldActor.pos[1] = 10.0f;
     koboldActor.pos[2] = 100.0f;
     koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor.anim, 2, 0.3f);
+    animations_change(&koboldActor.anim, 1, 0.3f);
 
     koboldActor2.pos[0] = -260.0f;
     koboldActor2.pos[1] = 10.0f;
@@ -249,11 +253,6 @@ int stage_setup() {
     //4=passdrink
     //5=shrug
     //6=dance
-
-//    float val1 = 200.0f;
-//    float val2 = 100.0f;
-//    float valstore;
-
     camashActor.pos[0] = 650.0f;
     camashActor.pos[1] = 20.0f;
     camashActor.pos[2] = 200.0f;
@@ -282,6 +281,7 @@ int stage_setup() {
     actors[10] = camashActor;
     actors[11] = usherKoboldActor;
     actors[12] = usherKoboldActor2;
+//    actors[13] = grifActor;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
     dergVector = actor_get_pos_vec(&dragonActor);
@@ -528,11 +528,12 @@ static void regular_prints() {
     int displayHeight = display_get_height();
     int btnPos = displayHeight - 40 - overScan;
 
+
     rdpq_mode_push();
     rdpq_set_mode_standard();
     rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
-    rdpq_sprite_blit(transBG1, 0, btnPos, NULL);
-    rdpq_set_mode_copy(true);
+//    rdpq_sprite_blit(transBG1, 0, btnPos, NULL);
+//    rdpq_set_mode_copy(true);
     rdpq_sprite_blit(trackBackSprite, 16, btnPos, NULL);
     rdpq_sprite_blit(trackFwdSprite, 272, btnPos, NULL);
     rdpq_mode_pop();

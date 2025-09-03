@@ -11,12 +11,6 @@ static void dragon_update(Actor *self, float objTime) {
     self->rot[1] = fm_fmodf(objTime, RAD_360);
 }
 
-/**
-* @section Camash.
-*/
-static void camash_update(Actor *self, float objTime) {
-  self->pos[2] = fm_fmodf(objTime, 1);
-}
 
 /**
  * @section Dynamo.
@@ -51,6 +45,7 @@ static void dynamo_part_draw(T3DModelIter* it, T3DModelState* state, float objTi
     rspq_block_run(it->object->userBlock);
     it->object->isVisible = false;
 }
+
 
 /**
  * @section Kobolds.
