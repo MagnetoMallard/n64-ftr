@@ -21,7 +21,7 @@
 #include "stage.h"
 #include "dialogue.h"
 
-#define ACTORS_COUNT 13
+#define ACTORS_COUNT 15
 #define DIRECTIONAL_LIGHT_COUNT 2
 
 static Actor actors[ACTORS_COUNT];
@@ -138,7 +138,9 @@ int stage_setup() {
     Actor koboldActor5 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor6 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
-    Actor camashActor = create_actor_from_model("CamashFF7");
+    Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
+    Actor koboldActor9 = create_actor_from_model("KoboldWithAnims");
+    Actor SluttyGenetActor = create_actor_from_model("SluttyGenet");
 
     textBoxPosX = rand() % ((display_get_width() - boxWidth));
     textBoxPosY = rand() % ((display_get_height() - boxHeight));
@@ -152,22 +154,25 @@ int stage_setup() {
     //---
 
     //Colour Stage Kobolds
-    kobold_init(&koboldActor, (color_t){255, 255, 255}, (color_t){255, 0, 0});
-    kobold_init(&koboldActor2, (color_t){255, 100, 100}, (color_t){24, 0, 100});
+    kobold_init(&koboldActor, (color_t){255, 255, 255});
+    kobold_init(&koboldActor2, (color_t){255, 100, 100});
 
     //Colour Usher Kobolds
-    kobold_init(&usherKoboldActor, (color_t){255, 200, 255}, (color_t){255, 0, 100});
-    kobold_init(&usherKoboldActor2, (color_t){255, 255, 200}, (color_t){24, 0, 100});
+    kobold_init(&usherKoboldActor, (color_t){255, 200, 255});
+    kobold_init(&usherKoboldActor2, (color_t){255, 255, 200});
 
     //Colour Dancefloor kobolds
-    kobold_init(&koboldActor3, (color_t){0, 100, 100}, (color_t){0, 100, 100});
-    kobold_init(&koboldActor4, (color_t){100, 100, 255}, (color_t){20, 100, 15});
-    kobold_init(&koboldActor5, (color_t){100, 255, 100}, (color_t){100, 80, 100});
-    kobold_init(&koboldActor6, (color_t){255, 100, 100}, (color_t){255, 80, 80});
-    kobold_init(&koboldActor7, (color_t){100, 0, 100}, (color_t){0, 0, 100});
+    kobold_init(&koboldActor3, (color_t){0, 100, 100});
+    kobold_init(&koboldActor4, (color_t){100, 100, 255});
+    kobold_init(&koboldActor5, (color_t){100, 255, 100});
+    kobold_init(&koboldActor6, (color_t){255, 100, 100});
+    kobold_init(&koboldActor7, (color_t){100, 0, 100});
+    kobold_init(&koboldActor8, (color_t){100, 200, 100});
+    kobold_init(&koboldActor9, (color_t){100, 100, 200});
 
     dragonActor.updateFunction = &dragon_update;
     koboldActor2.updateFunction = &dragon_update;
+    koboldActor9.updateFunction = &dragon_update;
     dynamoActor.customPartDrawFunc = &dynamo_part_draw;
 
     //START POSITIONS, ROTATION, AND ANIM
@@ -194,13 +199,13 @@ int stage_setup() {
     koboldActor.pos[1] = 10.0f;
     koboldActor.pos[2] = 100.0f;
     koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor.anim, 1, 0.3f);
+    animations_change(&koboldActor.anim, 0, 0.3f);
 
     koboldActor2.pos[0] = -260.0f;
     koboldActor2.pos[1] = 10.0f;
     koboldActor2.pos[2] = -230.0f;
     koboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor2.anim, 1, 0.3f);
+    animations_change(&koboldActor2.anim, 0, 0.8f);
 
     //Usher Kobolds
     usherKoboldActor.pos[0] = 75.0f;
@@ -220,31 +225,43 @@ int stage_setup() {
     koboldActor3.pos[1] = 0.0f;
     koboldActor3.pos[2] = 0.0f;
     koboldActor3.rot[1] = T3D_DEG_TO_RAD(90);
-    animations_change(&koboldActor3.anim, 2, 0.4f);
+    animations_change(&koboldActor3.anim, 0, 0.4f);
 
     koboldActor4.pos[0] = -160.0f;
     koboldActor4.pos[1] = 0.0f;
     koboldActor4.pos[2] = 0.0f;
     koboldActor4.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor4.anim, 2, 0.3f);
+    animations_change(&koboldActor4.anim, 0, 0.3f);
 
     koboldActor5.pos[0] = 80.0f;
     koboldActor5.pos[1] = 0.0f;
     koboldActor5.pos[2] = 160.0f;
     koboldActor5.rot[1] = T3D_DEG_TO_RAD(-200);
-    animations_change(&koboldActor5.anim, 2, 0.5f);
+    animations_change(&koboldActor5.anim, 0, 0.5f);
 
     koboldActor6.pos[0] = 80.0f;
     koboldActor6.pos[1] = 0.0f;
     koboldActor6.pos[2] = -160.0f;
     koboldActor6.rot[1] = T3D_DEG_TO_RAD(20);
-    animations_change(&koboldActor6.anim, 2, 0.25f);
+    animations_change(&koboldActor6.anim, 0, 0.25f);
 
     koboldActor7.pos[0] = -80.0f;
     koboldActor7.pos[1] = 0.0f;
     koboldActor7.pos[2] = 160.0f;
     koboldActor7.rot[1] = T3D_DEG_TO_RAD(-160);
-    animations_change(&koboldActor7.anim, 2, 0.35f);
+    animations_change(&koboldActor7.anim, 0, 0.35f);
+
+    koboldActor8.pos[0] = 510.0f;
+    koboldActor8.pos[1] = 56.0f;
+    koboldActor8.pos[2] = -5.0f;
+    koboldActor8.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&koboldActor8.anim, 3, 0.35f);
+
+    koboldActor9.pos[0] = 530.0f;
+    koboldActor9.pos[1] = 56.0f;
+    koboldActor9.pos[2] = 90.0f;
+    koboldActor9.rot[1] = T3D_DEG_TO_RAD(-90);
+    animations_change(&koboldActor9.anim, 4, 0.35f);
 
     //Camash
     //1=stand
@@ -253,14 +270,13 @@ int stage_setup() {
     //4=passdrink
     //5=shrug
     //6=dance
-    camashActor.pos[0] = 650.0f;
-    camashActor.pos[1] = 20.0f;
-    camashActor.pos[2] = 200.0f;
-    camashActor.scale[0] = 1.30f;
-    camashActor.scale[1] = 1.30f;
-    camashActor.scale[2] = 1.30f;
-    camashActor.rot[1] = T3D_DEG_TO_RAD(90);
-    animations_change(&camashActor.anim, 2, 1.0f);
+    SluttyGenetActor.pos[0] = 450.0f;
+    SluttyGenetActor.pos[1] = 0.0f;
+    SluttyGenetActor.pos[2] = 200.0f;
+    SluttyGenetActor.scale[0] = 1.30f;
+    SluttyGenetActor.scale[1] = 1.30f;
+    SluttyGenetActor.scale[2] = 1.30f;
+    SluttyGenetActor.rot[1] = T3D_DEG_TO_RAD(90);
 
     //Putting the dragon stuff here too
     dragonActor.scale[0] = .30f;
@@ -278,9 +294,11 @@ int stage_setup() {
     actors[7] = koboldActor5;
     actors[8] = koboldActor6;
     actors[9] = koboldActor7;
-    actors[10] = camashActor;
+    actors[10] = SluttyGenetActor;
     actors[11] = usherKoboldActor;
     actors[12] = usherKoboldActor2;
+    actors[13] = koboldActor8;
+    actors[14] = koboldActor9;
 //    actors[13] = grifActor;
 
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
@@ -534,6 +552,7 @@ static void regular_prints() {
     rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
 //    rdpq_sprite_blit(transBG1, 0, btnPos, NULL);
 //    rdpq_set_mode_copy(true);
+
     rdpq_sprite_blit(trackBackSprite, 16, btnPos, NULL);
     rdpq_sprite_blit(trackFwdSprite, 272, btnPos, NULL);
     rdpq_mode_pop();
