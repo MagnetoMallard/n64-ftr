@@ -25,19 +25,15 @@
 static float deltaTime = 0.0f;
 static float fogNear = 150.0f;
 static float fogFar = 300.0f;
-//static color_t fogColour = {70, 70, 70, 0xFF};
 static color_t fogColour = {87, 110, 168, 0xFF}; //nice colour :)
-//static color_t fogColour = {163, 142, 103, 0xFF};
 
 static float spinTimer = 0.0f;
 static float horizAnimationTimer = 0.0f;
 static float vertAnimationTimer = 0.0f;
 
-static T3DViewport viewport;
 uint8_t ambientLightColour[4] = {100, 100, 100, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
-rdpq_font_t* V5PRC___;
 rdpq_font_t* ftrFontSkinny;
 rdpq_font_t* ftrFontBig;
 surface_t* disp;
@@ -52,18 +48,19 @@ int koboldDialogueCounter = 0; //for the switch statement
 
 static int lightBehaviourIndex = 0;
 
+static T3DViewport viewport;
+static Camera camera;
+static StageData stageData;
+
 static void t3d_draw_update(T3DViewport* viewport);
 static void regular_prints();
 static void check_aabbs(Actor* curActor);
 
 static void debug_prints();
 static void draw_aabbs(Actor* curActor);
-
 //static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
 //static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
-static Camera camera;
-static StageData stageData;
 
 // ==== PUBLIC ====
 int stage_setup() {
