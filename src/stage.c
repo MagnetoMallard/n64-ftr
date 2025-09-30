@@ -36,6 +36,7 @@ rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
 rdpq_font_t* ftrFontSkinny;
 rdpq_font_t* ftrFontBig;
+rdpq_font_t* V5PRC___;
 surface_t* disp;
 
 static int boxWidth = 140;
