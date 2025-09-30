@@ -20,13 +20,10 @@
 #include "globals.h"
 #include "stage.h"
 #include "dialogue.h"
+#include "stage_data.h"
 
-#define ACTORS_COUNT 15
-#define DIRECTIONAL_LIGHT_COUNT 2
 
-static Actor actors[ACTORS_COUNT];
 static Camera camera;
-static bool _cameraDirty;
 
 static float deltaTime = 0.0f;
 static float fogNear = 150.0f;
@@ -40,7 +37,6 @@ static float horizAnimationTimer = 0.0f;
 static float vertAnimationTimer = 0.0f;
 
 static T3DViewport viewport;
-static Light directionalLights[DIRECTIONAL_LIGHT_COUNT];
 uint8_t ambientLightColour[4] = {100, 100, 100, 0x7f};
 rspq_syncpoint_t syncPoint = 0;
 rdpq_font_t* ftrFont;
@@ -54,37 +50,19 @@ static int boxHeight = 38;
 static int textBoxPosX;
 static int textBoxPosY;
 
-
 int textSegment = 1;
 int koboldDialogueCounter = 0; //for the switch statement
 //segments of 140 chars each, how many segments, which character
 //---OK BACK TO NORMALITY---
 
-static LightBehaviour lightBehaviourArray[3] = {
-    {
-        .name = "Synced Traffic Light",
-        .updateFunction = &light_update_traffic_light_xm
-    },
-    {
-        .name = "Synced Tekno Strobe",
-        .updateFunction = &light_update_xm_tekno_strobe
-    },
-    {
-        .name = "Mono Volume Follow",
-        .updateFunction = &light_update_vol_follow
-    },
-};
-
 static int lightBehaviourIndex = 0;
 static int* lightPointer = &lightBehaviourIndex;
 
 static void t3d_draw_update(T3DViewport* viewport);
-
 static void debug_prints();
 static void regular_prints();
 //static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
 static void draw_aabbs(Actor* curActor);
-
 static void check_aabbs(Actor* curActor);
 //static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
@@ -97,220 +75,34 @@ static sprite_t* transBG1;
 
 static rspq_block_t* hudBlock;
 
+StageData stageData;
+
 // ==== PUBLIC ====
 int stage_setup() {
+
     viewport = t3d_viewport_create();
 
     camera = camera_create();
-    //disp = display_get();
+
     // ======== Init Lights
-    uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
-    T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
-    Light pointLightOne = light_create(colorDir, lightDirVec, false);
-    pointLightOne.lightUpdateFunction = lightBehaviourArray[0].updateFunction;
-
-    uint8_t colorDir2[4] = {0xFF, 0x44, 0x44, 0xFF};
-    T3DVec3 lightDirVec2 = {{0.0f, 0.0f, 1.0f}};
-    Light pointLightTwo = light_create(colorDir2, lightDirVec2, false);
-
-    directionalLights[0] = pointLightOne;
-    directionalLights[1] = pointLightTwo;
+    initStageLights(&stageData);
 
     // ======== Init Actors
-    Actor dragonActor = create_actor_from_model("dragon2");
-
-    Actor stageActor = create_actor_from_model("MainBarArea");
-
-    Actor dynamoActor = create_actor_from_model("DynamoAnimationToontown");
-//    Actor grifActor = create_actor_from_model("grif");
-
-    //Init Stage Kobolds
-    Actor koboldActor = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor2 = create_actor_from_model("KoboldWithAnims");
-
-    //Init Usher Kobolds
-    Actor usherKoboldActor = create_actor_from_model("KoboldCelUsher");
-    Actor usherKoboldActor2 = create_actor_from_model("KoboldCelUsher");
-
-    //Init Dancefloor Kobolds
-    Actor koboldActor3 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor4 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor5 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor6 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor7 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
-    Actor koboldActor9 = create_actor_from_model("KoboldWithAnims");
-    Actor SluttyGenetActor = create_actor_from_model("SluttyGenet");
+    initStageActors(&stageData);
 
     textBoxPosX = rand() % ((display_get_width() - boxWidth));
     textBoxPosY = rand() % ((display_get_height() - boxHeight));
 
-    //I don't know why this is here but honestly I'm scared to move it at this point.
-    dynamo_init();
-
-    //---
-    //Colour change of the kobolds, RGBA. Final alpha seems to be unnecessary.
-    //Set kobold model's vertex colours to white.
-    //---
-
-    //Colour Stage Kobolds
-    kobold_init(&koboldActor, (color_t){255, 255, 255});
-    kobold_init(&koboldActor2, (color_t){255, 100, 100});
-
-    //Colour Usher Kobolds
-    kobold_init(&usherKoboldActor, (color_t){255, 200, 255});
-    kobold_init(&usherKoboldActor2, (color_t){255, 255, 200});
-
-    //Colour Dancefloor kobolds
-    kobold_init(&koboldActor3, (color_t){0, 100, 100});
-    kobold_init(&koboldActor4, (color_t){100, 100, 255});
-    kobold_init(&koboldActor5, (color_t){100, 255, 100});
-    kobold_init(&koboldActor6, (color_t){255, 100, 100});
-    kobold_init(&koboldActor7, (color_t){100, 0, 100});
-    kobold_init(&koboldActor8, (color_t){100, 200, 100});
-    kobold_init(&koboldActor9, (color_t){100, 100, 200});
-
-    dragonActor.updateFunction = &dragon_update;
-    koboldActor2.updateFunction = &dragon_update;
-    koboldActor9.updateFunction = &dragon_update;
-    dynamoActor.customPartDrawFunc = &dynamo_part_draw;
-
-    //START POSITIONS, ROTATION, AND ANIM
-    //Start postions of actors as a vec3, 0 on all vecs are centred. .pos[1] is equal to Blender's Z direction (Y here?)
-    //Models start faced towards the entrance, there's be a better way to represent this later I'm sure.
-
-    //DJ
-    dynamoActor.pos[0] = -340.0f;
-    dynamoActor.pos[1] = 50.0f;
-    dynamoActor.pos[2] = -100.0f;
-    dynamoActor.rot[1] = T3D_DEG_TO_RAD(-90);
-
-    //Grif
-//    grifActor.pos[0] = 0.0f;
-//    grifActor.pos[1] = 0.0f;
-//    grifActor.pos[2] = -100.0f;
-//    grifActor.scale[0] = .25f;
-//    grifActor.scale[1] = .25f;
-//    grifActor.scale[2] = .25f;
-//    animations_change(&grifActor.anim, 1, 0.3f);
-
-    //Stage kobolds
-    koboldActor.pos[0] = -284.0f;
-    koboldActor.pos[1] = 10.0f;
-    koboldActor.pos[2] = 100.0f;
-    koboldActor.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor.anim, 0, 0.3f);
-
-    koboldActor2.pos[0] = -260.0f;
-    koboldActor2.pos[1] = 10.0f;
-    koboldActor2.pos[2] = -230.0f;
-    koboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor2.anim, 0, 0.8f);
-
-    //Usher Kobolds
-    usherKoboldActor.pos[0] = 75.0f;
-    usherKoboldActor.pos[1] = 20.0f;
-    usherKoboldActor.pos[2] = 610.0f;
-    usherKoboldActor.rot[1] = T3D_DEG_TO_RAD(-100);
-    animations_change(&usherKoboldActor.anim, 3, 0.2f);
-
-    usherKoboldActor2.pos[0] = 75.0f;
-    usherKoboldActor2.pos[1] = 55.0f;
-    usherKoboldActor2.pos[2] = 680.0f;
-    usherKoboldActor2.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&usherKoboldActor2.anim, 2, 0.25f);
-
-    //Dancefloor Kobolds
-    koboldActor3.pos[0] = 160.0f;
-    koboldActor3.pos[1] = 0.0f;
-    koboldActor3.pos[2] = 0.0f;
-    koboldActor3.rot[1] = T3D_DEG_TO_RAD(90);
-    animations_change(&koboldActor3.anim, 0, 0.4f);
-
-    koboldActor4.pos[0] = -160.0f;
-    koboldActor4.pos[1] = 0.0f;
-    koboldActor4.pos[2] = 0.0f;
-    koboldActor4.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor4.anim, 0, 0.3f);
-
-    koboldActor5.pos[0] = 80.0f;
-    koboldActor5.pos[1] = 0.0f;
-    koboldActor5.pos[2] = 160.0f;
-    koboldActor5.rot[1] = T3D_DEG_TO_RAD(-200);
-    animations_change(&koboldActor5.anim, 0, 0.5f);
-
-    koboldActor6.pos[0] = 80.0f;
-    koboldActor6.pos[1] = 0.0f;
-    koboldActor6.pos[2] = -160.0f;
-    koboldActor6.rot[1] = T3D_DEG_TO_RAD(20);
-    animations_change(&koboldActor6.anim, 0, 0.25f);
-
-    koboldActor7.pos[0] = -80.0f;
-    koboldActor7.pos[1] = 0.0f;
-    koboldActor7.pos[2] = 160.0f;
-    koboldActor7.rot[1] = T3D_DEG_TO_RAD(-160);
-    animations_change(&koboldActor7.anim, 0, 0.35f);
-
-    koboldActor8.pos[0] = 510.0f;
-    koboldActor8.pos[1] = 56.0f;
-    koboldActor8.pos[2] = -5.0f;
-    koboldActor8.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor8.anim, 3, 0.35f);
-
-    koboldActor9.pos[0] = 530.0f;
-    koboldActor9.pos[1] = 56.0f;
-    koboldActor9.pos[2] = 90.0f;
-    koboldActor9.rot[1] = T3D_DEG_TO_RAD(-90);
-    animations_change(&koboldActor9.anim, 4, 0.35f);
-
-    //Camash
-    //1=stand
-    //2=shake
-    //3=walk
-    //4=passdrink
-    //5=shrug
-    //6=dance
-    SluttyGenetActor.pos[0] = 450.0f;
-    SluttyGenetActor.pos[1] = 0.0f;
-    SluttyGenetActor.pos[2] = 200.0f;
-    SluttyGenetActor.scale[0] = 1.30f;
-    SluttyGenetActor.scale[1] = 1.30f;
-    SluttyGenetActor.scale[2] = 1.30f;
-    SluttyGenetActor.rot[1] = T3D_DEG_TO_RAD(90);
-
-    //Putting the dragon stuff here too
-    dragonActor.scale[0] = .30f;
-    dragonActor.scale[1] = .30f;
-    dragonActor.scale[2] = .30f;
-    animations_change(&dragonActor.anim, 1, 1.0f);
-
-    actors[0] = dragonActor;
-    actors[1] = stageActor;
-    actors[2] = dynamoActor;
-    actors[3] = koboldActor;
-    actors[4] = koboldActor2;
-    actors[5] = koboldActor3;
-    actors[6] = koboldActor4;
-    actors[7] = koboldActor5;
-    actors[8] = koboldActor6;
-    actors[9] = koboldActor7;
-    actors[10] = SluttyGenetActor;
-    actors[11] = usherKoboldActor;
-    actors[12] = usherKoboldActor2;
-    actors[13] = koboldActor8;
-    actors[14] = koboldActor9;
-//    actors[13] = grifActor;
-
     // These are test values. You can look at them by pressing A for Dergs, B for Dynamo
-    dergVector = actor_get_pos_vec(&dragonActor);
-    dergVector.x += dragonActor.initialAabbMax[0] / 2;
-    dergVector.y += dragonActor.initialAabbMax[1] / 2;
-    dergVector.z += dragonActor.initialAabbMax[2] / 2;
+    dergVector = actor_get_pos_vec(&stageData.actors[0]);
+    dergVector.x += stageData.actors[0].initialAabbMax[0] / 2;
+    dergVector.y += stageData.actors[0].initialAabbMax[1] / 2;
+    dergVector.z += stageData.actors[0].initialAabbMax[2] / 2;
 
-    dynamoVector = actor_get_pos_vec(&dynamoActor);
-    dergVector.x += dynamoActor.initialAabbMax[0] / 2;
-    dergVector.y += dynamoActor.initialAabbMax[1] / 2;
-    dergVector.z += dynamoActor.initialAabbMax[2] / 2;
+    dynamoVector = actor_get_pos_vec(&stageData.actors[2]);
+    dergVector.x += stageData.actors[2].initialAabbMax[0] / 2;
+    dergVector.y += stageData.actors[2].initialAabbMax[1] / 2;
+    dergVector.z += stageData.actors[2].initialAabbMax[2] / 2;
 
     // Camera init
     camera.rotation.y = -0.48;
@@ -330,7 +122,6 @@ int stage_setup() {
     dragonBackdrop = sprite_load("rom:/TestImageDragon3.sprite");
 
     return 1;
-
 };
 
 //---DONE WITH THE TEXT NOW--
@@ -375,7 +166,7 @@ void stage_render_frame(enum GameState passedGameState) {
     camera_update(&camera, &viewport, deltaTime);
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
-        Actor* curActor = &actors[i];
+        Actor* curActor = &stageData.actors[i];
         if (passedGameState == STAGE) {
             actor_update(curActor, spinTimer, deltaTime);
         }
@@ -383,10 +174,10 @@ void stage_render_frame(enum GameState passedGameState) {
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 
-    directionalLights[0].lightUpdateFunction = lightBehaviourArray[lightBehaviourIndex].updateFunction;
+    stageData.directionalLights[0].lightUpdateFunction = lightBehaviourArray[lightBehaviourIndex].updateFunction;
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
-        Light* curLight = &directionalLights[i];
+        Light* curLight = &stageData.directionalLights[i];
         if (curLight->lightUpdateFunction) {
             curLight->lightUpdateFunction(curLight, deltaTime, spinTimer);
         }
@@ -401,13 +192,13 @@ void stage_render_frame(enum GameState passedGameState) {
     t3d_light_set_ambient(ambientLightColour);
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
-        light_draw(&directionalLights[i], i);
+        light_draw(&stageData.directionalLights[i], i);
     }
 
     t3d_light_set_count(DIRECTIONAL_LIGHT_COUNT);
 
     for (int i = 0; i < ACTORS_COUNT; i++) {
-        Actor* curActor = &actors[i];
+        Actor* curActor = &stageData.actors[i];
 
         if (curActor->animCount) {
             t3d_skeleton_update(&curActor->anim.skel);
@@ -470,7 +261,7 @@ void stage_render_frame(enum GameState passedGameState) {
 
 void stage_teardown() {
     for (int i = 0; i < ACTORS_COUNT; i++) {
-        actor_delete(&actors[i]);
+        actor_delete(&stageData.actors[i]);
     }
     sprite_free(trackFwdSprite);
     sprite_free(trackBackSprite);
