@@ -22,9 +22,6 @@
 #include "dialogue.h"
 #include "stage_data.h"
 
-
-static Camera camera;
-
 static float deltaTime = 0.0f;
 static float fogNear = 150.0f;
 static float fogFar = 300.0f;
@@ -52,30 +49,21 @@ static int textBoxPosY;
 
 int textSegment = 1;
 int koboldDialogueCounter = 0; //for the switch statement
-//segments of 140 chars each, how many segments, which character
-//---OK BACK TO NORMALITY---
 
 static int lightBehaviourIndex = 0;
-static int* lightPointer = &lightBehaviourIndex;
 
 static void t3d_draw_update(T3DViewport* viewport);
-static void debug_prints();
 static void regular_prints();
-//static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
-static void draw_aabbs(Actor* curActor);
 static void check_aabbs(Actor* curActor);
+
+static void debug_prints();
+static void draw_aabbs(Actor* curActor);
+
+//static void text_box(const char* textCont, const char* textName, int boxScreenposX, int boxScreenposY);
 //static void sine_text(const char* text, float speedFactor, float xOffset, float yOffset, bool scroll );
 
-static sprite_t* playBtnUpSprite;
-static sprite_t* playBtnDownSprite;
-static sprite_t* trackBackSprite;
-static sprite_t* trackFwdSprite;
-static sprite_t* dragonBackdrop;
-static sprite_t* transBG1;
-
-static rspq_block_t* hudBlock;
-
-StageData stageData;
+static Camera camera;
+static StageData stageData;
 
 // ==== PUBLIC ====
 int stage_setup() {
@@ -89,6 +77,9 @@ int stage_setup() {
 
     // ======== Init Actors
     initStageActors(&stageData);
+
+    // ======== Init Sprites
+    initStageSprites(&stageData);
 
     textBoxPosX = rand() % ((display_get_width() - boxWidth));
     textBoxPosY = rand() % ((display_get_height() - boxHeight));
@@ -112,14 +103,6 @@ int stage_setup() {
 
     camera_look_at(&camera, &dynamoVector);
     camera_update(&camera, &viewport, 0.0f);
-
-    //Sprite loading for UI
-    playBtnDownSprite = sprite_load("rom:/play-btn-down.sprite");
-    playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
-    trackBackSprite = sprite_load("rom:/track-back.sprite");
-    trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
-    transBG1 = sprite_load("rom:/TransBG1.sprite");
-    dragonBackdrop = sprite_load("rom:/TestImageDragon3.sprite");
 
     return 1;
 };
@@ -174,7 +157,7 @@ void stage_render_frame(enum GameState passedGameState) {
 
     if (syncPoint)rspq_syncpoint_wait(syncPoint); // wait for the RSP to process the previous frame
 
-    stageData.directionalLights[0].lightUpdateFunction = lightBehaviourArray[lightBehaviourIndex].updateFunction;
+    stageData.directionalLights[0].lightUpdateFunction = stageData.lightBehaviours[lightBehaviourIndex].updateFunction;
 
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; i++) {
         Light* curLight = &stageData.directionalLights[i];
@@ -225,7 +208,7 @@ void stage_render_frame(enum GameState passedGameState) {
         rdpq_mode_push();
         rdpq_set_mode_standard();
         rdpq_mode_blender(RDPQ_BLENDER_ADDITIVE);
-        rdpq_sprite_blit(dragonBackdrop, 0, 0,NULL);
+        rdpq_sprite_blit(stageData.dragonBackdrop, 0, 0,NULL);
         rdpq_mode_pop();
 
         rdpq_text_printf(
@@ -263,12 +246,12 @@ void stage_teardown() {
     for (int i = 0; i < ACTORS_COUNT; i++) {
         actor_delete(&stageData.actors[i]);
     }
-    sprite_free(trackFwdSprite);
-    sprite_free(trackBackSprite);
-    sprite_free(playBtnDownSprite);
-    sprite_free(playBtnUpSprite);
-    sprite_free(dragonBackdrop);
-    sprite_free(transBG1);
+    sprite_free(stageData.trackFwdSprite);
+    sprite_free(stageData.trackBackSprite);
+    sprite_free(stageData.playBtnDownSprite);
+    sprite_free(stageData.playBtnUpSprite);
+    sprite_free(stageData.dragonBackdrop);
+    sprite_free(stageData.transBG1);
     // sprite_free(koboldShortTape);
 }
 
@@ -344,8 +327,8 @@ static void regular_prints() {
 //    rdpq_sprite_blit(transBG1, 0, btnPos, NULL);
 //    rdpq_set_mode_copy(true);
 
-    rdpq_sprite_blit(trackBackSprite, 16, btnPos, NULL);
-    rdpq_sprite_blit(trackFwdSprite, 272, btnPos, NULL);
+    rdpq_sprite_blit(stageData.trackBackSprite, 16, btnPos, NULL);
+    rdpq_sprite_blit(stageData.trackFwdSprite, 272, btnPos, NULL);
     rdpq_mode_pop();
 
 
@@ -359,7 +342,7 @@ static void regular_prints() {
         4,
         0,
         margin,
-        lightBehaviourArray[lightBehaviourIndex].name
+        stageData.lightBehaviours[lightBehaviourIndex].name
     );
     rdpq_text_printf(
         &(rdpq_textparms_t){

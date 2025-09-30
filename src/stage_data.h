@@ -19,29 +19,46 @@
 
 typedef struct _stage_data {
     Actor actors[ACTORS_COUNT];
-    Camera camera[4];
-    LightBehaviour lightBehaviour[3];
-    sprite_t sprite[8];
+    LightBehaviour lightBehaviours[3];
     Light directionalLights[2];
+    // Camera camera[4]; TODO: Camera Stack Goes Here
+    // sprite_t sprite[8]; TODO: Make use of this when we get hashmaps in
+
+    sprite_t* playBtnUpSprite;
+    sprite_t* playBtnDownSprite;
+    sprite_t* trackBackSprite;
+    sprite_t* trackFwdSprite;
+    sprite_t* dragonBackdrop;
+    sprite_t* transBG1;
 } StageData;
 
-
-static LightBehaviour lightBehaviourArray[3] = {
-    {
-        .name = "Synced Traffic Light",
-        .updateFunction = &light_update_traffic_light_xm
-    },
-    {
-        .name = "Synced Tekno Strobe",
-        .updateFunction = &light_update_xm_tekno_strobe
-    },
-    {
-        .name = "Mono Volume Follow",
-        .updateFunction = &light_update_vol_follow
-    },
-};
+void initStageSprites(StageData* stageData) {
+    stageData->playBtnDownSprite = sprite_load("rom:/play-btn-down.sprite");
+    stageData->playBtnUpSprite = sprite_load("rom:/play-btn-up.sprite");
+    stageData->trackBackSprite = sprite_load("rom:/track-back.sprite");
+    stageData->trackFwdSprite = sprite_load("rom:/track-fwd.sprite");
+    stageData->transBG1 = sprite_load("rom:/TransBG1.sprite");
+    stageData->dragonBackdrop = sprite_load("rom:/TestImageDragon3.sprite");
+}
 
 void initStageLights(StageData* stageData) {
+    LightBehaviour lightBehaviourArray[3] = {
+        {
+            .name = "Synced Traffic Light",
+            .updateFunction = &light_update_traffic_light_xm
+        },
+        {
+            .name = "Synced Tekno Strobe",
+            .updateFunction = &light_update_xm_tekno_strobe
+        },
+        {
+            .name = "Mono Volume Follow",
+            .updateFunction = &light_update_vol_follow
+        },
+    };
+
+    memcpy(stageData->lightBehaviours, lightBehaviourArray, sizeof(lightBehaviourArray));
+
     uint8_t colorDir[4] = {0x00, 0x00, 0x00, 0xFF};
     T3DVec3 lightDirVec = {{0.0f, 1.0f, 0.0f}};
     Light pointLightOne = light_create(colorDir, lightDirVec, false);
@@ -80,7 +97,6 @@ void initStageActors(StageData* stageData) {
     Actor koboldActor8 = create_actor_from_model("KoboldWithAnims");
     Actor koboldActor9 = create_actor_from_model("KoboldWithAnims");
     Actor SluttyGenetActor = create_actor_from_model("SluttyGenet");
-
 
     // setup dynamo's blink cycle
     dynamo_init();
