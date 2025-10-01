@@ -6,6 +6,8 @@
 
 #include "actor_animation.h"
 
+//typedef struct actor_parms;
+
 ActorAnimation create_from_model(const T3DModel* model, uint32_t animationCount) {
     ActorAnimation animationStruct = (ActorAnimation){
         .animationCount = animationCount,

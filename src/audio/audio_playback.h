@@ -49,7 +49,7 @@ void audio_set_master_fx(enum AudioFxPreset fx);
 
 extern xm64player_t xm;
 extern char* songs[SONG_COUNT];
-extern enum GameSate musicState;
+extern enum GameState musicState;
 extern uint16_t currentPeak;
 
 #endif //AUDIO_PLAYBACK_H

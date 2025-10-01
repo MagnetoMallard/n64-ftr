@@ -10,7 +10,7 @@
 
 #define RAD_360 6.28318530718f
 
-enum GameSate {
+enum GameState {
     MAIN_MENU,
     PAUSED,
     STAGE,
@@ -23,10 +23,14 @@ enum GameFonts {
 
 extern T3DVec3 dergVector;
 extern T3DVec3 dynamoVector;
-extern enum GameSate gameState;
+extern enum GameState gameState;
 extern joypad_inputs_t inputs;
 extern joypad_buttons_t btnsUp;
 extern joypad_buttons_t btnsPressed;
 extern rspq_syncpoint_t syncPoint;
-extern rdpq_font_t* ftrFont;
+extern rdpq_font_t *ftrFont;
+extern rdpq_font_t *V5PRC___;
+extern rdpq_font_t *ftrFontSkinny;
+extern rdpq_font_t *ftrFontBig;
+
 #endif //GLOBALS_H

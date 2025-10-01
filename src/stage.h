@@ -6,8 +6,8 @@
 #define STAGE_H
 
 int stage_setup();
-void stage_take_input(enum GameSate passedGameState);
-void stage_render_frame(enum GameSate passedGameState);
+void stage_take_input(enum GameState passedGameState);
+void stage_render_frame(enum GameState passedGameState);
 void stage_teardown();
 
 #endif //STAGE_H

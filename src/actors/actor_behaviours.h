@@ -11,6 +11,7 @@ static void dragon_update(Actor *self, float objTime) {
     self->rot[1] = fm_fmodf(objTime, RAD_360);
 }
 
+
 /**
  * @section Dynamo.
  */
@@ -34,15 +35,17 @@ static void dynamo_set_eye_index(int eyeIndex) {
     rdpq_tex_upload(TILE0, &dynamoEyeSurface, NULL);
 }
 
-static void dynamo_part_draw(T3DModelIter *it, T3DModelState *state, float objTime) {
+static void dynamo_part_draw(T3DModelIter* it, T3DModelState* state, float objTime) {
     if (strcmp(it->object->material->name, "EYEL") || strcmp(it->object->material->name, "EYER") ) {
         dynamo_set_eye_index(fm_fmodf(objTime, 3));
     }
+
    // rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
     t3d_model_draw_material(it->object->material, state);
     rspq_block_run(it->object->userBlock);
     it->object->isVisible = false;
 }
+
 
 /**
  * @section Kobolds.
@@ -53,14 +56,8 @@ static void kobold_init(Actor* actorModel, const color_t color) {
     while (t3d_model_iter_next(&it)) {
 
         rspq_block_begin();
-            // if (strcmp(it.object->material->name, "Body")
-            //     || strcmp(it.object->material->name, "Scales")
-            //     || strcmp(it.object->material->name, "Snout")
-            //     || strcmp(it.object->material->name, "Eyes")
-            //     ) {
-                rdpq_set_prim_color(color);
-            // }
-            t3d_model_draw_object(it.object, actorModel->anim.skel.boneMatricesFP);
+        rdpq_set_prim_color(color);
+        t3d_model_draw_object(it.object, actorModel->anim.skel.boneMatricesFP);
         it.object->userBlock = rspq_block_end();
 
     }
