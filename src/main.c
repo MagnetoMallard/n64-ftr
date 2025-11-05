@@ -79,9 +79,9 @@ static void engine_init() {
     .interlaced = INTERLACE_HALF,
     .pal60 = true
   };
-    const resolution_t RESOLUTION_360x288_PAL = {
-    .width = 360,
-    .height = 288,
+    const resolution_t TESTING = {
+    .width = 320,
+    .height = 480,
     .interlaced = INTERLACE_HALF,
     .pal60 = true,
     //.overscan_margin = VI_CRT_MARGIN
